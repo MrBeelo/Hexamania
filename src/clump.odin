@@ -1,20 +1,42 @@
 package main
 
 import rl "vendor:raylib"
+import "core:math"
 
 MAX_HEXAGONS :: 1 + 6 + 12 + 18
+SPEED :: 15 * 60
+ACCELERATION :: 5 * 60
 
 HexagonClump :: struct {
 	hexagon_types: []HexagonType,
-	middle_hex_center: rl.Vector2,
+	pos: rl.Vector2,
+	vel: rl.Vector2,
 	rot: f32,
 }
 
-NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, rot: f32) -> HexagonClump {
+NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2) -> HexagonClump {
 	if len(hexagon_types) > MAX_HEXAGONS do return HexagonClump{}
-	new_hexagon_types := make_slice([]HexagonType, len(hexagon_types))
+	new_hexagon_types := make([]HexagonType, len(hexagon_types))
 	copy(new_hexagon_types, hexagon_types)
-	return HexagonClump{new_hexagon_types, center, rot}
+	return HexagonClump{new_hexagon_types, center, 0, 0}
+}
+
+AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
+	len := len(clump.hexagon_types)
+	if len >= MAX_HEXAGONS do return
+	new_hexagon_types := make([]HexagonType, len + 1)
+	copy(new_hexagon_types, clump.hexagon_types)
+	new_hexagon_types[len] = type
+	clump.hexagon_types = new_hexagon_types
+}
+
+UpdateHexagonClump :: proc(clump: ^HexagonClump) {
+	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2	
+
+	clump.vel.x = math.clamp(clump.vel.x, -SPEED, SPEED)
+	clump.vel.y = math.clamp(clump.vel.y, -SPEED, SPEED)
+
+	clump.pos += clump.vel * rl.GetFrameTime()
 }
 
 DrawHexagonClump :: proc(clump: HexagonClump) {
@@ -22,11 +44,11 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 		offset := GetHexagonOffset(index)
 
 		// Calculate the local_center and origin_center, based on the offset
-		local_center := clump.middle_hex_center + offset
+		local_center := clump.pos + offset
 		origin_center := GetAbsoluteCenterOffset(len(clump.hexagon_types)) - offset
 
 		// Correction explained below
-		diff := clump.middle_hex_center - GetAbsoluteCenter(clump)
+		diff := clump.pos - GetAbsoluteCenter(clump)
 		local_center += diff
 		
 		hexagon := Hexagon{hexagon_type, local_center, origin_center, clump.rot}
@@ -39,7 +61,7 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 // as the hex center, so it looks a bit off. To fix this, we take the difference from
 // those 2 values, and add it to every hexagon's local_center.
 GetAbsoluteCenter :: proc(clump: HexagonClump) -> rl.Vector2 {
-	return GetAbsoluteCenterOffset(len(clump.hexagon_types)) + clump.middle_hex_center
+	return GetAbsoluteCenterOffset(len(clump.hexagon_types)) + clump.pos
 }
 
 // From every hexagon in the clump, all the positions are averaged
