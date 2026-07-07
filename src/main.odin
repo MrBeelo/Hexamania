@@ -17,21 +17,26 @@ init :: proc() {
 	LoadHexagons()
 
 	player = NewPlayer()
+	append(&hearts, HexagonHeart{{ .BLANK, {300, 300}, 10, {} }})
 }
 
 update :: proc() {
 	UpdatePlayer(&player)
+	UpdatePellets()
+	UpdateHexagonHearts()
+	
 	if rl.IsKeyPressed(.N) do AddHexagonToClump(&player.clump, .BLANK)
+	if rl.IsMouseButtonPressed(.LEFT) do FirePellet()
 	
 	rl.BeginDrawing()
 	defer rl.EndDrawing()
-	
-	rl.ClearBackground(rl.WHITE)
+	rl.ClearBackground(rl.LIGHTGRAY)
 
 	rl.BeginMode2D(player.camera)
 	
-	rl.DrawCircleV(0, 2, rl.RED)
 	DrawPlayer(&player)
+	DrawPellets()
+	DrawHexagonHearts()
 	
 	rl.EndMode2D()
 
@@ -39,6 +44,7 @@ update :: proc() {
 	rl.DrawText(rl.TextFormat("vel: %.2f, %.2f", player.vel.x, player.vel.y), 10, 50, 32, rl.BLACK)
 	rl.DrawText(rl.TextFormat("speed: %d", SPEED), 10, 90, 32, rl.BLACK)
 	rl.DrawText(rl.TextFormat("acc: %d", ACCELERATION), 10, 130, 32, rl.BLACK)
+	rl.DrawText(rl.TextFormat("blanks: %d", GetHexagonTypeAmount(player.clump)[.BLANK]), 10, 170, 32, rl.BLACK)
 
     free_all(context.temp_allocator)
 }

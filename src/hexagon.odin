@@ -1,7 +1,6 @@
 package main
 
 import rl "vendor:raylib"
-import "core:math"
 
 // The size of the hexagon destination texture, which also happens to be its diameter
 HEXAGON_SIZE :: f32(32) 
@@ -54,12 +53,4 @@ LoadHexagons :: proc() {
 
 UnloadHexagons :: proc() {
 	for texture in hexagon_textures do rl.UnloadTexture(texture)
-}
-
-RotatePoint :: proc(point: rl.Vector2, pivot: rl.Vector2, rot: f32) -> rl.Vector2 {
-	delta := point - pivot
-	rad_rot := rot * 3.14 / 180
-	pos_x := pivot.x + delta.x * math.cos(rad_rot) - (delta.y * math.sin(rad_rot))
-	pos_y := pivot.y + delta.x * math.sin(rad_rot) + delta.y * math.cos(rad_rot)
-	return {pos_x, pos_y}
 }

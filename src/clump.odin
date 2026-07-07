@@ -30,6 +30,13 @@ AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
 	clump.hexagon_types = new_hexagon_types
 }
 
+// Returns how many of each type the clump contains
+GetHexagonTypeAmount :: proc(clump: HexagonClump) -> [HexagonType]int {
+	result: [HexagonType]int
+	for type in clump.hexagon_types do result[type] += 1
+	return result
+}
+
 UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2	
 

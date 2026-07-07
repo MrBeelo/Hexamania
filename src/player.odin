@@ -52,3 +52,7 @@ HandlePlayerCamera :: proc(plr: ^Player) {
 		if diff < -threshold do plr.camera.target[i] = plr.pos[i] + threshold
 	}
 }
+
+CameraPos :: proc(plr: Player) -> rl.Vector2 {
+	return plr.pos - plr.camera.target + plr.camera.offset
+}
