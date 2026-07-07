@@ -21,32 +21,28 @@ HexagonType :: enum {
 
 Hexagon :: struct {
 	type: HexagonType,
-	local_center: rl.Vector2,
-	origin_center: rl.Vector2,
+	center: rl.Vector2, // Hexagon center, should be rotated beforehand
 	rot: f32,
 	hurtbox: rl.Rectangle,
 }
 
-GetHexagonHurtBox :: proc(local_center: rl.Vector2, origin_center: rl.Vector2, rot: f32) -> rl.Rectangle {
-	delta := local_center - origin_center
-	rad_rot := rot * 3.14 / 180
-	pos_x := origin_center.x + delta.x * math.cos(rad_rot) - (delta.y * math.sin(rad_rot))
-	pos_y := origin_center.y + delta.x * math.sin(rad_rot) + delta.y * math.cos(rad_rot)
-	
+GetHexagonHurtBox :: proc(center: rl.Vector2) -> rl.Rectangle {
 	SIZE :: HEXAGON_SIZE * 5 / 8
-	return rl.Rectangle{pos_x - SIZE / 2, pos_y - SIZE / 2, SIZE, SIZE}
+	return rl.Rectangle{center.x - SIZE / 2, center.y - SIZE / 2, SIZE, SIZE}
 }
 
 DrawHexagon :: proc(hex: Hexagon) {
 	texture := hexagon_textures[hex.type]
 	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
 
-	// Origin is definitely needed here so that rotations work normally.
-	origin := hex.origin_center + HEXAGON_SIZE / 2
-	dest := rl.Rectangle{hex.local_center.x - HEXAGON_SIZE / 2 + origin.x, hex.local_center.y - HEXAGON_SIZE / 2 + origin.y, 
-		HEXAGON_SIZE, HEXAGON_SIZE}
+	// Note that hex.center should already be rotated, so we don't need to apply
+	// any modifications.
+	dest := rl.Rectangle{hex.center.x, hex.center.y, HEXAGON_SIZE, HEXAGON_SIZE}
+
+	// Since dest takes into account the fact that hex.center is rotated, rotating around
+	// the middle of it works!
+	rl.DrawTexturePro(texture, src, dest, HEXAGON_SIZE / 2, hex.rot, rl.WHITE)
 	
-	rl.DrawTexturePro(texture, src, dest, origin, hex.rot, rl.WHITE)
 	rl.DrawRectangleLinesEx(hex.hurtbox, 1, rl.RED)
 }
 
@@ -58,4 +54,12 @@ LoadHexagons :: proc() {
 
 UnloadHexagons :: proc() {
 	for texture in hexagon_textures do rl.UnloadTexture(texture)
+}
+
+RotatePoint :: proc(point: rl.Vector2, pivot: rl.Vector2, rot: f32) -> rl.Vector2 {
+	delta := point - pivot
+	rad_rot := rot * 3.14 / 180
+	pos_x := pivot.x + delta.x * math.cos(rad_rot) - (delta.y * math.sin(rad_rot))
+	pos_y := pivot.y + delta.x * math.sin(rad_rot) + delta.y * math.cos(rad_rot)
+	return {pos_x, pos_y}
 }

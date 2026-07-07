@@ -41,46 +41,36 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 
 DrawHexagonClump :: proc(clump: HexagonClump) {
 	for hexagon in GetClumpHexagons(clump) do DrawHexagon(hexagon)
+	rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
 
 GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {
 	hexagons := make([]Hexagon, len(clump.hexagon_types))
 	for hexagon_type, index in clump.hexagon_types {
+		// First we get the local offset from the middle hexagon
 		offset := GetHexagonOffset(index)
 
-		// Calculate the local_center and origin_center, based on the offset
-		local_center := clump.pos + offset
-		absolute_center_offset := GetAbsoluteCenterOffset(len(clump.hexagon_types))
-		origin_center := absolute_center_offset - offset
+		// We get the average offset, so we can center the clump properly (around clump.pos)
+		average_offset := GetAverageOffset(len(clump.hexagon_types))
 
-		// Correction explained below
-		pre_absolute_center := GetPreAbsoluteCenter(clump)
-		diff := clump.pos - pre_absolute_center
-		local_center += diff
+		// Local center here is the non rotated center of the hexagon
+		local_center := clump.pos + offset - average_offset
 
-		absolute_center := pre_absolute_center - absolute_center_offset
-		hurtbox := GetHexagonHurtBox(local_center, absolute_center, clump.rot)
+		// Rotated center is the actual center of the hexagon
+		rotated_center := RotatePoint(local_center, clump.pos, clump.rot)
 		
-		hexagon := Hexagon{hexagon_type, local_center, origin_center, clump.rot, hurtbox}
+		hurtbox := GetHexagonHurtBox(rotated_center)
+		hexagon := Hexagon{hexagon_type, rotated_center, clump.rot, hurtbox}
 		hexagons[index] = hexagon
 	}
 
 	return hexagons
 }
 
-// As explained below, adding these two values gives us the absolute center,
-// this is used for the rotation of every hexagon. Note that this is NOT In the same position
-// as the hex center, so it looks a bit off. To fix this, we take the difference from
-// those 2 values, and add it to every hexagon's local_center.
-GetPreAbsoluteCenter :: proc(clump: HexagonClump) -> rl.Vector2 {
-	return GetAbsoluteCenterOffset(len(clump.hexagon_types)) + clump.pos
-}
-
 // From every hexagon in the clump, all the positions are averaged
-// to get the absolute center offset. This is the offset from
-// the middle_hex_center, so adding these (which we do above)
-// will give us the absolute center
-GetAbsoluteCenterOffset :: proc(hexagon_count: int) -> rl.Vector2 {
+// to get the average offset. If we didn't calculate this, the center of the
+// clump would be the middle hex's center, which we don't always want.
+GetAverageOffset :: proc(hexagon_count: int) -> rl.Vector2 {
 	if hexagon_count == 0 do return {}
 	offset: rl.Vector2
 	for i in 0..<hexagon_count do offset += GetHexagonOffset(i)
