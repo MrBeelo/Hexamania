@@ -46,7 +46,7 @@ Accelerate :: proc(vel: ^f32, speed: f32, acceleration := ACCELERATION) {
 HandlePlayerCamera :: proc(plr: ^Player) {	
 	for i in 0..=1 {
 		diff := plr.pos[i] - plr.camera.target[i]
-		threshold := screen_size[i] / 5
+		threshold := screen_size[i] / 5 / plr.camera.zoom
 
 		if diff > threshold do plr.camera.target[i] = plr.pos[i] - threshold
 		if diff < -threshold do plr.camera.target[i] = plr.pos[i] + threshold

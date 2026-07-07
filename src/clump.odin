@@ -40,27 +40,39 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 }
 
 DrawHexagonClump :: proc(clump: HexagonClump) {
+	for hexagon in GetClumpHexagons(clump) do DrawHexagon(hexagon)
+}
+
+GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {
+	hexagons := make([]Hexagon, len(clump.hexagon_types))
 	for hexagon_type, index in clump.hexagon_types {
 		offset := GetHexagonOffset(index)
 
 		// Calculate the local_center and origin_center, based on the offset
 		local_center := clump.pos + offset
-		origin_center := GetAbsoluteCenterOffset(len(clump.hexagon_types)) - offset
+		absolute_center_offset := GetAbsoluteCenterOffset(len(clump.hexagon_types))
+		origin_center := absolute_center_offset - offset
 
 		// Correction explained below
-		diff := clump.pos - GetAbsoluteCenter(clump)
+		pre_absolute_center := GetPreAbsoluteCenter(clump)
+		diff := clump.pos - pre_absolute_center
 		local_center += diff
+
+		absolute_center := pre_absolute_center - absolute_center_offset
+		hurtbox := GetHexagonHurtBox(local_center, absolute_center, clump.rot)
 		
-		hexagon := Hexagon{hexagon_type, local_center, origin_center, clump.rot}
-		DrawHexagon(hexagon)
+		hexagon := Hexagon{hexagon_type, local_center, origin_center, clump.rot, hurtbox}
+		hexagons[index] = hexagon
 	}
+
+	return hexagons
 }
 
 // As explained below, adding these two values gives us the absolute center,
 // this is used for the rotation of every hexagon. Note that this is NOT In the same position
 // as the hex center, so it looks a bit off. To fix this, we take the difference from
 // those 2 values, and add it to every hexagon's local_center.
-GetAbsoluteCenter :: proc(clump: HexagonClump) -> rl.Vector2 {
+GetPreAbsoluteCenter :: proc(clump: HexagonClump) -> rl.Vector2 {
 	return GetAbsoluteCenterOffset(len(clump.hexagon_types)) + clump.pos
 }
 

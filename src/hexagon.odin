@@ -1,6 +1,7 @@
 package main
 
 import rl "vendor:raylib"
+import "core:math"
 
 // The size of the hexagon destination texture, which also happens to be its diameter
 HEXAGON_SIZE :: f32(32) 
@@ -23,6 +24,17 @@ Hexagon :: struct {
 	local_center: rl.Vector2,
 	origin_center: rl.Vector2,
 	rot: f32,
+	hurtbox: rl.Rectangle,
+}
+
+GetHexagonHurtBox :: proc(local_center: rl.Vector2, origin_center: rl.Vector2, rot: f32) -> rl.Rectangle {
+	delta := local_center - origin_center
+	rad_rot := rot * 3.14 / 180
+	pos_x := origin_center.x + delta.x * math.cos(rad_rot) - (delta.y * math.sin(rad_rot))
+	pos_y := origin_center.y + delta.x * math.sin(rad_rot) + delta.y * math.cos(rad_rot)
+	
+	SIZE :: HEXAGON_SIZE * 5 / 8
+	return rl.Rectangle{pos_x - SIZE / 2, pos_y - SIZE / 2, SIZE, SIZE}
 }
 
 DrawHexagon :: proc(hex: Hexagon) {
@@ -35,6 +47,7 @@ DrawHexagon :: proc(hex: Hexagon) {
 		HEXAGON_SIZE, HEXAGON_SIZE}
 	
 	rl.DrawTexturePro(texture, src, dest, origin, hex.rot, rl.WHITE)
+	rl.DrawRectangleLinesEx(hex.hurtbox, 1, rl.RED)
 }
 
 LoadHexagons :: proc() {
