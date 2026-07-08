@@ -194,3 +194,15 @@ hexagon_coord_offsets := [MAX_HEXAGONS]rl.Vector2 {
 	35 = {-2, 2},
 	36 = {-1, 2.5},
 }
+
+ForEachClump :: proc(func: proc(clump: ^HexagonClump)) {
+	for &enemy in enemies do func(&enemy.clump)
+	func(&player.clump)
+}
+
+GetAllClumps :: proc() -> []^HexagonClump {
+	result := make([]^HexagonClump, len(enemies) + 1)
+	for &enemy, index in enemies do result[index] = &enemy.clump
+	result[len(enemies)] = &player.clump
+	return result
+}

@@ -55,11 +55,8 @@ DrawEnemies :: proc() { for enemy in enemies do DrawEnemy(enemy) }
 
 DrawEnemy :: proc(enemy: Enemy) {
 	DrawHexagonClump(enemy.clump)
-	
-	text := rl.TextFormat("%.0f hp, %v, %d%d%d%d", enemy.health, enemy.ai_state, enemy.uuid[8], enemy.uuid[9], enemy.uuid[10], enemy.uuid[11])
-	text_size := f32(rl.MeasureText(text, 16))
-	text_pos := enemy.pos - {text_size / 2, 50}
-	rl.DrawTextEx(rl.GetFontDefault(), text, text_pos, 16, 2, rl.RED)
+
+	DrawDebugText(enemy.pos, "%.0f hp, %v, %d%d%d%d", enemy.health, enemy.ai_state, enemy.uuid[8], enemy.uuid[9], enemy.uuid[10], enemy.uuid[11])
 }
 
 HandleWanderState :: proc(enemy: ^Enemy) {

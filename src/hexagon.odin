@@ -43,6 +43,7 @@ DrawHexagon :: proc(hex: Hexagon) {
 	rl.DrawTexturePro(texture, src, dest, HEXAGON_SIZE / 2, hex.rot, rl.WHITE)
 	
 	rl.DrawRectangleLinesEx(hex.hurtbox, 1, rl.RED)
+	rl.DrawCircleV(hex.center, 3, rl.RED)
 }
 
 LoadHexagons :: proc() {

@@ -26,11 +26,10 @@ UpdatePellet :: proc(pellet: ^Pellet, index: int) {
 	pellet.pos += pellet.vel * PELLET_SPEED * rl.GetFrameTime()
 	if rl.Vector2Distance(pellet.pos, player.pos) > screen_size.x do unordered_remove(&pellets, index)
 
-	// NOTE: This loop should cover the player too!
-	for &enemy in enemies do if enemy.uuid != pellet.owner do for hexagon in GetClumpHexagons(enemy.clump) {
+	for clump in GetAllClumps() do if clump.uuid != pellet.owner do for hexagon in GetClumpHexagons(clump^) {
 		if rl.Vector2Distance(pellet.pos, hexagon.center) > 100 do continue
 		if rl.CheckCollisionPointRec(pellet.pos, hexagon.hurtbox) {
-			enemy.health -= 30
+			clump.health -= 30
 			unordered_remove(&pellets, index)
 		}
 	}
@@ -40,4 +39,5 @@ DrawPellets :: proc() { for pellet in pellets do DrawPellet(pellet) }
 
 DrawPellet :: proc(pellet: Pellet) {
 	rl.DrawCircleV(pellet.pos, 3, rl.WHITE)
+	DrawDebugText(pellet.pos, "Owner: %d%d%d%d", pellet.owner[8], pellet.owner[9], pellet.owner[10], pellet.owner[11])
 }
