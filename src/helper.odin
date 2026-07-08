@@ -15,6 +15,6 @@ RotatePoint :: proc(point: rl.Vector2, pivot: rl.Vector2, rot: f32) -> rl.Vector
 	return {pos_x, pos_y}
 }
 
-RotationFromPointToMouse :: proc(point: rl.Vector2, mouse: rl.Vector2) -> f32 {
-	return math.atan2(mouse.y - point.y, mouse.x - point.x) * RAD2DEG + 90
+RotationFrom2Points :: proc(p1: rl.Vector2, p2: rl.Vector2) -> f32 {
+	return math.atan2(p2.y - p1.y, p2.x - p1.x) * RAD2DEG + 90
 }

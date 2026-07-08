@@ -17,16 +17,17 @@ init :: proc() {
 	LoadHexagons()
 
 	player = NewPlayer()
-	append(&hearts, HexagonHeart{{ .BLANK, {300, 300}, 10, {} }})
+	append(&enemies, Enemy{ NewHexagonClump({.BLANK, .BLANK, .BLANK}, {200, 200}) })
 }
 
 update :: proc() {
 	UpdatePlayer(&player)
 	UpdatePellets()
 	UpdateHexagonHearts()
+	UpdateEnemies()
 	
 	if rl.IsKeyPressed(.N) do AddHexagonToClump(&player.clump, .BLANK)
-	if rl.IsMouseButtonPressed(.LEFT) do FirePellet()
+	if rl.IsMouseButtonPressed(.LEFT) do PlayerFirePellet()
 	
 	rl.BeginDrawing()
 	defer rl.EndDrawing()
@@ -37,6 +38,7 @@ update :: proc() {
 	DrawPlayer(&player)
 	DrawPellets()
 	DrawHexagonHearts()
+	DrawEnemies()
 	
 	rl.EndMode2D()
 

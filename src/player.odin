@@ -1,6 +1,7 @@
 package main
 
 import rl "vendor:raylib"
+import "core:math"
 
 Player :: struct {
 	using clump: HexagonClump,
@@ -25,6 +26,13 @@ UpdatePlayer :: proc(plr: ^Player) {
 	} else if Holding(.RIGHT) {
 	 	Accelerate(&plr.vel.x, SPEED)
 	} else do Accelerate(&plr.vel.x, 0)
+
+	// Clamp velocities down to 0 if they are low and player isn't moving
+	if !Holding(.HORIZ) && !Holding(.VERT) {
+		DEADZONE :: f32(3)
+		if math.abs(plr.vel.x) < DEADZONE do plr.vel.x = 0
+		if math.abs(plr.vel.y) < DEADZONE do plr.vel.y = 0
+	}
 
 	// Camera Management
 	HandlePlayerCamera(plr)

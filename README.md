@@ -14,10 +14,10 @@ Hexamania description goes here
 - ~~Get to 66 hexagons (should probably change to a number so that the player is a perfect hexagon) stuck together to REACH MAX!~~
 
 #### DAY 2
-- Evil hexagons, developed as the player
-- Kill enemy hexagons -> drop hearts
-- Evil hexagons attack!
-- Enemies get bigger and stronger as time passes
+- ~~Evil hexagons, developed as the player~~
+- ~~Kill enemy hexagons -> drop hearts~~
+- Evil hexagons move!
+- Evil hexagons attack! (base attack for now)
 - Powerups (circular): spawn randomly around the map, give either a temporary buff or a health boost idk
 - after max, no more normal hexagons spawn, only powerup ones.
 - Oh ye health, self explanatory (should be at the bottom middle of the screen lol)
@@ -27,10 +27,12 @@ Hexamania description goes here
 
 #### DAY 3
 - SPELLSSSSS
+- Design a couple different hexagon types
+- Enemies naturally spawn
+- Enemies get bigger and stronger as time passes
 - Hexagon has eyes <3 that look where your mouse is!
 - Background should have falling hexagons lol
 - Blur/bloom, lots of blur/bloom
-- Design a couple different hexagon types
 
 #### DAY 4
 - Sound effects

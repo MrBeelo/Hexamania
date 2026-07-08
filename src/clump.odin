@@ -4,6 +4,7 @@ import rl "vendor:raylib"
 import "core:math"
 
 MAX_HEXAGONS :: 1 + 6 + 12 + 18
+MAX_HEALTH :: 100
 SPEED :: 15 * 60
 ACCELERATION :: 5 * 60
 
@@ -12,13 +13,14 @@ HexagonClump :: struct {
 	pos: rl.Vector2,
 	vel: rl.Vector2,
 	rot: f32,
+	health: f32,
 }
 
 NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2) -> HexagonClump {
 	if len(hexagon_types) > MAX_HEXAGONS do return HexagonClump{}
 	new_hexagon_types := make([]HexagonType, len(hexagon_types))
 	copy(new_hexagon_types, hexagon_types)
-	return HexagonClump{new_hexagon_types, center, 0, 0}
+	return HexagonClump{new_hexagon_types, center, 0, 0, MAX_HEALTH}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
