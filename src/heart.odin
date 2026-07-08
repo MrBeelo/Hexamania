@@ -41,12 +41,11 @@ UpdateHexagonHeart :: proc(heart: ^HexagonHeart, index: int) {
 	heart.hurtbox = GetHexagonHurtBox(heart.center)
 	for hexagon in GetClumpHexagons(player.clump) {
 		dist := rl.Vector2Distance(hexagon.center, heart.center)
-		if dist > 150 do continue
+		if dist > 100 do continue
 
-		// NOTE: Pull heart close to player!
-		// heart.vel.x =  
+		heart.vel = VelocityFrom2Points(heart.center, player.pos) * (100 - dist)
 		
-		if dist < 100 && rl.CheckCollisionRecs(hexagon.hurtbox, heart.hurtbox) {
+		if rl.CheckCollisionRecs(hexagon.hurtbox, heart.hurtbox) {
 			unordered_remove(&hearts, index)
 			AddHexagonToClump(&player.clump, heart.type)
 		}

@@ -25,7 +25,7 @@ Hexamania description goes here
 - Menus (Main, Paused, Death, Win)
 - ~~a ye add points~~
 - ~~Zoom out when building a full shell (leveling up)~~
-- Hexahearts follow you when you're close.
+- ~~Hexahearts follow you when you're close.~~
 - ~~Make an ownership system (for spells, pellets, etc)~~
 - ~~Entities have UUIDs, so that the above works~~
 - Add sprinting

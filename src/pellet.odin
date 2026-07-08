@@ -1,7 +1,6 @@
 package main
 
 import rl "vendor:raylib"
-import "core:math"
 import "core:encoding/uuid"
 
 PELLET_SPEED :: 10 * 60
@@ -17,7 +16,7 @@ Pellet :: struct {
 PlayerFirePellet :: proc() {
 	pos := player.pos
 	rot := RotationFrom2Points(CameraPos(player), rl.GetMousePosition())
-	vel := rl.Vector2{math.cos(rot * DEG2RAD - PI / 2), math.sin(rot * DEG2RAD - PI / 2)}
+	vel := VelocityFromRotation(rot)
 	append(&pellets, Pellet{pos, rot, vel, player.uuid})
 }
 

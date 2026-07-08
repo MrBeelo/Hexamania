@@ -34,6 +34,9 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
 	len := len(clump.hexagon_types)
 	if len >= MAX_HEXAGONS do return
+
+	// The slice the clump currently has is 1 type short, so we make a new
+	// one and copy it.
 	new_hexagon_types := make([]HexagonType, len + 1)
 	copy(new_hexagon_types, clump.hexagon_types)
 	new_hexagon_types[len] = type
