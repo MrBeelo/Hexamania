@@ -26,7 +26,7 @@ Hexagon :: struct {
 }
 
 GetHexagonHurtBox :: proc(center: rl.Vector2) -> rl.Rectangle {
-	SIZE :: HEXAGON_SIZE * 5 / 8
+	SIZE :: HEXAGON_SIZE * 3 / 4
 	return rl.Rectangle{center.x - SIZE / 2, center.y - SIZE / 2, SIZE, SIZE}
 }
 

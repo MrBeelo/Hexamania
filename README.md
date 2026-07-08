@@ -21,16 +21,14 @@ Hexamania description goes here
 - Powerups (circular): spawn randomly around the map, give either a temporary buff or a health boost idk
 - after max, no more normal hexagons spawn, only powerup ones.
 - ~~Oh ye health, self explanatory~~
-- Grade when you die XD
-- Menus (Main, Paused, Death, Win)
 - ~~a ye add points~~
 - ~~Zoom out when building a full shell (leveling up)~~
 - ~~Hexahearts follow you when you're close.~~
 - ~~Make an ownership system (for spells, pellets, etc)~~
 - ~~Entities have UUIDs, so that the above works~~
-- Add sprinting
+- ~~Add sprinting~~
 - Add SIMPLE background
-- Passively regain health
+- ~~Passively regain health~~
 
 #### DAY 3
 - Maybe make enemies collidable?
@@ -38,6 +36,8 @@ Hexamania description goes here
 - Design a couple different hexagon types
 - Enemies naturally spawn
 - Enemies get bigger and stronger as time passes
+- Grade when you die XD
+- Menus (Main, Paused, Death, Win)
 - Hexagon has eyes <3 that look where your mouse is!
 - Background should have falling hexagons lol
 - Blur/bloom, lots of blur/bloom

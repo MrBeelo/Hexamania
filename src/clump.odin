@@ -8,6 +8,7 @@ import "core:encoding/uuid"
 MAX_HEXAGONS :: 1 + 6 + 12 + 18
 MAX_HEALTH :: f32(100)
 
+// Clumps function as entities, hence their "health" and "uuid" fields.
 HexagonClump :: struct {
 	hexagon_types: []HexagonType,
 	pos: rl.Vector2,
@@ -15,6 +16,15 @@ HexagonClump :: struct {
 	rot: f32,
 	health: f32,
 	uuid: uuid.Identifier,
+	spr: SprintPackaage,
+	health_regen: Timer,
+}
+
+// Everything that has to do with sprinting.
+SprintPackaage :: struct {
+	sprinting: bool,
+	sprint_secs: f32,
+	time_since_last_sprint: f32,
 }
 
 NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel := rl.Vector2{}, rot := f32(0), health := MAX_HEALTH) -> HexagonClump {
@@ -27,8 +37,11 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	// Generate entity UUID
 	context.random_generator = crypto.random_generator()
 	id := uuid.generate_v7()
+
+	// Health Regen Timer
+	health_regen := NewTimer(2, true, true)
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {}, health_regen}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -51,12 +64,31 @@ GetHexagonTypeAmount :: proc(clump: HexagonClump) -> [HexagonType]int {
 }
 
 UpdateHexagonClump :: proc(clump: ^HexagonClump) {
-	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2	
+	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2
 
+	// Health Regen Stuff
+	UpdateTimer(&clump.health_regen)
+	if clump.health_regen.ding do clump.health += 1
+	clump.health = math.clamp(clump.health, 0, MAX_HEALTH)
+
+	// NOTE: It's obvious enough. Base speed needed.
 	clump.vel.x = math.clamp(clump.vel.x, -PLAYER_SPEED, PLAYER_SPEED)
 	clump.vel.y = math.clamp(clump.vel.y, -PLAYER_SPEED, PLAYER_SPEED)
 
-	clump.pos += clump.vel * rl.GetFrameTime()
+	// Sprinting logic
+	if clump.spr.sprinting {
+		clump.spr.sprint_secs -= rl.GetFrameTime()
+		clump.spr.time_since_last_sprint = 0
+	} else {
+		clump.spr.time_since_last_sprint += rl.GetFrameTime()
+	}
+
+	if clump.spr.sprint_secs <= 0 do clump.spr.sprinting = false
+	if clump.spr.time_since_last_sprint > 5 do clump.spr.sprint_secs += rl.GetFrameTime()
+	clump.spr.sprint_secs = math.clamp(clump.spr.sprint_secs, 0, 5)
+
+	// Final velocity addition (should probably be last)
+	clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
 }
 
 DrawHexagonClump :: proc(clump: HexagonClump) {

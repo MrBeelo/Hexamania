@@ -37,6 +37,8 @@ UpdatePlayer :: proc(plr: ^Player) {
 		if math.abs(plr.vel.y) < DEADZONE do plr.vel.y = 0
 	}
 
+	plr.spr.sprinting = Holding(.SPRINT) && plr.spr.sprint_secs > 0
+
 	// Camera Management
 	HandlePlayerCamera(plr)
 
