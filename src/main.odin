@@ -18,7 +18,8 @@ init :: proc() {
 
 	StartStopwatch(&time_survived)
 	player = NewPlayer()
-	append(&enemies, NewEnemy({.BLANK, .BLANK, .BLANK}, {200, 200}))
+	append(&enemies, NewEnemy({.BLANK, .BLANK, .BLANK}, 100))
+	append(&enemies, NewEnemy({.BLANK, .BLANK}, -100))
 }
 
 update :: proc() {

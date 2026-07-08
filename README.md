@@ -22,13 +22,15 @@ Hexamania description goes here
 - after max, no more normal hexagons spawn, only powerup ones.
 - ~~Oh ye health, self explanatory~~
 - Grade when you die XD
-- Menus (MainMenu, DeathMenu, WinMenu)
+- Menus (Main, Paused, Death, Win)
 - ~~a ye add points~~
 - ~~Zoom out when building a full shell (leveling up)~~
 - Hexahearts follow you when you're close.
-- Make an ownership system (for spells, pellets, etc)
-- Entities have UUIDs, so that the above works
+- ~~Make an ownership system (for spells, pellets, etc)~~
+- ~~Entities have UUIDs, so that the above works~~
 - Add sprinting
+- Add SIMPLE background
+- Passively regain health
 
 #### DAY 3
 - Maybe make enemies collidable?

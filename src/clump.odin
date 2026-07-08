@@ -2,6 +2,8 @@ package main
 
 import rl "vendor:raylib"
 import "core:math"
+import "core:crypto"
+import "core:encoding/uuid"
 
 MAX_HEXAGONS :: 1 + 6 + 12 + 18
 MAX_HEALTH :: f32(100)
@@ -12,13 +14,21 @@ HexagonClump :: struct {
 	vel: rl.Vector2,
 	rot: f32,
 	health: f32,
+	uuid: uuid.Identifier,
 }
 
 NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel := rl.Vector2{}, rot := f32(0), health := MAX_HEALTH) -> HexagonClump {
 	if len(hexagon_types) > MAX_HEXAGONS do return HexagonClump{}
+
+	// Copy the hexagon_types parameter to clump
 	new_hexagon_types := make([]HexagonType, len(hexagon_types))
 	copy(new_hexagon_types, hexagon_types)
-	return HexagonClump{new_hexagon_types, center, 0, 0, health}
+
+	// Generate entity UUID
+	context.random_generator = crypto.random_generator()
+	id := uuid.generate_v7()
+	
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
