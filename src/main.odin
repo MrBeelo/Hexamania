@@ -15,6 +15,7 @@ init :: proc() {
 	rl.SetConfigFlags({.VSYNC_HINT, .WINDOW_HIGHDPI, .MSAA_4X_HINT})
 	rl.InitWindow(i32(screen_size.x), i32(screen_size.y), "Hexamania.io")
 	LoadHexagons()
+	LoadBackground()
 
 	StartStopwatch(&time_survived)
 	player = NewPlayer()
@@ -37,7 +38,8 @@ update :: proc() {
 	rl.ClearBackground(rl.LIGHTGRAY)
 
 	rl.BeginMode2D(player.camera)
-	
+
+	DrawBackground()
 	DrawPlayer(&player)
 	DrawPellets()
 	DrawHexagonHearts()
@@ -60,5 +62,7 @@ update :: proc() {
 
 close :: proc() { 
 	UnloadHexagons()
+	UnloadBackground()
+	
 	rl.CloseWindow() 
 }

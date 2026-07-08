@@ -27,7 +27,7 @@ Hexamania description goes here
 - ~~Make an ownership system (for spells, pellets, etc)~~
 - ~~Entities have UUIDs, so that the above works~~
 - ~~Add sprinting~~
-- Add SIMPLE background
+- ~~Add SIMPLE background~~
 - ~~Passively regain health~~
 
 #### DAY 3

@@ -26,3 +26,11 @@ VelocityFromRotation :: proc(rot: f32) -> rl.Vector2 {
 VelocityFrom2Points :: proc(p1: rl.Vector2, p2: rl.Vector2) -> rl.Vector2 {
 	return VelocityFromRotation(RotationFrom2Points(p1, p2))
 }
+
+RoundToNearest :: proc(x: f32, to: f32) -> f32 {
+	return math.round(x / to) * to
+}
+
+RoundDownToNearest :: proc(x: f32, to: f32) -> f32 {
+	return math.floor(x / to) * to
+}
