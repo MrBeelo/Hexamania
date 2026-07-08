@@ -17,7 +17,7 @@ Hexamania description goes here
 - ~~Evil hexagons, developed as the player~~
 - ~~Kill enemy hexagons -> drop hearts~~
 - Evil hexagons move! (AI: Wander, "Find a target it likes", Full aggro, panic and run away on low health)
-- Evil hexagons attack! (base attack for now)
+- ~~Evil hexagons attack! (base attack for now)~~
 - Powerups (circular): spawn randomly around the map, give either a temporary buff or a health boost idk
 - after max, no more normal hexagons spawn, only powerup ones.
 - ~~Oh ye health, self explanatory~~
@@ -31,20 +31,20 @@ Hexamania description goes here
 - ~~Passively regain health~~
 
 #### DAY 3
-- Maybe make enemies collidable?
+- ~~Maybe make enemies collidable?~~
 - SPELLSSSSS
-- Design a couple different hexagon types
+- Design a couple different hexagon and powerup types
 - Enemies naturally spawn
 - Enemies get bigger and stronger as time passes
 - Grade when you die XD
 - Menus (Main, Paused, Death, Win)
+- Health bar (should be at the bottom middle of the screen lol)
+
+#### DAY 4
 - Hexagon has eyes <3 that look where your mouse is!
 - Background should have falling hexagons lol
 - Blur/bloom, lots of blur/bloom
-- Health bar (should be at the bottom middle of the screen lol)
 - Transitions maybe? (for each gamestate)
-
-#### DAY 4
 - Rest of the art, cuz I know you aint finishing it in day 3
 - Sound effects
 - Music! (should be 6/4 lol, calm and relaxing with reverb/echo)

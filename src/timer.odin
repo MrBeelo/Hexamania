@@ -10,9 +10,10 @@ Timer :: struct {
 	ding: bool,
 }
 
-NewTimer :: proc(duration: f32, repeat: bool, auto_start := false) -> Timer {
+NewTimer :: proc(duration: f32, repeat: bool, auto_start := false, begin_now := false) -> Timer {
 	timer := Timer{duration, 0, false, repeat, false}
 	if auto_start do ActivateTimer(&timer)
+	if begin_now do timer.start_time = f32(rl.GetTime()) - timer.duration
 	return timer
 }
 

@@ -2,6 +2,7 @@ package main
 
 import rl "vendor:raylib"
 import "core:math"
+import "core:math/rand"
 
 PI :: 3.141
 DEG2RAD :: PI / 180
@@ -33,4 +34,13 @@ RoundToNearest :: proc(x: f32, to: f32) -> f32 {
 
 RoundDownToNearest :: proc(x: f32, to: f32) -> f32 {
 	return math.floor(x / to) * to
+}
+
+// Given a range, returns a number within it, and randomly selects if it is
+// positive or negative
+RangeRand :: proc(range: rl.Vector2) -> f32 {
+	abs := rand.float32_range(range.x, range.y)
+	sign := rand.int_range(0, 2) // Sign: Either 0 or 1
+	if sign == 0 do sign = -1 // Sign: Either -1 or 1
+	return abs * f32(sign)
 }

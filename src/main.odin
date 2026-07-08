@@ -53,9 +53,7 @@ update :: proc() {
 	rl.DrawText(rl.TextFormat("acc: %d", PLAYER_ACCELERATION), 10, 130, 32, rl.BLACK)
 	rl.DrawText(rl.TextFormat("time survived: %f", GetElapsedStopwatchTime(time_survived)), 10, 170, 32, rl.BLACK)
 	rl.DrawText(rl.TextFormat("points: %d", points), 10, 210, 32, rl.BLACK)
-	rl.DrawText(rl.TextFormat("spr1: %v", player.spr.sprinting), 10, 250, 32, rl.BLACK)
-	rl.DrawText(rl.TextFormat("spr2: %v", player.spr.sprint_secs), 10, 290, 32, rl.BLACK)
-	rl.DrawText(rl.TextFormat("spr3: %v", player.spr.time_since_last_sprint), 10, 330, 32, rl.BLACK)
+	rl.DrawText(rl.TextFormat("fps: %d", rl.GetFPS()), 10, 250, 32, rl.BLACK)
 
     free_all(context.temp_allocator)
 }

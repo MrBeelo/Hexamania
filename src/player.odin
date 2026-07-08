@@ -42,13 +42,12 @@ UpdatePlayer :: proc(plr: ^Player) {
 	// Camera Management
 	HandlePlayerCamera(plr)
 
-	// Hexagon Updating (must always do this)
 	UpdateHexagonClump(&plr.clump)
 }
 
 DrawPlayer :: proc(plr: ^Player) {
-	// Hexagon Drawing (must always do this)
 	DrawHexagonClump(plr.clump)
+	DrawDebugText(plr.pos, "%.0f hp, %d%d%d%d", plr.health, plr.uuid[8], plr.uuid[9], plr.uuid[10], plr.uuid[11])
 }
 
 Accelerate :: proc(vel: ^f32, speed: f32, acceleration := PLAYER_ACCELERATION) {

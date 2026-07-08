@@ -18,6 +18,8 @@ HexagonClump :: struct {
 	uuid: uuid.Identifier,
 	spr: SprintPackaage,
 	health_regen: Timer,
+	grace_period: f32,
+	damaged: bool,
 }
 
 // Everything that has to do with sprinting.
@@ -41,7 +43,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	// Health Regen Timer
 	health_regen := NewTimer(2, true, true)
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {}, health_regen}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {}, health_regen, 0, false}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -64,12 +66,14 @@ GetHexagonTypeAmount :: proc(clump: HexagonClump) -> [HexagonType]int {
 }
 
 UpdateHexagonClump :: proc(clump: ^HexagonClump) {
+	if clump.damaged do clump.damaged = false
 	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2
 
 	// Health Regen Stuff
 	UpdateTimer(&clump.health_regen)
 	if clump.health_regen.ding do clump.health += 1
 	clump.health = math.clamp(clump.health, 0, MAX_HEALTH)
+	if clump.grace_period > 0 do clump.grace_period -= rl.GetFrameTime()
 
 	// NOTE: It's obvious enough. Base speed needed.
 	clump.vel.x = math.clamp(clump.vel.x, -PLAYER_SPEED, PLAYER_SPEED)
@@ -87,6 +91,9 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	if clump.spr.time_since_last_sprint > 5 do clump.spr.sprint_secs += rl.GetFrameTime()
 	clump.spr.sprint_secs = math.clamp(clump.spr.sprint_secs, 0, 5)
 
+	// Collision logic
+	HandleClumpCollisions(clump)
+
 	// Final velocity addition (should probably be last)
 	clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
 }
@@ -94,6 +101,36 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 DrawHexagonClump :: proc(clump: HexagonClump) {
 	for hexagon in GetClumpHexagons(clump) do DrawHexagon(hexagon)
 	rl.DrawCircleV(clump.pos, 2, rl.BLUE)
+}
+
+HandleClumpCollisions :: proc(clump: ^HexagonClump) {
+	if clump.grace_period > 0 do return
+	for enemy_clump in GetAllClumps() {
+		if clump.uuid == enemy_clump.uuid do continue
+		if enemy_clump.grace_period > 0 do continue
+		
+		for hexagon in GetClumpHexagons(clump^) do for enemy_hexagon in GetClumpHexagons(enemy_clump^) {
+			if rl.Vector2Distance(hexagon.center, enemy_hexagon.center) > 100 do continue
+			if !rl.CheckCollisionRecs(hexagon.hurtbox, enemy_hexagon.hurtbox) do continue
+			DamageClump(clump, 5)
+			DamageClump(enemy_clump, 5)
+			clump.vel *= -1
+			enemy_clump.vel *= -1
+		}
+	}
+}
+
+GetAllClumps :: proc() -> []^HexagonClump {
+	result := make([]^HexagonClump, len(enemies) + 1)
+	for &enemy, index in enemies do result[index] = &enemy.clump
+	result[len(enemies)] = &player.clump
+	return result
+}
+
+DamageClump :: proc(clump: ^HexagonClump, amount: f32) {
+	if clump.grace_period > 0 do return
+	clump.health -= amount
+	clump.grace_period = 0.15
 }
 
 GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {
@@ -193,16 +230,4 @@ hexagon_coord_offsets := [MAX_HEXAGONS]rl.Vector2 {
 	34 = {-3, 1.5},
 	35 = {-2, 2},
 	36 = {-1, 2.5},
-}
-
-ForEachClump :: proc(func: proc(clump: ^HexagonClump)) {
-	for &enemy in enemies do func(&enemy.clump)
-	func(&player.clump)
-}
-
-GetAllClumps :: proc() -> []^HexagonClump {
-	result := make([]^HexagonClump, len(enemies) + 1)
-	for &enemy, index in enemies do result[index] = &enemy.clump
-	result[len(enemies)] = &player.clump
-	return result
 }
