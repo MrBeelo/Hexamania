@@ -20,10 +20,10 @@ Hexamania description goes here
 - Evil hexagons attack! (base attack for now)
 - Powerups (circular): spawn randomly around the map, give either a temporary buff or a health boost idk
 - after max, no more normal hexagons spawn, only powerup ones.
-- Oh ye health, self explanatory (should be at the bottom middle of the screen lol)
+- ~~Oh ye health, self explanatory~~
 - Grade when you die XD
-- a ye add points
-- Zoom out when building a full shell (leveling up)
+- ~~a ye add points~~
+- ~~Zoom out when building a full shell (leveling up)~~
 
 #### DAY 3
 - SPELLSSSSS
@@ -33,6 +33,7 @@ Hexamania description goes here
 - Hexagon has eyes <3 that look where your mouse is!
 - Background should have falling hexagons lol
 - Blur/bloom, lots of blur/bloom
+- Health bar (should be at the bottom middle of the screen lol)
 
 #### DAY 4
 - Sound effects

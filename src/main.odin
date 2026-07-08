@@ -16,6 +16,7 @@ init :: proc() {
 	rl.InitWindow(i32(screen_size.x), i32(screen_size.y), "Hexamania.io")
 	LoadHexagons()
 
+	StartStopwatch(&time_survived)
 	player = NewPlayer()
 	append(&enemies, Enemy{ NewHexagonClump({.BLANK, .BLANK, .BLANK}, {200, 200}) })
 }
@@ -27,6 +28,7 @@ update :: proc() {
 	UpdateEnemies()
 	
 	if rl.IsKeyPressed(.N) do AddHexagonToClump(&player.clump, .BLANK)
+	if rl.IsKeyPressed(.K) do StopStopwatch(&time_survived)
 	if rl.IsMouseButtonPressed(.LEFT) do PlayerFirePellet()
 	
 	rl.BeginDrawing()
@@ -46,7 +48,8 @@ update :: proc() {
 	rl.DrawText(rl.TextFormat("vel: %.2f, %.2f", player.vel.x, player.vel.y), 10, 50, 32, rl.BLACK)
 	rl.DrawText(rl.TextFormat("speed: %d", SPEED), 10, 90, 32, rl.BLACK)
 	rl.DrawText(rl.TextFormat("acc: %d", ACCELERATION), 10, 130, 32, rl.BLACK)
-	rl.DrawText(rl.TextFormat("blanks: %d", GetHexagonTypeAmount(player.clump)[.BLANK]), 10, 170, 32, rl.BLACK)
+	rl.DrawText(rl.TextFormat("time survived: %f", GetElapsedStopwatchTime(time_survived)), 10, 170, 32, rl.BLACK)
+	rl.DrawText(rl.TextFormat("points: %d", points), 10, 210, 32, rl.BLACK)
 
     free_all(context.temp_allocator)
 }

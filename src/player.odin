@@ -59,8 +59,33 @@ HandlePlayerCamera :: proc(plr: ^Player) {
 		if diff > threshold do plr.camera.target[i] = plr.pos[i] - threshold
 		if diff < -threshold do plr.camera.target[i] = plr.pos[i] + threshold
 	}
+
+	plr.camera.zoom = GetCameraZoom(GetPlayerLevel(plr^))
 }
 
 CameraPos :: proc(plr: Player) -> rl.Vector2 {
 	return plr.pos - plr.camera.target + plr.camera.offset
+}
+
+GetCameraZoom :: proc(level: int) -> f32 {
+	switch level {
+	case 1: return 1
+	case 2: return 0.8
+	case 3: return 0.7
+	case 4: return 0.6
+	}
+
+	return 1
+}
+
+GetPlayerLevel :: proc(plr: Player) -> int {
+	hexagons := len(plr.hexagon_types)
+	switch {
+	case hexagons < 1 + 6: return 1
+	case hexagons < 1 + 6 + 12: return 2
+	case hexagons < 1 + 6 + 12 + 18: return 3
+	case hexagons == 1 + 6 + 12 + 18: return 4
+	}
+
+	return 1
 }

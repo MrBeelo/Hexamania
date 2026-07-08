@@ -12,6 +12,7 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	if enemy.health <= 0 {
 		ThrowRandomHeart(enemy.pos)
 		unordered_remove(&enemies, index)
+		points += len(enemy.clump.hexagon_types)
 	}
 	
 	UpdateHexagonClump(&enemy.clump)
