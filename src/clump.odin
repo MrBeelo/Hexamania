@@ -43,7 +43,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	// Health Regen Timer
 	health_regen := NewTimer(2, true, true)
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {}, health_regen, 0, false}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, false}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -112,10 +112,10 @@ HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 		for hexagon in GetClumpHexagons(clump^) do for enemy_hexagon in GetClumpHexagons(enemy_clump^) {
 			if rl.Vector2Distance(hexagon.center, enemy_hexagon.center) > 100 do continue
 			if !rl.CheckCollisionRecs(hexagon.hurtbox, enemy_hexagon.hurtbox) do continue
-			DamageClump(clump, 5)
-			DamageClump(enemy_clump, 5)
-			clump.vel *= -1
-			enemy_clump.vel *= -1
+			DamageClump(clump, 3)
+			DamageClump(enemy_clump, 3)
+			clump.vel *= -1.3
+			enemy_clump.vel *= -1.3
 		}
 	}
 }
