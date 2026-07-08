@@ -4,9 +4,7 @@ import rl "vendor:raylib"
 import "core:math"
 
 MAX_HEXAGONS :: 1 + 6 + 12 + 18
-MAX_HEALTH :: 100
-SPEED :: 15 * 60
-ACCELERATION :: 5 * 60
+MAX_HEALTH :: f32(100)
 
 HexagonClump :: struct {
 	hexagon_types: []HexagonType,
@@ -16,11 +14,11 @@ HexagonClump :: struct {
 	health: f32,
 }
 
-NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2) -> HexagonClump {
+NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel := rl.Vector2{}, rot := f32(0), health := MAX_HEALTH) -> HexagonClump {
 	if len(hexagon_types) > MAX_HEXAGONS do return HexagonClump{}
 	new_hexagon_types := make([]HexagonType, len(hexagon_types))
 	copy(new_hexagon_types, hexagon_types)
-	return HexagonClump{new_hexagon_types, center, 0, 0, MAX_HEALTH}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -42,8 +40,8 @@ GetHexagonTypeAmount :: proc(clump: HexagonClump) -> [HexagonType]int {
 UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2	
 
-	clump.vel.x = math.clamp(clump.vel.x, -SPEED, SPEED)
-	clump.vel.y = math.clamp(clump.vel.y, -SPEED, SPEED)
+	clump.vel.x = math.clamp(clump.vel.x, -PLAYER_SPEED, PLAYER_SPEED)
+	clump.vel.y = math.clamp(clump.vel.y, -PLAYER_SPEED, PLAYER_SPEED)
 
 	clump.pos += clump.vel * rl.GetFrameTime()
 }

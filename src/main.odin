@@ -18,7 +18,7 @@ init :: proc() {
 
 	StartStopwatch(&time_survived)
 	player = NewPlayer()
-	append(&enemies, Enemy{ NewHexagonClump({.BLANK, .BLANK, .BLANK}, {200, 200}) })
+	append(&enemies, NewEnemy({.BLANK, .BLANK, .BLANK}, {200, 200}))
 }
 
 update :: proc() {
@@ -46,8 +46,8 @@ update :: proc() {
 
 	rl.DrawText(rl.TextFormat("pos: %.2f, %.2f", player.pos.x, player.pos.y), 10, 10, 32, rl.BLACK)
 	rl.DrawText(rl.TextFormat("vel: %.2f, %.2f", player.vel.x, player.vel.y), 10, 50, 32, rl.BLACK)
-	rl.DrawText(rl.TextFormat("speed: %d", SPEED), 10, 90, 32, rl.BLACK)
-	rl.DrawText(rl.TextFormat("acc: %d", ACCELERATION), 10, 130, 32, rl.BLACK)
+	rl.DrawText(rl.TextFormat("speed: %d", PLAYER_SPEED), 10, 90, 32, rl.BLACK)
+	rl.DrawText(rl.TextFormat("acc: %d", PLAYER_ACCELERATION), 10, 130, 32, rl.BLACK)
 	rl.DrawText(rl.TextFormat("time survived: %f", GetElapsedStopwatchTime(time_survived)), 10, 170, 32, rl.BLACK)
 	rl.DrawText(rl.TextFormat("points: %d", points), 10, 210, 32, rl.BLACK)
 

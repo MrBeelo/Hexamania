@@ -16,16 +16,22 @@ Hexamania description goes here
 #### DAY 2
 - ~~Evil hexagons, developed as the player~~
 - ~~Kill enemy hexagons -> drop hearts~~
-- Evil hexagons move!
+- Evil hexagons move! (AI: Wander, "Find a target it likes", Full aggro, panic and run away on low health)
 - Evil hexagons attack! (base attack for now)
 - Powerups (circular): spawn randomly around the map, give either a temporary buff or a health boost idk
 - after max, no more normal hexagons spawn, only powerup ones.
 - ~~Oh ye health, self explanatory~~
 - Grade when you die XD
+- Menus (MainMenu, DeathMenu, WinMenu)
 - ~~a ye add points~~
 - ~~Zoom out when building a full shell (leveling up)~~
+- Hexahearts follow you when you're close.
+- Make an ownership system (for spells, pellets, etc)
+- Entities have UUIDs, so that the above works
+- Add sprinting
 
 #### DAY 3
+- Maybe make enemies collidable?
 - SPELLSSSSS
 - Design a couple different hexagon types
 - Enemies naturally spawn
@@ -34,7 +40,9 @@ Hexamania description goes here
 - Background should have falling hexagons lol
 - Blur/bloom, lots of blur/bloom
 - Health bar (should be at the bottom middle of the screen lol)
+- Transitions maybe? (for each gamestate)
 
 #### DAY 4
+- Rest of the art, cuz I know you aint finishing it in day 3
 - Sound effects
-- Music should be 6/4 lol, calm and relaxing with reverb/echo
+- Music! (should be 6/4 lol, calm and relaxing with reverb/echo)

@@ -3,6 +3,9 @@ package main
 import rl "vendor:raylib"
 import "core:math"
 
+PLAYER_SPEED :: 3 * 60
+PLAYER_ACCELERATION :: 5 * 60
+
 Player :: struct {
 	using clump: HexagonClump,
 	camera: rl.Camera2D,
@@ -16,15 +19,15 @@ NewPlayer :: proc() -> Player {
 UpdatePlayer :: proc(plr: ^Player) {
 	// Movement
 	if Holding(.UP) {
-	 	Accelerate(&plr.vel.y, -SPEED)
+	 	Accelerate(&plr.vel.y, -PLAYER_SPEED)
 	} else if Holding(.DOWN) {
-		Accelerate(&plr.vel.y, SPEED)
+		Accelerate(&plr.vel.y, PLAYER_SPEED)
 	} else do Accelerate(&plr.vel.y, 0)
 	
 	if Holding(.LEFT) {
-	 	Accelerate(&plr.vel.x, -SPEED)
+	 	Accelerate(&plr.vel.x, -PLAYER_SPEED)
 	} else if Holding(.RIGHT) {
-	 	Accelerate(&plr.vel.x, SPEED)
+	 	Accelerate(&plr.vel.x, PLAYER_SPEED)
 	} else do Accelerate(&plr.vel.x, 0)
 
 	// Clamp velocities down to 0 if they are low and player isn't moving
@@ -46,7 +49,7 @@ DrawPlayer :: proc(plr: ^Player) {
 	DrawHexagonClump(plr.clump)
 }
 
-Accelerate :: proc(vel: ^f32, speed: f32, acceleration := ACCELERATION) {
+Accelerate :: proc(vel: ^f32, speed: f32, acceleration := PLAYER_ACCELERATION) {
 	if vel^ > speed do vel^ -= f32(acceleration) * rl.GetFrameTime()
 	if vel^ < speed do vel^ += f32(acceleration) * rl.GetFrameTime()
 }
@@ -69,10 +72,10 @@ CameraPos :: proc(plr: Player) -> rl.Vector2 {
 
 GetCameraZoom :: proc(level: int) -> f32 {
 	switch level {
-	case 1: return 1
-	case 2: return 0.8
-	case 3: return 0.7
-	case 4: return 0.6
+	case 1: return 1.2
+	case 2: return 1.1
+	case 3: return 0.9
+	case 4: return 0.7
 	}
 
 	return 1
