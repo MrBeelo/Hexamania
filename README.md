@@ -34,12 +34,13 @@ Hexamania description goes here
 - ~~Maybe make enemies collidable?~~
 - SPELLSSSSS
 - Design a couple different hexagon and powerup types
-- Enemies naturally spawn
-- Powerups naturally spawn
-- Enemies get bigger and stronger as time passes
+- ~~Enemies naturally spawn~~
+- ~~Powerups naturally spawn~~
+- ~~Enemies get bigger and stronger as time passes~~
 - ~~Grade when you die XD~~
 - ~~Menus (Main, Paused, Death, Win)~~
 - ~~Health bar (should be at the bottom middle of the screen lol)~~
+- ~~Map~~
 
 #### DAY 4
 - Hexagon has eyes <3 that look where your mouse is!

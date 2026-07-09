@@ -20,6 +20,7 @@ init :: proc() {
 	LoadPowerups()
 	LoadFonts()
 	InitMenus()
+	InitEnemies()
 }
 
 update :: proc() {
@@ -53,7 +54,9 @@ update :: proc() {
 		
 		rl.EndMode2D()
 
+		// HUD
 		DrawPlayerHealthBar()
+		DrawMap()
 
 		if debug_on {
 			rl.DrawText(rl.TextFormat("pos: %.2f, %.2f", player.pos.x, player.pos.y), 10, 10, 32, rl.BLACK)
@@ -63,6 +66,8 @@ update :: proc() {
 			rl.DrawText(rl.TextFormat("time survived: %f", GetElapsedStopwatchTime(time_survived)), 10, 170, 32, rl.BLACK)
 			rl.DrawText(rl.TextFormat("points: %d", points), 10, 210, 32, rl.BLACK)
 			rl.DrawText(rl.TextFormat("fps: %d", rl.GetFPS()), 10, 250, 32, rl.BLACK)
+			rl.DrawText(rl.TextFormat("enemies: %d", len(enemies)), 10, 290, 32, rl.BLACK)
+			rl.DrawText(rl.TextFormat("powerups: %d", len(world_powerups)), 10, 330, 32, rl.BLACK)
 		}
 	}
 

@@ -44,7 +44,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	id := uuid.generate_v7()
 
 	// Health Regen Timer
-	health_regen := NewTimer(2, true, true)
+	health_regen := NewTimer(7, true, true)
 	
 	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil}
 }
@@ -162,7 +162,7 @@ GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {
 		
 		hurtbox := GetHexagonHurtBox(rotated_center)
 		hexagon := Hexagon{hexagon_type, rotated_center, clump.rot, hurtbox}
-		hexagons[index] = hexagon
+		if len(hexagons) > index do hexagons[index] = hexagon
 	}
 
 	return hexagons

@@ -1,10 +1,12 @@
 package main
 
 import rl "vendor:raylib"
+import "core:math"
 import "core:math/rand"
 
 ENEMY_ACCELERATION :: 3 * 60
 
+enemy_spawn_timer: Timer
 enemies: [dynamic]Enemy
 
 // AI State is the way each entity's AI behaves
@@ -29,19 +31,54 @@ Enemy :: struct {
 	turn_timer: Timer,
 	attack_timer: Timer,
 	target_vel: rl.Vector2,
+	time_away_from_player: f32,
 }
 
-NewEnemy :: proc(hexagon_types: []HexagonType, pos: rl.Vector2, health := MAX_HEALTH) -> Enemy {
+NewEnemy :: proc(hexagon_types: []HexagonType, pos: rl.Vector2, vel := rl.Vector2{}, health := MAX_HEALTH) -> Enemy {
 	rot := rand.float32_range(-180, 180)
-	clump := NewHexagonClump(hexagon_types, pos, {}, rot, health)
+	clump := NewHexagonClump(hexagon_types, pos, vel, rot, health)
 	
 	switch_timer := NewTimer(2, true, true, true)
 	fire_timer := NewTimer(5, true, true)
 	
-	return Enemy{clump, .ROAM, switch_timer, fire_timer, 0}
+	return Enemy{clump, .ROAM, switch_timer, fire_timer, 0, 0}
 }
 
-UpdateEnemies :: proc() { for &enemy, index in enemies do UpdateEnemy(&enemy, index) }
+InitEnemies :: proc() {
+	enemy_spawn_timer = NewTimer(5, true, true)
+}
+
+UpdateEnemies :: proc() { 
+	for &enemy, index in enemies do UpdateEnemy(&enemy, index)
+
+	// Spawning Enemies
+	UpdateTimer(&enemy_spawn_timer)
+	if enemy_spawn_timer.ding {
+		if player.camera.zoom == 0 do return // Will cause a division by zero error, but this shouldn't happen anyway.
+		
+		hexagons := math.floor_div(int(GetElapsedStopwatchTime(time_survived)), 15) + 1
+		hexagons = rand.int_range(hexagons, hexagons + 3)
+		if hexagons <= 0 do return
+		
+		hexagon_types := make([]HexagonType, hexagons)
+		for i in 0..<hexagons do hexagon_types[i] = .BLANK // NOTE: It's obvious.
+		
+		level := GetLevel(hexagon_types)
+		visible_screen_size := screen_size / player.camera.zoom
+		min_dist := player.camera.target + visible_screen_size / 2 + (f32(level) - 1) * HEXAGON_SIZE
+		pos_x := RangeRand({min_dist.x, min_dist.x + 200})
+		pos_y := RangeRand({min_dist.y, min_dist.y + 200})
+		pos := rl.Vector2{pos_x, pos_y}
+
+		rot := RotationFrom2Points(pos, player.camera.target)
+		rot += rand.float32_range(-10, 10)
+		vel := VelocityFromRotation(rot)
+		
+		append(&enemies, NewEnemy(hexagon_types, pos, vel))
+		
+		enemy_spawn_timer.duration = rand.float32_range(3, 9)
+	}
+}
 
 UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	RANGE :: 250
@@ -66,6 +103,13 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 
 	Accelerate(&enemy.vel.x, enemy.target_vel.x, ENEMY_ACCELERATION)
 	Accelerate(&enemy.vel.y, enemy.target_vel.y, ENEMY_ACCELERATION)
+
+	// Despawn if away from player
+	player_dist := rl.Vector2Distance(enemy.pos, player.pos)
+	player_dist -= f32(GetPlayerLevel(player) - 1) * HEXAGON_SIZE
+	player_dist -= f32(GetLevel(enemy.hexagon_types) - 1) * HEXAGON_SIZE
+	if player_dist > 500 do enemy.time_away_from_player += rl.GetFrameTime(); else do enemy.time_away_from_player = 0
+	if enemy.time_away_from_player > 20 && len(enemies) > index do unordered_remove(&enemies, index)
 	
 	UpdateHexagonClump(&enemy.clump)
 }

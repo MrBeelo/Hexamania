@@ -7,6 +7,7 @@ import "core:math/rand"
 POWERUP_SIZE :: f32(32)
 world_powerups: [dynamic]WorldPowerup
 powerup_textures: [PowerupType]rl.Texture2D
+powerup_spawn_timer: Timer
 
 // Because for some reason union lengths aren't known at compile time, PowerupType
 // will be a regular enum, and the Powerup will have a "value" field that changes
@@ -46,7 +47,24 @@ ThrowRandomWorldPowerup :: proc(pos: rl.Vector2) {
 	append(&world_powerups, WorldPowerup{type, value, pos, {vel_x, vel_y}, {}})
 }
 
-UpdateWorldPowerups :: proc() { for &powerup, index in world_powerups do UpdateWorldPowerup(&powerup, index) }
+UpdateWorldPowerups :: proc() { 
+	for &powerup, index in world_powerups do UpdateWorldPowerup(&powerup, index)
+
+	// Spawning powerups
+	UpdateTimer(&powerup_spawn_timer)
+	if powerup_spawn_timer.ding {
+		if player.camera.zoom == 0 do return
+		
+		visible_screen_size := screen_size / player.camera.zoom
+		min_dist := player.camera.target + visible_screen_size / 2
+		pos_x := RangeRand({min_dist.x, min_dist.x + 200})
+		pos_y := RangeRand({min_dist.y, min_dist.y + 200})
+
+		ThrowRandomWorldPowerup({pos_x, pos_y})
+		
+		powerup_spawn_timer.duration = rand.float32_range(20, 30)
+	}
+}
 
 UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {	
 	powerup.pos += powerup.vel * rl.GetFrameTime()
@@ -84,6 +102,11 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 		// Add health as soon as bound powerup is acquired
 		if powerup.type == .HEALTH do player.health += powerup.value
 	}
+
+	// Despawn if away from player
+	player_dist := rl.Vector2Distance(powerup.pos, player.pos)
+	player_dist -= f32(GetPlayerLevel(player) - 1) * HEXAGON_SIZE
+	if player_dist > 1000 && len(world_powerups) > index do unordered_remove(&world_powerups, index)
 }
 
 DrawWorldPowerups :: proc() { for powerup in world_powerups do DrawWorldPowerup(powerup) }
@@ -108,6 +131,8 @@ LoadPowerups :: proc() {
 		.DAMAGE = rl.LoadTexture("res/powerup/damage.png"),
 		.SPEED = rl.LoadTexture("res/powerup/speed.png"),
 	}
+
+	powerup_spawn_timer = NewTimer(20, true, true)
 }
 
 UnloadPowerups :: proc() {

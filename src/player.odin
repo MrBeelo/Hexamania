@@ -102,7 +102,7 @@ HandlePlayerCamera :: proc(plr: ^Player) {
 }
 
 CameraPos :: proc(plr: Player) -> rl.Vector2 {
-	return plr.pos - plr.camera.target + plr.camera.offset
+	return (plr.pos - plr.camera.target) * plr.camera.zoom + plr.camera.offset
 }
 
 GetCameraZoom :: proc(level: int) -> f32 {
