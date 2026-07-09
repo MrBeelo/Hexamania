@@ -31,11 +31,13 @@ update :: proc() {
 		UpdateHexagonHearts()
 		UpdateEnemies()
 		UpdateWorldPowerups()
+		UpdateSpells()
 		if rl.IsKeyPressed(.ESCAPE) do game_state = .PAUSED
 	}
 
 	if rl.IsKeyPressed(.F3) do debug_on = !debug_on
-	if rl.IsKeyPressed(.N) do AddHexagonToClump(&player.clump, .BLANK)
+	if rl.IsKeyPressed(.N) do AddHexagonToClump(&player.clump, .RIFLE)
+	if rl.IsKeyPressed(.K) do SummonHealthPad(player.clump)
 	
 	rl.BeginDrawing()
 	defer rl.EndDrawing()
@@ -46,6 +48,7 @@ update :: proc() {
 		rl.BeginMode2D(player.camera)
 
 		DrawBackground()
+		DrawSpellsBelow()
 		DrawHexagonHearts()
 		DrawWorldPowerups()
 		DrawPlayer(&player)

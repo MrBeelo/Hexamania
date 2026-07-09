@@ -15,7 +15,14 @@ HEXAGON_HEIGHT :: HEXAGON_SIDE_LENGTH * 1.73 // sqrt(3) ~= 1.73
 hexagon_textures: [HexagonType]rl.Texture2D
 
 HexagonType :: enum {
-	BLANK,
+	RIFLE,
+	RIFLE_UPGRADE_FIRE_RATE,
+	RIFLE_UPGRADE_PELLET_SPEED,
+	RIFLE_UPGRADE_DAMAGE,
+	HEALTH_PAD,
+	HEALTH_PAD_UPGRADE_HEAL_AMOUNT,
+	HEALTH_PAD_UPGRADE_SIZE,
+	HEALTH_PAD_UPGRADE_TIME,
 }
 
 Hexagon :: struct {
@@ -50,7 +57,14 @@ DrawHexagon :: proc(hex: Hexagon) {
 
 LoadHexagons :: proc() {
 	hexagon_textures = {
-		.BLANK = rl.LoadTexture("res/hexagon/blank.png"),
+		.RIFLE = rl.LoadTexture("res/hexagon/rifle.png"),
+		.RIFLE_UPGRADE_FIRE_RATE = rl.LoadTexture("res/hexagon/rifle_upgrade_fire_rate.png"),
+		.RIFLE_UPGRADE_PELLET_SPEED = rl.LoadTexture("res/hexagon/rifle_upgrade_pellet_speed.png"),
+		.RIFLE_UPGRADE_DAMAGE = rl.LoadTexture("res/hexagon/rifle_upgrade_damage.png"),
+		.HEALTH_PAD = rl.LoadTexture("res/hexagon/health_pad.png"),
+		.HEALTH_PAD_UPGRADE_HEAL_AMOUNT = rl.LoadTexture("res/hexagon/health_pad_upgrade_heal_amount.png"),
+		.HEALTH_PAD_UPGRADE_SIZE = rl.LoadTexture("res/hexagon/health_pad_upgrade_size.png"),
+		.HEALTH_PAD_UPGRADE_TIME = rl.LoadTexture("res/hexagon/health_pad_upgrade_time.png"),
 	}
 }
 

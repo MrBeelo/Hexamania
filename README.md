@@ -43,24 +43,46 @@ Hexamania description goes here
 - ~~Map~~
 
 #### DAY 4
+###### Code
+- Implement rifle fire rate for both players and enemies (player -> hold to auto fire)
+- Enemy do spells
+- Balance to hell
+###### Art
 - Hexagon has eyes <3 that look where your mouse is!
 - Background should have falling hexagons lol
 - Blur/bloom, lots of blur/bloom
 - Transitions maybe? (for each gamestate)
-- Rest of the art, cuz I know you aint finishing it in day 3
+
+#### DAY 5 (FINAL DAY)
+###### Art
+- Rest of the art, cuz I know you aint finishing it in day 4
+###### Sound
 - Sound effects
 - Music! (should be 6/4 lol, calm and relaxing with reverb/echo)
 
-## POWERUP IDEAS
+## HEXAHEARTS
 
-#### Mine
-- Become Invisible
-- Sub. Invisibility length (MAX: 5)
+#### Rifle
+Shoots pellets  
+Victim takes damage when hit by pellet
+Upgrades: shoot speed (how fast they go), damage, fire rate
 
-- Push enemies from you
-- Sub. Push harder (MAX: 2)
-- Sub. More push time (MAX: 3)
+#### Health Pad
+Places a health pad on the user's position (like grass and flowers or something)  
+User heals when on the pad  
+Upgrades: size, time, health (how much health it gives each time)  
 
-- Pull enemies to a "black hole"
-- Sub. Pull harder (MAX: 2)
-- Sub. More pull time (MAX: 3)
+#### Ice Ground
+Ice area thingies are summoned from the ground (with piercing)  
+After hitting an enemy, freezes them for some seconds (cant move or attack)  
+Upgrades: more range, more aoe, more freeze time  
+
+#### Black Hole
+Shoots a black hole  
+Close enemies are pulled into it  
+Upgrades: size, suction power, time  
+
+#### Fireball
+Shoots a fireball (with piercing)  
+Hit enemies get burned for some seconds (periodically take damage)  
+Upgrades: size/aoe, time, damage dealt  

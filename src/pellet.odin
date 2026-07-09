@@ -11,11 +11,12 @@ Pellet :: struct {
 	pos: rl.Vector2,
 	vel: rl.Vector2,
 	owner: uuid.Identifier,
+	pellet_multipliers: struct{ speed_mult: f32, damage_mult: f32 }
 }
 
 PlayerFirePellet :: proc() {
 	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
-	append(&pellets, Pellet{player.pos, vel, player.uuid})
+	append(&pellets, Pellet{player.pos, vel, player.uuid, GetPelletMultipliers(player.clump)})
 }
 
 EnemyFirePellet :: proc(enemy: Enemy, target: rl.Vector2) {
@@ -30,7 +31,14 @@ EnemyFirePellet :: proc(enemy: Enemy, target: rl.Vector2) {
 	rot := RotationFrom2Points(enemy.pos, target)
 	rot += rand.float32_range(-inaccuracy, inaccuracy) // Enemy inaccuracies!
 	vel := VelocityFromRotation(rot)
-	append(&pellets, Pellet{enemy.pos, vel, enemy.uuid})
+	append(&pellets, Pellet{enemy.pos, vel, enemy.uuid, GetPelletMultipliers(enemy.clump)})
+}
+
+GetPelletMultipliers :: proc(clump: HexagonClump) -> struct{ speed_mult: f32, damage_mult: f32 } {
+	hexagon_type_amounts := GetHexagonTypeAmounts(clump)
+	speed_mult := 1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_PELLET_SPEED]) * 2 / 5
+	damage_mult := 1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_DAMAGE]) * 3 / 10
+	return {speed_mult, damage_mult}
 }
 
 UpdatePellets :: proc() { for &pellet, index in pellets do UpdatePellet(&pellet, index) }

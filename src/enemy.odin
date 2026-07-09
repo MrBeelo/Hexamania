@@ -61,7 +61,7 @@ UpdateEnemies :: proc() {
 		if hexagons <= 0 do return
 		
 		hexagon_types := make([]HexagonType, hexagons)
-		for i in 0..<hexagons do hexagon_types[i] = .BLANK // NOTE: It's obvious.
+		for i in 0..<hexagons do hexagon_types[i] = .RIFLE // NOTE: It's obvious.
 		
 		level := GetLevel(hexagon_types)
 		visible_screen_size := screen_size / player.camera.zoom

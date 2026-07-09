@@ -62,10 +62,18 @@ AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
 }
 
 // Returns how many of each type the clump contains
-GetHexagonTypeAmount :: proc(clump: HexagonClump) -> [HexagonType]int {
+GetHexagonTypeAmounts :: proc(clump: HexagonClump) -> [HexagonType]int {
 	result: [HexagonType]int
 	for type in clump.hexagon_types do result[type] += 1
 	return result
+}
+
+// Checks if any of the clump's hexagons intersect with the rectangle
+ClumpIntersectsRect :: proc(clump: HexagonClump, rect: rl.Rectangle) -> bool {
+	for hexagon in GetClumpHexagons(clump) {
+	 	if rl.CheckCollisionRecs(rect, hexagon.hurtbox) do return true
+	}
+	return false
 }
 
 UpdateHexagonClump :: proc(clump: ^HexagonClump) {

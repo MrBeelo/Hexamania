@@ -14,7 +14,7 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.BLANK}, 0), camera, {} }
+	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {} }
 }
 
 UpdatePlayer :: proc(plr: ^Player) {
