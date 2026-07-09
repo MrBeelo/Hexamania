@@ -74,7 +74,7 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 	if lowest_dist < RANGE do powerup.vel = VelocityFrom2Points(powerup.pos, player.pos) * (100 - lowest_dist)
 	
 	if rl.CheckCollisionRecs(closest_box, powerup.hurtbox) {
-		unordered_remove(&world_powerups, index)
+		if len(world_powerups) > index do unordered_remove(&world_powerups, index)
 
 		value := powerup.value
 		if player.bound_powerups[powerup.type].time_remaining > 0 do value = math.max(player.bound_powerups[powerup.type].value, powerup.value)

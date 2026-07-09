@@ -71,7 +71,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmp2ydu2dd_.js
+// include: /tmp/tmpysw4srmg.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
@@ -160,6 +160,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
         if (!check) throw new Error(msg);
       }
 Module['FS_createPath']("/", "res", true, true);
+Module['FS_createPath']("/res", "font", true, true);
 Module['FS_createPath']("/res", "hexagon", true, true);
 Module['FS_createPath']("/res", "powerup", true, true);
 
@@ -197,25 +198,25 @@ Module['FS_createPath']("/res", "powerup", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/res/background.png", "start": 0, "end": 27626}, {"filename": "/res/hexagon/blank.png", "start": 27626, "end": 34098}, {"filename": "/res/powerup/damage.png", "start": 34098, "end": 34392}, {"filename": "/res/powerup/health.png", "start": 34392, "end": 34722}, {"filename": "/res/powerup/speed.png", "start": 34722, "end": 35034}], "remote_package_size": 35034});
+    loadPackage({"files": [{"filename": "/res/background.png", "start": 0, "end": 27626}, {"filename": "/res/font/OFL.txt", "start": 27626, "end": 32165}, {"filename": "/res/font/Quicksand-Medium.ttf", "start": 32165, "end": 111109}, {"filename": "/res/font/Quicksand-Regular.ttf", "start": 111109, "end": 190041}, {"filename": "/res/font/Quicksand-SemiBold.ttf", "start": 190041, "end": 268857}, {"filename": "/res/hexagon/blank.png", "start": 268857, "end": 275329}, {"filename": "/res/powerup/damage.png", "start": 275329, "end": 275623}, {"filename": "/res/powerup/health.png", "start": 275623, "end": 275953}, {"filename": "/res/powerup/speed.png", "start": 275953, "end": 276265}], "remote_package_size": 276265});
 
   })();
 
-// end include: /tmp/tmp2ydu2dd_.js
-// include: /tmp/tmpwbxk4smf.js
+// end include: /tmp/tmpysw4srmg.js
+// include: /tmp/tmpb6y7f_xy.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpwbxk4smf.js
-// include: /tmp/tmp5st084ha.js
+  // end include: /tmp/tmpb6y7f_xy.js
+// include: /tmp/tmp2smwmkr1.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmp5st084ha.js
+  // end include: /tmp/tmp2smwmkr1.js
 
 
 var programArgs = [];
@@ -7440,6 +7441,8 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
 
   var _glTexImage2D = _emscripten_glTexImage2D;
 
+  var _glTexParameterf = _emscripten_glTexParameterf;
+
   var _glTexParameteri = _emscripten_glTexParameteri;
 
   var _glUniform1i = _emscripten_glUniform1i;
@@ -9553,49 +9556,49 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('onCOSStore');
 }
 var ASM_CONSTS = {
-  125814: () => { if (document.fullscreenElement) return 1; },  
- 125860: () => { return Module.canvas.width; },  
- 125892: () => { return parseInt(Module.canvas.style.width); },  
- 125940: () => { document.exitFullscreen(); },  
- 125967: () => { setTimeout(function(){ Module.requestFullscreen(false, false); }, 100); },  
- 126039: () => { if (document.fullscreenElement) return 1; },  
- 126085: () => { return Module.canvas.width; },  
- 126117: () => { return screen.width; },  
- 126142: () => { document.exitFullscreen(); },  
- 126169: ($0) => { const canvasId = UTF8ToString($0); setTimeout(function() { Module.requestFullscreen(false, true); setTimeout(function() { document.querySelector(canvasId).style.width="unset"; }, 100); }, 100); },  
- 126363: () => { return window.innerWidth; },  
- 126389: () => { return window.innerHeight; },  
- 126416: () => { if (document.fullscreenElement) return 1; },  
- 126462: () => { return Module.canvas.width; },  
- 126494: () => { return parseInt(Module.canvas.style.width); },  
- 126542: () => { if (document.fullscreenElement) return 1; },  
- 126588: () => { return Module.canvas.width; },  
- 126620: () => { return screen.width; },  
- 126645: () => { return window.innerWidth; },  
- 126671: () => { return window.innerHeight; },  
- 126698: () => { if (document.fullscreenElement) return 1; },  
- 126744: () => { return Module.canvas.width; },  
- 126776: () => { return screen.width; },  
- 126801: () => { document.exitFullscreen(); },  
- 126828: () => { if (document.fullscreenElement) return 1; },  
- 126874: () => { return Module.canvas.width; },  
- 126906: () => { return parseInt(Module.canvas.style.width); },  
- 126954: () => { document.exitFullscreen(); },  
- 126981: ($0) => { Module.canvas.style.opacity = $0; },  
- 127019: () => { return screen.width; },  
- 127044: () => { return screen.height; },  
- 127070: () => { return window.screenX; },  
- 127097: () => { return window.screenY; },  
- 127124: () => { return window.devicePixelRatio; },  
- 127160: ($0) => { navigator.clipboard.writeText(UTF8ToString($0)); },  
- 127213: ($0) => { Module.canvas.style.cursor = UTF8ToString($0); },  
- 127264: () => { Module.canvas.style.cursor = 'none'; },  
- 127301: ($0, $1, $2, $3) => { try { navigator.getGamepads()[$0].vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: $3, weakMagnitude: $1, strongMagnitude: $2 }); } catch (e) { try { navigator.getGamepads()[$0].hapticActuators[0].pulse($2, $3); } catch (e) { } } },  
- 127557: ($0) => { Module.canvas.style.cursor = UTF8ToString($0); },  
- 127608: () => { if (document.pointerLockElement) return 1; },  
- 127655: () => { if (document.fullscreenElement) return 1; },  
- 127701: () => { return window.innerWidth; },  
- 127727: () => { return window.innerHeight; }
+  136846: () => { if (document.fullscreenElement) return 1; },  
+ 136892: () => { return Module.canvas.width; },  
+ 136924: () => { return parseInt(Module.canvas.style.width); },  
+ 136972: () => { document.exitFullscreen(); },  
+ 136999: () => { setTimeout(function(){ Module.requestFullscreen(false, false); }, 100); },  
+ 137071: () => { if (document.fullscreenElement) return 1; },  
+ 137117: () => { return Module.canvas.width; },  
+ 137149: () => { return screen.width; },  
+ 137174: () => { document.exitFullscreen(); },  
+ 137201: ($0) => { const canvasId = UTF8ToString($0); setTimeout(function() { Module.requestFullscreen(false, true); setTimeout(function() { document.querySelector(canvasId).style.width="unset"; }, 100); }, 100); },  
+ 137395: () => { return window.innerWidth; },  
+ 137421: () => { return window.innerHeight; },  
+ 137448: () => { if (document.fullscreenElement) return 1; },  
+ 137494: () => { return Module.canvas.width; },  
+ 137526: () => { return parseInt(Module.canvas.style.width); },  
+ 137574: () => { if (document.fullscreenElement) return 1; },  
+ 137620: () => { return Module.canvas.width; },  
+ 137652: () => { return screen.width; },  
+ 137677: () => { return window.innerWidth; },  
+ 137703: () => { return window.innerHeight; },  
+ 137730: () => { if (document.fullscreenElement) return 1; },  
+ 137776: () => { return Module.canvas.width; },  
+ 137808: () => { return screen.width; },  
+ 137833: () => { document.exitFullscreen(); },  
+ 137860: () => { if (document.fullscreenElement) return 1; },  
+ 137906: () => { return Module.canvas.width; },  
+ 137938: () => { return parseInt(Module.canvas.style.width); },  
+ 137986: () => { document.exitFullscreen(); },  
+ 138013: ($0) => { Module.canvas.style.opacity = $0; },  
+ 138051: () => { return screen.width; },  
+ 138076: () => { return screen.height; },  
+ 138102: () => { return window.screenX; },  
+ 138129: () => { return window.screenY; },  
+ 138156: () => { return window.devicePixelRatio; },  
+ 138192: ($0) => { navigator.clipboard.writeText(UTF8ToString($0)); },  
+ 138245: ($0) => { Module.canvas.style.cursor = UTF8ToString($0); },  
+ 138296: () => { Module.canvas.style.cursor = 'none'; },  
+ 138333: ($0, $1, $2, $3) => { try { navigator.getGamepads()[$0].vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: $3, weakMagnitude: $1, strongMagnitude: $2 }); } catch (e) { try { navigator.getGamepads()[$0].hapticActuators[0].pulse($2, $3); } catch (e) { } } },  
+ 138589: ($0) => { Module.canvas.style.cursor = UTF8ToString($0); },  
+ 138640: () => { if (document.pointerLockElement) return 1; },  
+ 138687: () => { if (document.fullscreenElement) return 1; },  
+ 138733: () => { return window.innerWidth; },  
+ 138759: () => { return window.innerHeight; }
 };
 function SetCanvasIdJs(out,outSize) { var canvasId = "#" + Module.canvas.id; stringToUTF8(canvasId, out, outSize); }
 function __asyncjs__RequestClipboardData() { return Asyncify.handleAsync(async () => { if (navigator.clipboard && window.isSecureContext) { let items = await navigator.clipboard.read(); for (const item of items) { if (item.types.includes("text/plain")) { const blob = await item.getType("text/plain"); const text = await blob.text(); window._lastClipboardString = text; } else if (item.types.find(t => t.startsWith("image/"))) { const blob = await item.getType(item.types.find(t => t.startsWith("image/"))); const bitmap = await createImageBitmap(blob); const canvas = document.createElement('canvas'); canvas.width = bitmap.width; canvas.height = bitmap.height; const ctx = canvas.getContext('2d'); ctx.drawImage(bitmap, 0, 0); const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data; window._lastImgWidth = canvas.width; window._lastImgHeight = canvas.height; window._lastImgData = imgData; } } } else console.warn("Clipboard read() requires HTTPS/Localhost"); }); }
@@ -10166,6 +10169,8 @@ var wasmImports = {
   glShaderSource: _glShaderSource,
   /** @export */
   glTexImage2D: _glTexImage2D,
+  /** @export */
+  glTexParameterf: _glTexParameterf,
   /** @export */
   glTexParameteri: _glTexParameteri,
   /** @export */

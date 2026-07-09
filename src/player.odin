@@ -18,6 +18,13 @@ NewPlayer :: proc() -> Player {
 }
 
 UpdatePlayer :: proc(plr: ^Player) {
+	// Manage death
+	if plr.health <= 0 {
+		StopStopwatch(&time_survived)
+		game_state = .FINISH
+	}
+	
+	// Manage speed
 	speed := GetPlayerSpeed(plr^)
 	if Holding(.HORIZ) && Holding(.VERT) do speed *= (1 / 1.41)
 	
@@ -49,17 +56,19 @@ UpdatePlayer :: proc(plr: ^Player) {
 	// Update the powerups the player has
 	UpdateBoundPowerups(&plr.bound_powerups)
 
+	// Pellets
+	if rl.IsMouseButtonPressed(.LEFT) do PlayerFirePellet()
+
 	UpdateHexagonClump(&plr.clump)
 }
 
 DrawPlayer :: proc(plr: ^Player) {
 	DrawHexagonClump(plr.clump)
-	DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
+	if debug_on do DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
 }
 
 DrawPlayerHealthBar :: proc() {
 	bar_size := rl.Vector2{screen_size.x / 2, 32}
-	
 	
 	shell_pos := rl.Vector2{screen_size.x / 2 - bar_size.x / 2, screen_size.y - bar_size.y}
 	rl.DrawRectangleV(shell_pos, bar_size, rl.BLACK)

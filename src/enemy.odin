@@ -56,14 +56,12 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	}
 	
 	if enemy.health <= 0 {
-		points += len(enemy.clump.hexagon_types)
-
 		if GetPlayerLevel(player) == MAX_LEVEL do ThrowRandomWorldPowerup(enemy.pos); else {
 			ThrowRandomHeart(enemy.pos)
 			// NOTE: Do type stuff here to throw correct hexaheart
 		}
 		
-		unordered_remove(&enemies, index)
+		if len(enemies) > index do unordered_remove(&enemies, index)
 	}
 
 	Accelerate(&enemy.vel.x, enemy.target_vel.x, ENEMY_ACCELERATION)
@@ -102,7 +100,7 @@ DrawEnemies :: proc() { for enemy in enemies do DrawEnemy(enemy) }
 
 DrawEnemy :: proc(enemy: Enemy) {
 	DrawHexagonClump(enemy.clump)
-	DrawDebugText(enemy.pos, "%.0f hp, %v, %s", enemy.health, enemy.ai_state, ShortUUID(enemy.uuid))
+	if debug_on do DrawDebugText(enemy.pos, "%.0f hp, %v, %s", enemy.health, enemy.ai_state, ShortUUID(enemy.uuid))
 }
 
 GetDetectionRange :: proc(hexagon_types: []HexagonType) -> f32 {

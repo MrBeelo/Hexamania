@@ -44,3 +44,12 @@ RangeRand :: proc(range: rl.Vector2) -> f32 {
 	if sign == 0 do sign = -1 // Sign: Either -1 or 1
 	return abs * f32(sign)
 }
+
+FloatToTimeStr :: proc(value: f32) -> string {
+	mins := int(math.floor(value / 60))
+	secs := int(math.floor(value)) % 60
+	mins = math.max(mins, 0)
+	secs = math.max(secs, 0)
+	str := string(rl.TextFormat("%2d:%02d", mins, secs))
+	return str
+}

@@ -98,7 +98,7 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 
 DrawHexagonClump :: proc(clump: HexagonClump) {
 	for hexagon in GetClumpHexagons(clump) do DrawHexagon(hexagon)
-	rl.DrawCircleV(clump.pos, 2, rl.BLUE)
+	if debug_on do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
 
 HandleClumpCollisions :: proc(clump: ^HexagonClump) {
@@ -141,6 +141,8 @@ DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) 
 	clump.health -= amount * multiplier
 	clump.grace_period = 0.15
 	clump.attacker = attacker
+
+	if clump.health <= 0 && attacker.uuid == player.uuid do points += len(clump.hexagon_types)
 }
 
 GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {

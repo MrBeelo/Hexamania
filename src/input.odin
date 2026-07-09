@@ -2,9 +2,9 @@ package main
 
 import rl "vendor:raylib"
 
-Button :: enum { UP, DOWN, LEFT, RIGHT, HORIZ, VERT, SPRINT }
+GameButton :: enum { UP, DOWN, LEFT, RIGHT, HORIZ, VERT, SPRINT }
 
-Pressed :: proc(button: Button) -> bool {
+Pressed :: proc(button: GameButton) -> bool {
 	switch button {
 	case .UP: return rl.IsKeyPressed(.W) || rl.IsKeyPressed(.UP)
 	case .DOWN: return rl.IsKeyPressed(.S) || rl.IsKeyPressed(.DOWN)
@@ -18,7 +18,7 @@ Pressed :: proc(button: Button) -> bool {
 	return false
 }
 
-Holding :: proc(button: Button) -> bool {
+Holding :: proc(button: GameButton) -> bool {
 	switch button {
 	case .UP: return rl.IsKeyDown(.W) || rl.IsKeyDown(.UP)
 	case .DOWN: return rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN)

@@ -37,8 +37,8 @@ Hexamania description goes here
 - Enemies naturally spawn
 - Powerups naturally spawn
 - Enemies get bigger and stronger as time passes
-- Grade when you die XD
-- Menus (Main, Paused, Death, Win)
+- ~~Grade when you die XD~~
+- ~~Menus (Main, Paused, Death, Win)~~
 - ~~Health bar (should be at the bottom middle of the screen lol)~~
 
 #### DAY 4
@@ -49,3 +49,17 @@ Hexamania description goes here
 - Rest of the art, cuz I know you aint finishing it in day 3
 - Sound effects
 - Music! (should be 6/4 lol, calm and relaxing with reverb/echo)
+
+## POWERUP IDEAS
+
+#### Mine
+- Become Invisible
+- Sub. Invisibility length (MAX: 5)
+
+- Push enemies from you
+- Sub. Push harder (MAX: 2)
+- Sub. More push time (MAX: 3)
+
+- Pull enemies to a "black hole"
+- Sub. Pull harder (MAX: 2)
+- Sub. More pull time (MAX: 3)

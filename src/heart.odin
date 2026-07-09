@@ -51,7 +51,7 @@ UpdateHexagonHeart :: proc(heart: ^HexagonHeart, index: int) {
 	if lowest_dist < RANGE do heart.vel = VelocityFrom2Points(heart.center, player.pos) * (100 - lowest_dist)
 	
 	if rl.CheckCollisionRecs(closest_box, heart.hurtbox) {
-		unordered_remove(&hearts, index)
+		if len(hearts) > index do unordered_remove(&hearts, index)
 		AddHexagonToClump(&player.clump, heart.type)
 	}
 }
@@ -61,5 +61,5 @@ DrawHexagonHearts :: proc() { for heart in hearts do DrawHexagonHeart(heart) }
 DrawHexagonHeart :: proc(heart: HexagonHeart) {
 	rl.DrawCircleGradient(heart.center, 40, rl.SKYBLUE, rl.BLANK)
 	DrawHexagon(heart.hexagon)
-	DrawDebugText(heart.center, "%.1f, %.1f", heart.vel.x, heart.vel.y)
+	if debug_on do DrawDebugText(heart.center, "%.1f, %.1f", heart.vel.x, heart.vel.y)
 }

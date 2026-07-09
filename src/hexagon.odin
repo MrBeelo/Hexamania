@@ -26,7 +26,7 @@ Hexagon :: struct {
 }
 
 GetHexagonHurtBox :: proc(center: rl.Vector2) -> rl.Rectangle {
-	SIZE :: HEXAGON_SIZE * 3 / 4
+	SIZE :: HEXAGON_SIZE * 7 / 8
 	return rl.Rectangle{center.x - SIZE / 2, center.y - SIZE / 2, SIZE, SIZE}
 }
 
@@ -41,9 +41,11 @@ DrawHexagon :: proc(hex: Hexagon) {
 	// Since dest takes into account the fact that hex.center is rotated, rotating around
 	// the middle of it works!
 	rl.DrawTexturePro(texture, src, dest, HEXAGON_SIZE / 2, hex.rot, rl.WHITE)
-	
-	rl.DrawRectangleLinesEx(hex.hurtbox, 1, rl.RED)
-	rl.DrawCircleV(hex.center, 3, rl.RED)
+
+	if debug_on {
+		rl.DrawRectangleLinesEx(hex.hurtbox, 1, rl.RED)
+		rl.DrawCircleV(hex.center, 3, rl.RED)
+	}
 }
 
 LoadHexagons :: proc() {
