@@ -34,7 +34,7 @@ UpdatePellet :: proc(pellet: ^Pellet, index: int) {
 	for clump in GetAllClumps() do if clump.uuid != pellet.owner && clump.grace_period <= 0 do for hexagon in GetClumpHexagons(clump^) {
 		if rl.Vector2Distance(pellet.pos, hexagon.center) > 100 do continue
 		if rl.CheckCollisionPointRec(pellet.pos, hexagon.hurtbox) {
-			DamageClump(clump, 30)
+			DamageClump(clump, 30, GetClumpFromUUID(pellet.owner))
 			unordered_remove(&pellets, index)
 		}
 	}
@@ -44,5 +44,5 @@ DrawPellets :: proc() { for pellet in pellets do DrawPellet(pellet) }
 
 DrawPellet :: proc(pellet: Pellet) {
 	rl.DrawCircleV(pellet.pos, 3, rl.WHITE)
-	DrawDebugText(pellet.pos, "Owner: %d%d%d%d", pellet.owner[8], pellet.owner[9], pellet.owner[10], pellet.owner[11])
+	DrawDebugText(pellet.pos, "Owner: %s", ShortUUID(pellet.owner))
 }

@@ -19,7 +19,7 @@ HexagonClump :: struct {
 	spr: SprintPackaage,
 	health_regen: Timer,
 	grace_period: f32,
-	damaged: bool,
+	attacker: ^HexagonClump,
 }
 
 // Everything that has to do with sprinting.
@@ -43,7 +43,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	// Health Regen Timer
 	health_regen := NewTimer(2, true, true)
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, false}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -66,7 +66,6 @@ GetHexagonTypeAmount :: proc(clump: HexagonClump) -> [HexagonType]int {
 }
 
 UpdateHexagonClump :: proc(clump: ^HexagonClump) {
-	if clump.damaged do clump.damaged = false
 	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2
 
 	// Health Regen Stuff
@@ -112,8 +111,8 @@ HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 		for hexagon in GetClumpHexagons(clump^) do for enemy_hexagon in GetClumpHexagons(enemy_clump^) {
 			if rl.Vector2Distance(hexagon.center, enemy_hexagon.center) > 100 do continue
 			if !rl.CheckCollisionRecs(hexagon.hurtbox, enemy_hexagon.hurtbox) do continue
-			DamageClump(clump, 3)
-			DamageClump(enemy_clump, 3)
+			DamageClump(clump, 3, enemy_clump)
+			DamageClump(enemy_clump, 3, clump)
 			clump.vel *= -1.3
 			enemy_clump.vel *= -1.3
 		}
@@ -127,10 +126,16 @@ GetAllClumps :: proc() -> []^HexagonClump {
 	return result
 }
 
-DamageClump :: proc(clump: ^HexagonClump, amount: f32) {
+GetClumpFromUUID :: proc(id: uuid.Identifier) -> ^HexagonClump {
+	for clump in GetAllClumps() do if clump.uuid == id do return clump
+	return nil
+}
+
+DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) {
 	if clump.grace_period > 0 do return
 	clump.health -= amount
 	clump.grace_period = 0.15
+	clump.attacker = attacker
 }
 
 GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {
@@ -154,6 +159,11 @@ GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {
 	}
 
 	return hexagons
+}
+
+// Get a short part of the clump's UUID, as a string
+ShortUUID :: proc(id: uuid.Identifier) -> string {
+	return string(rl.TextFormat("%d%d%d%d", id[8], id[9], id[10], id[11]))
 }
 
 // From every hexagon in the clump, all the positions are averaged

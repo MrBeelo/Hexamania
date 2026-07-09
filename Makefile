@@ -22,7 +22,7 @@ OPTIMIZATION := none
 STRICT := true
 
 # What should be the target? Options: desktop, web
-MODE := desktop
+MODE := web
 
 # Odin's path. (needed for web building only)
 ODIN_PATH := $(shell odin root)

@@ -47,7 +47,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 
 DrawPlayer :: proc(plr: ^Player) {
 	DrawHexagonClump(plr.clump)
-	DrawDebugText(plr.pos, "%.0f hp, %d%d%d%d", plr.health, plr.uuid[8], plr.uuid[9], plr.uuid[10], plr.uuid[11])
+	DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
 }
 
 Accelerate :: proc(vel: ^f32, speed: f32, acceleration := PLAYER_ACCELERATION) {
@@ -82,8 +82,10 @@ GetCameraZoom :: proc(level: int) -> f32 {
 	return 1
 }
 
-GetPlayerLevel :: proc(plr: Player) -> int {
-	hexagons := len(plr.hexagon_types)
+GetPlayerLevel :: proc(plr: Player) -> int { return GetLevel(plr.hexagon_types) }
+
+GetLevel :: proc(hexagon_types: []HexagonType) -> int {
+	hexagons := len(hexagon_types)
 	switch {
 	case hexagons < 1 + 6: return 1
 	case hexagons < 1 + 6 + 12: return 2

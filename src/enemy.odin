@@ -41,11 +41,15 @@ NewEnemy :: proc(hexagon_types: []HexagonType, pos: rl.Vector2, health := MAX_HE
 UpdateEnemies :: proc() { for &enemy, index in enemies do UpdateEnemy(&enemy, index) }
 
 UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
+	RANGE :: 250
+	is_clump_close, closest_clump := GetClosestClump(enemy, RANGE)
+	SetAIState(enemy, is_clump_close, closest_clump)
+	
 	switch enemy.ai_state {
 	case .ROAM: HandleRoamingState(enemy)
-	case .INSPECT: HandleInspectState(enemy, &player.clump) // NOTE: Replace player.clump with closest clump.
-	case .AGGRO: HandleAggroState(enemy, &player.clump) // NOTE: Replace player.clump with the clump that attacked last.
-	case .PANIC: HandlePanicState(enemy, &player.clump) // NOTE: Same as AGGRO.
+	case .INSPECT: { assert(closest_clump != nil); HandleInspectState(enemy, closest_clump) }
+	case .AGGRO: { assert(enemy.attacker != nil); HandleAggroState(enemy, enemy.attacker) }
+	case .PANIC: { assert(closest_clump != nil); HandlePanicState(enemy, closest_clump) }
 	}
 	
 	if enemy.health <= 0 {
@@ -57,11 +61,41 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	UpdateHexagonClump(&enemy.clump)
 }
 
+SetAIState :: proc(enemy: ^Enemy, is_clump_close: bool, closest_clump: ^HexagonClump) {
+	if !is_clump_close { enemy.ai_state = .ROAM; return }
+	if enemy.health <= 30 { enemy.ai_state = .PANIC; return }
+	if enemy.attacker != nil && enemy.ai_state != .PANIC { enemy.ai_state = .AGGRO; return }
+	enemy.ai_state = .INSPECT
+}
+
+GetClosestClump :: proc(enemy: ^Enemy, range: f32) -> (found: bool, clump: ^HexagonClump) {
+	closest_dist := range
+	closest_clump: ^HexagonClump = nil
+	
+	level := f32(GetLevel(enemy.hexagon_types))
+	for other_clump in GetAllClumps() {
+		if enemy.uuid == other_clump.uuid do continue
+		other_level := f32(GetLevel(other_clump.hexagon_types))
+		dist := rl.Vector2Distance(enemy.pos, other_clump.pos) - HEXAGON_SIZE * (level + other_level - 2)
+		if dist >= range do continue
+		if dist < closest_dist {
+			closest_dist = dist
+			closest_clump = other_clump
+		}
+	}
+
+	return closest_dist < range, closest_clump
+}
+
 DrawEnemies :: proc() { for enemy in enemies do DrawEnemy(enemy) }
 
 DrawEnemy :: proc(enemy: Enemy) {
 	DrawHexagonClump(enemy.clump)
-	DrawDebugText(enemy.pos, "%.0f hp, %v, %d%d%d%d", enemy.health, enemy.ai_state, enemy.uuid[8], enemy.uuid[9], enemy.uuid[10], enemy.uuid[11])
+	DrawDebugText(enemy.pos, "%.0f hp, %v, %s", enemy.health, enemy.ai_state, ShortUUID(enemy.uuid))
+}
+
+GetDetectionRange :: proc(hexagon_types: []HexagonType) -> f32 {
+	return HEXAGON_SIZE * f32(GetLevel(hexagon_types)) * 2 + 300
 }
 
 // NOTE: HUGE NOTE
@@ -126,7 +160,7 @@ HandlePanicState :: proc(enemy: ^Enemy, attacker: ^HexagonClump) {
 
 	// Move away from the target
 	if enemy.turn_timer.ding {
-		enemy.turn_timer.duration = rand.float32_range(1, 2)
+		enemy.turn_timer.duration = rand.float32_range(0.5, 1)
 		rot := RotationFrom2Points(enemy.pos, attacker.pos) + RangeRand({10, 20}) + 180 // We add 180 so that direction flips
 		enemy.vel = VelocityFromRotation(rot) * rand.float32_range(60, 70)
 	}
