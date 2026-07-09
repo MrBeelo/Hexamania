@@ -57,8 +57,8 @@ UpdateWorldPowerups :: proc() {
 		
 		visible_screen_size := screen_size / player.camera.zoom
 		min_dist := player.camera.target + visible_screen_size / 2
-		pos_x := RangeRand({min_dist.x, min_dist.x + 200})
-		pos_y := RangeRand({min_dist.y, min_dist.y + 200})
+		pos_x := RangeRand({min_dist.x, min_dist.x + 70})
+		pos_y := RangeRand({min_dist.y, min_dist.y + 70})
 
 		ThrowRandomWorldPowerup({pos_x, pos_y})
 		
