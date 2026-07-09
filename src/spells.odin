@@ -6,21 +6,26 @@ import "core:encoding/uuid"
 spells: [dynamic]Spell
 Spell :: union {
 	HealthPad,
+	IceBall,
 }
 
 UpdateSpells :: proc() {
-	for &spell, index in spells do switch &x in spell {
-	case HealthPad: UpdateHealthPad(&x, index)
+	for &spell, index in spells do switch &s in spell {
+	case HealthPad: UpdateHealthPad(&s, index)
+	case IceBall: UpdateIceBall(&s, index)
 	}
 }
 
 DrawSpellsBelow :: proc() {
-	for spell in spells do switch x in spell {
-	case HealthPad: DrawHealthPad(x)
+	for spell in spells do switch s in spell {
+	case HealthPad: DrawHealthPad(s)
+	case IceBall: DrawIceBall(s)
 	}
 }
 
-HealthPad :: struct { owner: uuid.Identifier, rect: rl.Rectangle, heal_amount: f32, heal_timer: Timer, time_left: f32, }
+// HEALTH PAD
+
+HealthPad :: struct { owner: uuid.Identifier, rect: rl.Rectangle, heal_amount: f32, heal_timer: Timer, time_left: f32 }
 
 SummonHealthPad :: proc(clump: HexagonClump) {
 	hexagon_type_amounts := GetHexagonTypeAmounts(clump)
@@ -48,4 +53,47 @@ UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
 
 DrawHealthPad :: proc(pad: HealthPad) {
 	rl.DrawRectangleLinesEx(pad.rect, 5, rl.GREEN)
+}
+
+// ICE BALL
+
+ICE_BALL_SPEED :: 120
+
+IceBall :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, put_floor_timer: Timer, time_left: f32, 
+	floor_size: f32, freeze_time: f32 }
+
+PlayerThrowIceBall :: proc() {
+	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+	put_floor_timer := NewTimer(1, true, true)
+
+	hexagon_type_amounts := GetHexagonTypeAmounts(player.clump)
+	time_left := 3 + f32(hexagon_type_amounts[.ICE_BALL_UPGRADE_RANGE])
+	floor_size := 75 + f32(hexagon_type_amounts[.ICE_BALL_UPGRADE_RANGE]) * 25
+	freeze_time := 3 + f32(hexagon_type_amounts[.ICE_BALL_UPGRADE_RANGE])
+	
+	append(&spells, IceBall{player.uuid, player.pos, vel, put_floor_timer, time_left, floor_size, freeze_time})
+}
+
+EnemyThrowIceBall :: proc() {
+	// NOTE: To add tomorrow
+}
+
+UpdateIceBall :: proc(ball: ^IceBall, index: int) {
+	UpdateTimer(&ball.put_floor_timer)
+	if ball.put_floor_timer.ding {
+		rect := rl.Rectangle{ball.pos.x - ball.floor_size / 2, ball.pos.y - ball.floor_size / 2, ball.floor_size, ball.floor_size}
+		for clump in GetAllClumps() {
+			if clump.uuid == ball.owner do continue
+			if ClumpIntersectsRect(clump^, rect) do clump.frozen_time_left = ball.freeze_time
+		}
+	}
+
+	ball.time_left -= rl.GetFrameTime()
+	if ball.time_left <= 0 && len(spells) > index do unordered_remove(&spells, index)
+
+	ball.pos += ball.vel * ICE_BALL_SPEED * rl.GetFrameTime()
+}
+
+DrawIceBall :: proc(ball: IceBall) {
+	rl.DrawCircleLinesV(ball.pos, 50, rl.SKYBLUE)
 }

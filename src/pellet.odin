@@ -11,7 +11,7 @@ Pellet :: struct {
 	pos: rl.Vector2,
 	vel: rl.Vector2,
 	owner: uuid.Identifier,
-	pellet_multipliers: struct{ speed_mult: f32, damage_mult: f32 }
+	pellet_multipliers: struct{ speed_mult: f32, damage_mult: f32 },
 }
 
 PlayerFirePellet :: proc() {

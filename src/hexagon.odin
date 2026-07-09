@@ -1,6 +1,7 @@
 package main
 
 import rl "vendor:raylib"
+import "core:strings"
 
 // The size of the hexagon destination texture, which also happens to be its diameter
 HEXAGON_SIZE :: f32(32) 
@@ -23,6 +24,10 @@ HexagonType :: enum {
 	HEALTH_PAD_UPGRADE_HEAL_AMOUNT,
 	HEALTH_PAD_UPGRADE_SIZE,
 	HEALTH_PAD_UPGRADE_TIME,
+	ICE_BALL,
+	ICE_BALL_UPGRADE_RANGE,
+	ICE_BALL_UPGRADE_FLOOR_SIZE,
+	ICE_BALL_UPGRADE_FREEZE_TIME,
 }
 
 Hexagon :: struct {
@@ -55,16 +60,24 @@ DrawHexagon :: proc(hex: Hexagon) {
 	}
 }
 
+LoadHexagon :: proc(name: string) -> rl.Texture2D { 
+	return rl.LoadTexture(strings.clone_to_cstring(strings.concatenate({"res/hexagon/", name, ".png"}))) 
+}
+
 LoadHexagons :: proc() {
 	hexagon_textures = {
-		.RIFLE = rl.LoadTexture("res/hexagon/rifle.png"),
-		.RIFLE_UPGRADE_FIRE_RATE = rl.LoadTexture("res/hexagon/rifle_upgrade_fire_rate.png"),
-		.RIFLE_UPGRADE_PELLET_SPEED = rl.LoadTexture("res/hexagon/rifle_upgrade_pellet_speed.png"),
-		.RIFLE_UPGRADE_DAMAGE = rl.LoadTexture("res/hexagon/rifle_upgrade_damage.png"),
-		.HEALTH_PAD = rl.LoadTexture("res/hexagon/health_pad.png"),
-		.HEALTH_PAD_UPGRADE_HEAL_AMOUNT = rl.LoadTexture("res/hexagon/health_pad_upgrade_heal_amount.png"),
-		.HEALTH_PAD_UPGRADE_SIZE = rl.LoadTexture("res/hexagon/health_pad_upgrade_size.png"),
-		.HEALTH_PAD_UPGRADE_TIME = rl.LoadTexture("res/hexagon/health_pad_upgrade_time.png"),
+		.RIFLE = LoadHexagon("rifle"),
+		.RIFLE_UPGRADE_FIRE_RATE = LoadHexagon("rifle_upgrade_fire_rate"),
+		.RIFLE_UPGRADE_PELLET_SPEED = LoadHexagon("rifle_upgrade_pellet_speed"),
+		.RIFLE_UPGRADE_DAMAGE = LoadHexagon("rifle_upgrade_damage"),
+		.HEALTH_PAD = LoadHexagon("health_pad"),
+		.HEALTH_PAD_UPGRADE_HEAL_AMOUNT = LoadHexagon("health_pad_upgrade_heal_amount"),
+		.HEALTH_PAD_UPGRADE_SIZE = LoadHexagon("health_pad_upgrade_size"),
+		.HEALTH_PAD_UPGRADE_TIME = LoadHexagon("health_pad_upgrade_time"),
+		.ICE_BALL = LoadHexagon("ice_ball"),
+		.ICE_BALL_UPGRADE_RANGE = LoadHexagon("ice_ball_upgrade_range"),
+		.ICE_BALL_UPGRADE_FLOOR_SIZE = LoadHexagon("ice_ball_upgrade_floor_size"),
+		.ICE_BALL_UPGRADE_FREEZE_TIME = LoadHexagon("ice_ball_upgrade_freeze_time"),
 	}
 }
 

@@ -23,6 +23,8 @@ HexagonClump :: struct {
 	health_regen: Timer,
 	grace_period: f32,
 	attacker: ^HexagonClump,
+	frozen_time_left: f32,
+	burning: struct{ time_left: f32, damage: f32 },
 }
 
 // Everything that has to do with sprinting.
@@ -46,7 +48,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	// Health Regen Timer
 	health_regen := NewTimer(7, true, true)
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, {}}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -100,8 +102,12 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	// Collision logic
 	HandleClumpCollisions(clump)
 
+	// Handle spells
+	if clump.frozen_time_left > 0 do clump.frozen_time_left -= rl.GetFrameTime()
+	clump.frozen_time_left = math.max(clump.frozen_time_left, 0)
+
 	// Final velocity addition (should probably be last)
-	clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
+	if clump.frozen_time_left <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
 }
 
 DrawHexagonClump :: proc(clump: HexagonClump) {
