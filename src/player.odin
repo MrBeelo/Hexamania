@@ -57,6 +57,23 @@ DrawPlayer :: proc(plr: ^Player) {
 	DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
 }
 
+DrawPlayerHealthBar :: proc() {
+	bar_size := rl.Vector2{screen_size.x / 2, 32}
+	
+	
+	shell_pos := rl.Vector2{screen_size.x / 2 - bar_size.x / 2, screen_size.y - bar_size.y}
+	rl.DrawRectangleV(shell_pos, bar_size, rl.BLACK)
+
+	BUFFER :: f32(3)
+	health_bar_size := bar_size - {BUFFER * 2, BUFFER}
+	health_bar_size.x = health_bar_size.x * player.health / MAX_HEALTH
+	rl.DrawRectangleV(shell_pos + BUFFER, health_bar_size, rl.RED)
+
+	sprint_bar_size := bar_size - {BUFFER * 2, BUFFER}
+	sprint_bar_size.x = sprint_bar_size.x * player.spr.sprint_secs / MAX_SPRINT_SECS
+	rl.DrawRectangleV(shell_pos + BUFFER + {0, bar_size.y * 2 / 3}, sprint_bar_size, rl.SKYBLUE)
+}
+
 GetPlayerSpeed :: proc(plr: Player) -> f32 {
 	speed := f32(BASE_PLAYER_SPEED)
 	if plr.bound_powerups[.SPEED].time_remaining > 0 do speed *= plr.bound_powerups[.SPEED].value

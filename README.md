@@ -39,7 +39,7 @@ Hexamania description goes here
 - Enemies get bigger and stronger as time passes
 - Grade when you die XD
 - Menus (Main, Paused, Death, Win)
-- Health bar (should be at the bottom middle of the screen lol)
+- ~~Health bar (should be at the bottom middle of the screen lol)~~
 
 #### DAY 4
 - Hexagon has eyes <3 that look where your mouse is!

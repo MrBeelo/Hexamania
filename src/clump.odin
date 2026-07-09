@@ -8,6 +8,8 @@ import "core:encoding/uuid"
 MAX_LEVEL :: 4
 MAX_HEXAGONS :: 1 + 6 + 12 + 18
 MAX_HEALTH :: f32(100)
+MAX_SPRINT_SECS :: f32(5)
+REGEN_SPRINT_TIME :: f32(5)
 
 // Clumps function as entities, hence their "health" and "uuid" fields.
 HexagonClump :: struct {
@@ -75,10 +77,6 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	clump.health = math.clamp(clump.health, 0, MAX_HEALTH)
 	if clump.grace_period > 0 do clump.grace_period -= rl.GetFrameTime()
 
-	// NOTE: It's obvious enough. Base speed needed.
-	//clump.vel.x = math.clamp(clump.vel.x, -BASE_PLAYER_SPEED, BASE_PLAYER_SPEED)
-	//clump.vel.y = math.clamp(clump.vel.y, -BASE_PLAYER_SPEED, BASE_PLAYER_SPEED)
-
 	// Sprinting logic
 	if clump.spr.sprinting {
 		clump.spr.sprint_secs -= rl.GetFrameTime()
@@ -88,8 +86,8 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	}
 
 	if clump.spr.sprint_secs <= 0 do clump.spr.sprinting = false
-	if clump.spr.time_since_last_sprint > 5 do clump.spr.sprint_secs += rl.GetFrameTime()
-	clump.spr.sprint_secs = math.clamp(clump.spr.sprint_secs, 0, 5)
+	if clump.spr.time_since_last_sprint > REGEN_SPRINT_TIME do clump.spr.sprint_secs += rl.GetFrameTime()
+	clump.spr.sprint_secs = math.clamp(clump.spr.sprint_secs, 0, MAX_SPRINT_SECS)
 
 	// Collision logic
 	HandleClumpCollisions(clump)
