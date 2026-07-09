@@ -3,6 +3,8 @@ package main
 import rl "vendor:raylib"
 import "core:math/rand"
 
+ENEMY_ACCELERATION :: 3 * 60
+
 enemies: [dynamic]Enemy
 
 // AI State is the way each entity's AI behaves
@@ -26,6 +28,7 @@ Enemy :: struct {
 	ai_state: AIState,
 	turn_timer: Timer,
 	attack_timer: Timer,
+	target_vel: rl.Vector2,
 }
 
 NewEnemy :: proc(hexagon_types: []HexagonType, pos: rl.Vector2, health := MAX_HEALTH) -> Enemy {
@@ -35,7 +38,7 @@ NewEnemy :: proc(hexagon_types: []HexagonType, pos: rl.Vector2, health := MAX_HE
 	switch_timer := NewTimer(2, true, true, true)
 	fire_timer := NewTimer(5, true, true)
 	
-	return Enemy{clump, .ROAM, switch_timer, fire_timer}
+	return Enemy{clump, .ROAM, switch_timer, fire_timer, 0}
 }
 
 UpdateEnemies :: proc() { for &enemy, index in enemies do UpdateEnemy(&enemy, index) }
@@ -54,9 +57,17 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	
 	if enemy.health <= 0 {
 		points += len(enemy.clump.hexagon_types)
-		ThrowRandomHeart(enemy.pos)
+
+		if GetPlayerLevel(player) == MAX_LEVEL do ThrowRandomWorldPowerup(enemy.pos); else {
+			ThrowRandomHeart(enemy.pos)
+			// NOTE: Do type stuff here to throw correct hexaheart
+		}
+		
 		unordered_remove(&enemies, index)
 	}
+
+	Accelerate(&enemy.vel.x, enemy.target_vel.x, ENEMY_ACCELERATION)
+	Accelerate(&enemy.vel.y, enemy.target_vel.y, ENEMY_ACCELERATION)
 	
 	UpdateHexagonClump(&enemy.clump)
 }
@@ -108,8 +119,8 @@ HandleRoamingState :: proc(enemy: ^Enemy) {
 		enemy.turn_timer.duration = rand.float32_range(2, 10)
 
 		// Choose random velocity to use
-		enemy.vel.x = RangeRand({20, 60})
-		enemy.vel.y = RangeRand({20, 60})
+		enemy.target_vel.x = RangeRand({20, 60})
+		enemy.target_vel.y = RangeRand({20, 60})
 	}
 }
 
@@ -121,7 +132,7 @@ HandleInspectState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 	if enemy.turn_timer.ding {
 		enemy.turn_timer.duration = rand.float32_range(2, 3)
 		rot := RotationFrom2Points(enemy.pos, target.pos) + RangeRand({30, 50})
-		enemy.vel = VelocityFromRotation(rot) * rand.float32_range(40, 60)
+		enemy.target_vel = VelocityFromRotation(rot) * rand.float32_range(40, 60)
 	}
 
 	// Fire, but not too frequently, see if target responds
@@ -138,8 +149,16 @@ HandleAggroState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 	// Move towards the target
 	if enemy.turn_timer.ding {
 		enemy.turn_timer.duration = rand.float32_range(1, 2)
-		rot := RotationFrom2Points(enemy.pos, target.pos) + RangeRand({10, 20})
-		enemy.vel = VelocityFromRotation(rot) * rand.float32_range(60, 70)
+		dist := rl.Vector2Distance(enemy.pos, target.pos)
+
+		rot_modifier: f32
+		switch {
+		case dist < 100: rot_modifier = 150
+		case dist < 200: rot_modifier = 60
+		}
+		
+		rot := RotationFrom2Points(enemy.pos, target.pos) + RangeRand({10, 20}) + rot_modifier
+		enemy.target_vel = VelocityFromRotation(rot) * rand.float32_range(60, 70)
 	}
 
 	// Sprint to catch up to target
@@ -162,7 +181,7 @@ HandlePanicState :: proc(enemy: ^Enemy, attacker: ^HexagonClump) {
 	if enemy.turn_timer.ding {
 		enemy.turn_timer.duration = rand.float32_range(0.5, 1)
 		rot := RotationFrom2Points(enemy.pos, attacker.pos) + RangeRand({10, 20}) + 180 // We add 180 so that direction flips
-		enemy.vel = VelocityFromRotation(rot) * rand.float32_range(60, 70)
+		enemy.target_vel = VelocityFromRotation(rot) * rand.float32_range(60, 70)
 	}
 
 	// Sprint if it can

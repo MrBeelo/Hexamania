@@ -3,32 +3,36 @@ package main
 import rl "vendor:raylib"
 import "core:math"
 
-PLAYER_SPEED :: 3 * 60
+BASE_PLAYER_SPEED :: 3 * 60
 PLAYER_ACCELERATION :: 5 * 60
 
 Player :: struct {
 	using clump: HexagonClump,
 	camera: rl.Camera2D,
+	bound_powerups: [PowerupType]BoundPowerup,
 }
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.BLANK}, 0), camera }
+	return Player{ NewHexagonClump({.BLANK}, 0), camera, {} }
 }
 
 UpdatePlayer :: proc(plr: ^Player) {
+	speed := GetPlayerSpeed(plr^)
+	if Holding(.HORIZ) && Holding(.VERT) do speed *= (1 / 1.41)
+	
 	// Movement
 	if Holding(.UP) {
-	 	Accelerate(&plr.vel.y, -PLAYER_SPEED)
+	 	Accelerate(&plr.vel.y, -speed, PLAYER_ACCELERATION)
 	} else if Holding(.DOWN) {
-		Accelerate(&plr.vel.y, PLAYER_SPEED)
-	} else do Accelerate(&plr.vel.y, 0)
+		Accelerate(&plr.vel.y, speed, PLAYER_ACCELERATION)
+	} else do Accelerate(&plr.vel.y, 0, PLAYER_ACCELERATION)
 	
 	if Holding(.LEFT) {
-	 	Accelerate(&plr.vel.x, -PLAYER_SPEED)
+	 	Accelerate(&plr.vel.x, -speed, PLAYER_ACCELERATION)
 	} else if Holding(.RIGHT) {
-	 	Accelerate(&plr.vel.x, PLAYER_SPEED)
-	} else do Accelerate(&plr.vel.x, 0)
+	 	Accelerate(&plr.vel.x, speed, PLAYER_ACCELERATION)
+	} else do Accelerate(&plr.vel.x, 0, PLAYER_ACCELERATION)
 
 	// Clamp velocities down to 0 if they are low and player isn't moving
 	if !Holding(.HORIZ) && !Holding(.VERT) {
@@ -42,6 +46,9 @@ UpdatePlayer :: proc(plr: ^Player) {
 	// Camera Management
 	HandlePlayerCamera(plr)
 
+	// Update the powerups the player has
+	UpdateBoundPowerups(&plr.bound_powerups)
+
 	UpdateHexagonClump(&plr.clump)
 }
 
@@ -50,9 +57,10 @@ DrawPlayer :: proc(plr: ^Player) {
 	DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
 }
 
-Accelerate :: proc(vel: ^f32, speed: f32, acceleration := PLAYER_ACCELERATION) {
-	if vel^ > speed do vel^ -= f32(acceleration) * rl.GetFrameTime()
-	if vel^ < speed do vel^ += f32(acceleration) * rl.GetFrameTime()
+GetPlayerSpeed :: proc(plr: Player) -> f32 {
+	speed := f32(BASE_PLAYER_SPEED)
+	if plr.bound_powerups[.SPEED].time_remaining > 0 do speed *= plr.bound_powerups[.SPEED].value
+	return speed
 }
 
 HandlePlayerCamera :: proc(plr: ^Player) {	

@@ -29,12 +29,13 @@ Hexamania description goes here
 - ~~Passively regain health~~
 
 #### DAY 3
-- Powerups (circular): spawn randomly around the map, give either a temporary buff or a health boost idk
-- after max, no more normal hexagons spawn, only powerup ones.
+- ~~Powerups (circular): give either a temporary buff or a health boost idk~~
+- ~~after max, no more normal hexagons spawn, only powerup ones.~~
 - ~~Maybe make enemies collidable?~~
 - SPELLSSSSS
 - Design a couple different hexagon and powerup types
 - Enemies naturally spawn
+- Powerups naturally spawn
 - Enemies get bigger and stronger as time passes
 - Grade when you die XD
 - Menus (Main, Paused, Death, Win)

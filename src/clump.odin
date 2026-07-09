@@ -5,6 +5,7 @@ import "core:math"
 import "core:crypto"
 import "core:encoding/uuid"
 
+MAX_LEVEL :: 4
 MAX_HEXAGONS :: 1 + 6 + 12 + 18
 MAX_HEALTH :: f32(100)
 
@@ -75,8 +76,8 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	if clump.grace_period > 0 do clump.grace_period -= rl.GetFrameTime()
 
 	// NOTE: It's obvious enough. Base speed needed.
-	clump.vel.x = math.clamp(clump.vel.x, -PLAYER_SPEED, PLAYER_SPEED)
-	clump.vel.y = math.clamp(clump.vel.y, -PLAYER_SPEED, PLAYER_SPEED)
+	//clump.vel.x = math.clamp(clump.vel.x, -BASE_PLAYER_SPEED, BASE_PLAYER_SPEED)
+	//clump.vel.y = math.clamp(clump.vel.y, -BASE_PLAYER_SPEED, BASE_PLAYER_SPEED)
 
 	// Sprinting logic
 	if clump.spr.sprinting {
@@ -133,7 +134,13 @@ GetClumpFromUUID :: proc(id: uuid.Identifier) -> ^HexagonClump {
 
 DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) {
 	if clump.grace_period > 0 do return
-	clump.health -= amount
+
+	multiplier := f32(1)
+	if attacker.uuid == player.uuid && clump.uuid != player.uuid {
+		if player.bound_powerups[.DAMAGE].time_remaining > 0 do multiplier = player.bound_powerups[.DAMAGE].value
+	}
+	
+	clump.health -= amount * multiplier
 	clump.grace_period = 0.15
 	clump.attacker = attacker
 }
@@ -159,6 +166,11 @@ GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {
 	}
 
 	return hexagons
+}
+
+Accelerate :: proc(value: ^f32, target: f32, acceleration: f32) {
+	if value^ > target do value^ -= f32(acceleration) * rl.GetFrameTime()
+	if value^ < target do value^ += f32(acceleration) * rl.GetFrameTime()
 }
 
 // Get a short part of the clump's UUID, as a string

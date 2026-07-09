@@ -48,7 +48,7 @@ DrawHexagon :: proc(hex: Hexagon) {
 
 LoadHexagons :: proc() {
 	hexagon_textures = {
-		.BLANK = rl.LoadTexture("res/blank.png"),
+		.BLANK = rl.LoadTexture("res/hexagon/blank.png"),
 	}
 }
 

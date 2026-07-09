@@ -2,7 +2,7 @@ package main
 
 import rl "vendor:raylib"
 
-BACKGROUND_SIZE :: f32(512)
+BACKGROUND_SIZE :: f32(1024)
 background: rl.Texture2D
 
 LoadBackground :: proc() {
