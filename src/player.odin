@@ -10,11 +10,13 @@ Player :: struct {
 	using clump: HexagonClump,
 	camera: rl.Camera2D,
 	bound_powerups: [PowerupType]BoundPowerup,
+	spell_mode: bool,
+	active_spell: Maybe(SpellType),
 }
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {} }
+	return Player{ NewHexagonClump({.RIFLE, .ICE_BALL}, 0), camera, {}, false, nil }
 }
 
 UpdatePlayer :: proc(plr: ^Player) {
@@ -56,10 +58,41 @@ UpdatePlayer :: proc(plr: ^Player) {
 	// Update the powerups the player has
 	UpdateBoundPowerups(&plr.bound_powerups)
 
-	// Pellets
-	if (rl.IsMouseButtonPressed(.LEFT) || rl.IsMouseButtonDown(.LEFT)) && player.rifle_delay <= 0 do PlayerFirePellet()
+	if rl.IsMouseButtonPressed(.RIGHT) {
+		if plr.active_spell == nil {
+			for spell in SpellType do if HasSpell(plr.clump, spell) { plr.active_spell = spell; plr.spell_mode = true }
+		} else {
+			plr.spell_mode = !plr.spell_mode
+		}
+	}
+
+	if !plr.spell_mode {
+		if rl.IsMouseButtonDown(.LEFT) && plr.rifle_delay <= 0 do PlayerFirePellet()
+	} else {
+		move := rl.GetMouseWheelMove()
+		if move > 0 do ChangePlayerActiveSpell(true, plr.active_spell.?, plr.active_spell.?)
+		if move < 0 do ChangePlayerActiveSpell(false, plr.active_spell.?, plr.active_spell.?)
+
+		if rl.IsMouseButtonPressed(.LEFT) do switch plr.active_spell {
+		case .HEALTH_PAD: SummonHealthPad(plr.clump)
+		case .ICE_BALL: PlayerThrowIceBall()
+		case .FIREBALL: PlayerThrowFireball()
+		}
+	}	
 
 	UpdateHexagonClump(&plr.clump)
+}
+
+ChangePlayerActiveSpell :: proc(up: bool, start_spell: SpellType, test_spell: SpellType) {
+	index := int(test_spell)
+	index += 1 if up else -1
+	index %= len(SpellType)
+	if index < 0 do index += 4
+
+	new_spell := SpellType(index)
+	if new_spell == start_spell do return
+	if HasSpell(player.clump, new_spell) { player.active_spell = new_spell; return }
+	ChangePlayerActiveSpell(up, start_spell, new_spell)
 }
 
 DrawPlayer :: proc(plr: ^Player) {

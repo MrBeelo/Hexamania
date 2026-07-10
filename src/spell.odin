@@ -3,6 +3,8 @@ package main
 import rl "vendor:raylib"
 import "core:encoding/uuid"
 
+SpellType :: enum { HEALTH_PAD, ICE_BALL, FIREBALL }
+
 spells: [dynamic]Spell
 Spell :: union {
 	HealthPad,
@@ -26,18 +28,29 @@ DrawSpellsBelow :: proc() {
 	}
 }
 
+HasSpell :: proc(clump: HexagonClump, spell: SpellType) -> bool {
+	hexagon_type_amounts := GetHexagonTypeAmounts(clump)
+	switch spell {
+	case .HEALTH_PAD: return hexagon_type_amounts[.HEALTH_PAD] > 0
+	case .ICE_BALL: return hexagon_type_amounts[.ICE_BALL] > 0
+	case .FIREBALL: return hexagon_type_amounts[.FIREBALL] > 0
+	}
+
+	return false
+}
+
 // HEALTH PAD
 
 HealthPad :: struct { owner: uuid.Identifier, rect: rl.Rectangle, heal_amount: f32, heal_timer: Timer, time_left: f32 }
 
 SummonHealthPad :: proc(clump: HexagonClump) {
 	hexagon_type_amounts := GetHexagonTypeAmounts(clump)
-	time_left := 10 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_TIME]) * 5
-	size := 150 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_SIZE]) * 50
+	time_left := 10 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_TIME]) * 4
+	size := 150 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_SIZE]) * 100
 	heal_amount := 3 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_HEAL_AMOUNT])
 
 	rect := rl.Rectangle{clump.pos.x - size / 2, clump.pos.y - size / 2, size, size}
-	heal_timer := NewTimer(2, true, true)
+	heal_timer := NewTimer(1, true, true)
 	health_pad := HealthPad{clump.uuid, rect, heal_amount, heal_timer, time_left}
 
 	append(&spells, health_pad)

@@ -47,7 +47,7 @@ Hexamania description goes here
 - ~~Implement rifle upgrades (currently only the textures)~~
 - Spell previews in spell mode (like a green rect_lines for the health one, etc)
 - Spell cooldowns! (visible in spell mode)
-- Better system to do player spells (right click to activate spell mode, scroll to choose spell)
+- ~~Better system to do player spells (right click to activate spell mode, scroll to choose spell)~~
 - Enemy do spells
 - Enemies spawn with different hexahearts and drop correct hexahearts
 - Balance to hell
