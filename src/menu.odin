@@ -3,7 +3,7 @@ package main
 import rl "vendor:raylib"
 import "core:fmt"
 
-GameState :: enum { PLAYING, MAIN, PAUSED, FINISH }
+GameState :: enum { PLAYING, MAIN, PAUSED, FINISH, ANALYSIS }
 game_state := GameState.MAIN
 menus: [GameState]Menu
 
@@ -29,6 +29,7 @@ InitMenus :: proc() {
 		.MAIN = MainMenu(),
 		.PAUSED = PausedMenu(),
 		.FINISH = FinishMenu(),
+		.ANALYSIS = AnalysisMenu(),
 	}
 }
 
@@ -75,10 +76,29 @@ FinishMenu :: proc() -> Menu { return NewMenu(
 		
 		DrawMenuTitle("YOU WIN" if has_won else "YOU DIED")
 		
-		DrawStat("Time Survived: %s", 0, FloatToTimeStr(GetElapsedStopwatchTime(time_survived)))
-		DrawStat("Points: %d", 1, points)
-		DrawStat("Hexahearts: %d", 2, len(player.hexagon_types) - 1)
-		DrawStat("Grade: %s (%d)", 3, GetGrade(grade, has_won)[0], grade)
+		DrawFinishStat("Time Survived: %s", 0, FloatToTimeStr(GetElapsedStopwatchTime(time_survived)))
+		DrawFinishStat("Points: %d", 1, points)
+		DrawFinishStat("Hexahearts: %d", 2, len(player.hexagon_types) - 1)
+		DrawFinishStat("Grade: %s (%d)", 3, GetGrade(grade, has_won)[0], grade)
+		
+		for &button in buttons do DrawButton(button)
+	},
+)}
+
+AnalysisMenu :: proc() -> Menu { return NewMenu(
+	buttons = []Button {
+		NewButtonDef("BACK", screen_size / 2 + {0, 250}, proc(){ game_state = .PLAYING }, true),
+	},
+	draw = proc(buttons: []Button) {
+		DrawMenuTitle("ANALYSIS")
+
+		hexagon_type_amounts := GetHexagonTypeAmounts(player.clump)
+
+		DrawAnalysisStat("RIFLE: %.0f px/s, %.0f dmg, %.2f f.r.", 0, GetRifleStats(hexagon_type_amounts))
+		if HasSpell(player.clump, .HEALTH_PAD) do DrawAnalysisStat("HEALTH PAD: %.0f s, %.0f px, %.0f hp", 1, GetHealthPadStats(hexagon_type_amounts))
+		if HasSpell(player.clump, .ICE_BALL) do DrawAnalysisStat("ICE BALL: %.0f s, %.0f px, %.0f s", 2, GetIceBallStats(hexagon_type_amounts))
+		if HasSpell(player.clump, .FIREBALL) do DrawAnalysisStat("FIREBALL: %.0f s, %.0f px, %.0f dmg", 3, GetFireballStats(hexagon_type_amounts))
+		if HasSpell(player.clump, .BLACK_HOLE) do DrawAnalysisStat("BLACK HOLE: %.0f s, %.0f s.p., %.0f px", 4, GetBlackHoleStats(hexagon_type_amounts))
 		
 		for &button in buttons do DrawButton(button)
 	},
@@ -118,8 +138,14 @@ NewButtonDef :: proc(text: string, center: rl.Vector2, function: proc(), small :
 	return NewButton(text, center, function, 64 if !small else 48, .QUICKSAND_MEDIUM, {rl.WHITE, rl.YELLOW}, 5)
 }
 
-DrawStat :: proc(text: string, index: int, args: ..any) {
+DrawFinishStat :: proc(text: string, index: int, args: ..any) {
 	str := string(fmt.ctprintf(text, ..args))
 	pos := rl.Vector2{screen_size.x / 2 - 300, screen_size.y / 2 - 200 + f32(index) * 40}
+	DrawText(str, pos, 32, spacing = 3)
+}
+
+DrawAnalysisStat :: proc(text: string, index: int, args: ..any) {
+	str := string(fmt.ctprintf(text, ..args))
+	pos := rl.Vector2{screen_size.x / 2 - 300, screen_size.y / 2 - 150 + f32(index) * 50}
 	DrawText(str, pos, 32, spacing = 3)
 }

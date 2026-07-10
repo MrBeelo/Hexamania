@@ -35,6 +35,7 @@ update :: proc() {
 		UpdateWorldPowerups()
 		UpdateSpells()
 		if rl.IsKeyPressed(.ESCAPE) do game_state = .PAUSED
+		if rl.IsKeyPressed(.LEFT_CONTROL) do game_state = .ANALYSIS
 	}
 
 	if rl.IsKeyPressed(.F3) do debug_on = !debug_on

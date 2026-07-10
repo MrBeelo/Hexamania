@@ -4,24 +4,23 @@ import rl "vendor:raylib"
 import "core:encoding/uuid"
 import "core:math/rand"
 
-PELLET_SPEED :: 5 * 60
+PELLET_BASE_DAMAGE :: 10
+PELLET_BASE_SPEED :: 5 * 60
 pellets: [dynamic]Pellet
 
 Pellet :: struct {
 	pos: rl.Vector2,
 	vel: rl.Vector2,
 	owner: uuid.Identifier,
-	pellet_multipliers: struct{ speed_mult: f32, damage_mult: f32 },
+	speed: f32,
+	damage: f32,
 }
 
 PlayerFirePellet :: proc() {
 	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
-	player.rifle_delay = GetRifleDelay(player.clump)
-	append(&pellets, Pellet{player.pos, vel, player.uuid, GetPelletMultipliers(player.clump)})
-}
-
-GetRifleDelay :: proc(clump: HexagonClump) -> f32 {
-	return 0.5 - f32(GetHexagonTypeAmounts(player.clump)[.RIFLE_UPGRADE_FIRE_RATE]) * 0.07
+	speed, damage, fire_rate := GetRifleStats(GetHexagonTypeAmounts(player.clump))
+	player.rifle_delay = fire_rate
+	append(&pellets, Pellet{player.pos, vel, player.uuid, speed, damage})
 }
 
 EnemyFirePellet :: proc(enemy: ^Enemy, target: rl.Vector2) {
@@ -34,28 +33,30 @@ EnemyFirePellet :: proc(enemy: ^Enemy, target: rl.Vector2) {
 	rot += rand.float32_range(-inaccuracy, inaccuracy) // Enemy inaccuracies!
 	vel := VelocityFromRotation(rot)
 
-	enemy.rifle_delay = GetRifleDelay(enemy.clump)
+	speed, damage, fire_rate := GetRifleStats(GetHexagonTypeAmounts(enemy.clump))
 	
-	append(&pellets, Pellet{enemy.pos, vel, enemy.uuid, GetPelletMultipliers(enemy.clump)})
+	enemy.rifle_delay = fire_rate
+	
+	append(&pellets, Pellet{enemy.pos, vel, enemy.uuid, speed, damage})
 }
 
-GetPelletMultipliers :: proc(clump: HexagonClump) -> struct{ speed_mult: f32, damage_mult: f32 } {
-	hexagon_type_amounts := GetHexagonTypeAmounts(clump)
-	speed_mult := 1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_PELLET_SPEED]) * 2 / 5
-	damage_mult := 1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_DAMAGE]) * 3 / 10
-	return {speed_mult, damage_mult}
+GetRifleStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (speed: f32, damage: f32, fire_rate: f32) {
+	speed = PELLET_BASE_SPEED * (1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_PELLET_SPEED]) * 2 / 5)
+	damage = PELLET_BASE_DAMAGE * (1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_DAMAGE]) * 3 / 10)
+	fire_rate = 0.5 - f32(GetHexagonTypeAmounts(player.clump)[.RIFLE_UPGRADE_FIRE_RATE]) * 0.07
+	return speed, damage, fire_rate
 }
 
 UpdatePellets :: proc() { for &pellet, index in pellets do UpdatePellet(&pellet, index) }
 
 UpdatePellet :: proc(pellet: ^Pellet, index: int) {
-	pellet.pos += pellet.vel * PELLET_SPEED * rl.GetFrameTime()
+	pellet.pos += pellet.vel * pellet.speed * rl.GetFrameTime()
 	if rl.Vector2Distance(pellet.pos, player.pos) > screen_size.x do if len(pellets) > index do unordered_remove(&pellets, index)
 
 	for clump in GetAllClumps() do if clump.uuid != pellet.owner && clump.grace_period <= 0 do for hexagon in GetClumpHexagons(clump^) {
 		if rl.Vector2Distance(pellet.pos, hexagon.center) > 100 do continue
 		if rl.CheckCollisionPointRec(pellet.pos, hexagon.hurtbox) {
-			DamageClump(clump, 10, GetClumpFromUUID(pellet.owner))
+			DamageClump(clump, pellet.damage, GetClumpFromUUID(pellet.owner))
 			if len(pellets) > index do unordered_remove(&pellets, index)
 		}
 	}

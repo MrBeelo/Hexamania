@@ -89,7 +89,7 @@ GenEnemyHexagonTypes :: proc(hexagon_types: ^[]HexagonType) {
 	hexagon_types[0] = .RIFLE
 
 	// Main type is guaranteed to appear on the first shell, somewhere
-	main_type_index := rand.int_range(1, 7)
+	main_type_index := rand.int_range(1, 5)
 	// Same for the secondary type, but for the second shell
 	secondary_type_index := rand.int_range(7, 19)
 	
@@ -183,13 +183,14 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 
 GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
 	if GetPlayerLevel(player) == MAX_LEVEL do return nil
+	shuffled := Shuffle(enemy.hexagon_types)
 	
-	for hexagon_type in enemy.hexagon_types {
+	for hexagon_type in shuffled {
 		if hexagon_type == .RIFLE do continue
-		if hexagon_type == .HEALTH_PAD && HasSpell(player.clump, .HEALTH_PAD) do continue
-		if hexagon_type == .ICE_BALL && HasSpell(player.clump, .ICE_BALL) do continue
-		if hexagon_type == .FIREBALL && HasSpell(player.clump, .FIREBALL) do continue
-		if hexagon_type == .BLACK_HOLE && HasSpell(player.clump, .BLACK_HOLE) do continue
+		if hexagon_type == .HEALTH_PAD do if HasSpell(player.clump, .HEALTH_PAD) do continue; else do return hexagon_type
+		if hexagon_type == .ICE_BALL do if HasSpell(player.clump, .ICE_BALL) do continue; else do return hexagon_type
+		if hexagon_type == .FIREBALL do if HasSpell(player.clump, .FIREBALL) do continue; else do return hexagon_type
+		if hexagon_type == .BLACK_HOLE do if HasSpell(player.clump, .BLACK_HOLE) do continue; else do return hexagon_type
 
 		// From now on, it's guaranteed that the hexagon is an upgrade
 		spell := GetSpellFromHexagonType(hexagon_type)
@@ -362,7 +363,8 @@ HandleAggroState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 
 	// Fire as fast as possible
 	if enemy.attack_timer.ding {
-		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(3, 3.5)
+		_, _, fire_rate := GetRifleStats(GetHexagonTypeAmounts(enemy.clump))
+		enemy.attack_timer.duration = fire_rate * rand.float32_range(3, 3.5)
 		spell_weights := [SpellType]int{.HEALTH_PAD = 0, .ICE_BALL = 2, .FIREBALL = 2, .BLACK_HOLE = 1}
 		EnemyAttack(enemy, target.pos, 25, spell_weights)
 	}
@@ -386,7 +388,8 @@ HandlePanicState :: proc(enemy: ^Enemy, attacker: ^HexagonClump) {
 
 	// Fire as much as it can, while running away
 	if enemy.attack_timer.ding {
-		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(4, 4.5)
+		_, _, fire_rate := GetRifleStats(GetHexagonTypeAmounts(enemy.clump))
+		enemy.attack_timer.duration = fire_rate * rand.float32_range(4, 4.5)
 		spell_weights := [SpellType]int{.HEALTH_PAD = 3, .ICE_BALL = 0, .FIREBALL = 0, .BLACK_HOLE = 1}
 		EnemyAttack(enemy, attacker.pos, 50, spell_weights)
 	}

@@ -9,7 +9,7 @@ MAX_LEVEL :: 4
 MAX_HEXAGONS :: 1 + 6 + 12 + 18
 MAX_HEALTH :: f32(100)
 MAX_SPRINT_SECS :: f32(5)
-REGEN_SPRINT_TIME :: f32(5)
+REGEN_SPRINT_TIME :: f32(2.5)
 
 // Clumps function as entities, hence their "health" and "uuid" fields.
 HexagonClump :: struct {

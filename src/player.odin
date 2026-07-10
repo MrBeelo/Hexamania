@@ -17,7 +17,7 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE, .BLACK_HOLE}, 0), camera, {}, false, nil }
+	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {}, false, nil }
 }
 
 UpdatePlayer :: proc(plr: ^Player) {
@@ -147,21 +147,25 @@ DrawActiveSpellPreview :: proc() {
 	if player.spell_cooldowns[player.active_spell.?] > 0 do return // If the active spell is on cooldown, don't draw the preview
 	switch player.active_spell.? {
 	case .HEALTH_PAD: {
-		size := (150 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_SIZE]) * 100) * player.camera.zoom
+		_, size, _ := GetHealthPadStats(hexagon_type_amounts)
+		size *= player.camera.zoom
 		pos := CameraPos(player)
 		rect := rl.Rectangle{pos.x - size / 2, pos.y - size / 2, size, size}
 		rl.DrawRectangleLinesEx(rect, 5, rl.GREEN)
 	}
 	case .ICE_BALL: {
-		rl.DrawCircleLinesV(rl.GetMousePosition(), 50 * player.camera.zoom, rl.SKYBLUE)
+		size := ICE_BALL_SIZE * player.camera.zoom
+		rl.DrawCircleLinesV(rl.GetMousePosition(), size, rl.SKYBLUE)
 	}
 	case .FIREBALL: {
-		size := 30 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_SIZE]) * 15
-		rl.DrawCircleLinesV(rl.GetMousePosition(), size * player.camera.zoom, rl.ORANGE)
+		_, size, _ := GetFireballStats(hexagon_type_amounts)
+		size *= player.camera.zoom
+		rl.DrawCircleLinesV(rl.GetMousePosition(), size, rl.ORANGE)
 	}
 	case .BLACK_HOLE: {
-		size := 20 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SIZE]) * 5
-		rl.DrawCircleLinesV(rl.GetMousePosition(), size * player.camera.zoom, rl.PURPLE)
+		_, _, size := GetBlackHoleStats(hexagon_type_amounts)
+		size *= player.camera.zoom
+		rl.DrawCircleLinesV(rl.GetMousePosition(), size, rl.PURPLE)
 	}
 	}
 }

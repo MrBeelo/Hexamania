@@ -49,3 +49,13 @@ FloatToTimeStr :: proc(value: f32) -> string {
 	str := string(rl.TextFormat("%2d:%02d", mins, secs))
 	return str
 }
+
+Shuffle :: proc(arr: []$T) -> []T {
+	result := make([]T, len(arr))
+	copy(result, arr)
+	#reverse for _, i in result {
+		j := rand.int_range(0, i + 1)
+		result[i], result[j] = result[j], result[i]
+	}
+	return result
+}
