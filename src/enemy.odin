@@ -62,7 +62,8 @@ UpdateEnemies :: proc() {
 		if hexagons <= 0 do return
 		
 		hexagon_types := make([]HexagonType, hexagons)
-		for i in 0..<hexagons do hexagon_types[i] = .RIFLE // NOTE: It's obvious.
+		//for i in 0..<hexagons do hexagon_types[i] = .RIFLE // NOTE: It's obvious.
+		GenEnemyHexagonTypes(&hexagon_types)
 		
 		pos := GetRandomSpawnPos()
 		rot := RotationFrom2Points(pos, player.camera.target)
@@ -72,6 +73,78 @@ UpdateEnemies :: proc() {
 		append(&enemies, NewEnemy(hexagon_types, pos, vel))
 		enemy_spawn_timer.duration = rand.float32_range(10, 15)
 	}
+}
+
+GenEnemyHexagonTypes :: proc(hexagon_types: ^[]HexagonType) {
+	length := len(hexagon_types)
+	
+	main_type := rand.choice_enum(SpellType)
+	secondary_type_num := int(main_type) + 1
+	secondary_type_num %= len(SpellType)
+	secondary_type := SpellType(secondary_type_num)
+
+	main_type_added, secondary_type_added: bool
+
+	// Middle hex is always a rifle
+	hexagon_types[0] = .RIFLE
+
+	// Main type is guaranteed to appear on the first shell, somewhere
+	main_type_index := rand.int_range(1, 7)
+	// Same for the secondary type, but for the second shell
+	secondary_type_index := rand.int_range(7, 19)
+	
+	for i in 1..<MAX_HEXAGONS {
+		if i >= length do return
+		add_main_type := i == main_type_index
+		add_secondary_type := i == secondary_type_index
+		
+		if add_main_type {
+			// Add the main type
+			hexagon_types[i] = GetHexagonTypeFromSpellType(main_type)
+			main_type_added = true
+		} else if add_secondary_type {
+			// Add the secondary type
+			hexagon_types[i] = GetHexagonTypeFromSpellType(secondary_type)
+			secondary_type_added = true
+		} else {
+			// Add a random upgrade, based on the spell types the entity has
+			upgrade_type_to_add := rand.int_range(0, 3) // nil, main, secondary
+			upgrade_to_add := rand.int_range(0, 3) // All spell types have 3 upgrades
+
+			if upgrade_type_to_add == 2 && !secondary_type_added do upgrade_type_to_add = 1
+			if upgrade_type_to_add == 1 && !main_type_added do upgrade_type_to_add = 0
+
+			upgrades: [3]HexagonType
+			switch upgrade_type_to_add {
+			case 0: upgrades = GetHexagonUpgradesFromSpellType(nil)
+			case 1: upgrades = GetHexagonUpgradesFromSpellType(main_type)
+			case 2: upgrades = GetHexagonUpgradesFromSpellType(secondary_type)
+			}
+
+			hexagon_types[i] = upgrades[upgrade_to_add]
+		}
+	}
+}
+
+GetHexagonTypeFromSpellType :: proc(spell: SpellType) -> HexagonType {
+	switch spell {
+	case .HEALTH_PAD: return .HEALTH_PAD
+	case .ICE_BALL: return .ICE_BALL
+	case .FIREBALL: return .FIREBALL
+	}
+	return .RIFLE
+}
+
+// nil corresponds to RIFLE
+GetHexagonUpgradesFromSpellType :: proc(spell: Maybe(SpellType)) -> [3]HexagonType {
+	if spell == nil do return {.RIFLE_UPGRADE_FIRE_RATE, .RIFLE_UPGRADE_PELLET_SPEED, .RIFLE_UPGRADE_DAMAGE}
+	switch spell.? {
+	case .HEALTH_PAD: return {.HEALTH_PAD_UPGRADE_HEAL_AMOUNT, .HEALTH_PAD_UPGRADE_SIZE, .HEALTH_PAD_UPGRADE_TIME}
+	case .ICE_BALL: return {.ICE_BALL_UPGRADE_RANGE, .ICE_BALL_UPGRADE_FLOOR_SIZE, .ICE_BALL_UPGRADE_FREEZE_TIME}
+	case .FIREBALL: return {.FIREBALL_UPGRADE_SIZE, .FIREBALL_UPGRADE_TIME, .FIREBALL_UPGRADE_DAMAGE}
+	}
+
+	return {.RIFLE, .RIFLE, .RIFLE}
 }
 
 UpdateEnemy :: proc(enemy: ^Enemy, index: int) {

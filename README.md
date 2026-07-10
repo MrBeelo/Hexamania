@@ -49,7 +49,8 @@ Hexamania description goes here
 - ~~Spell cooldowns! (visible in spell mode)~~
 - ~~Better system to do player spells (right click to activate spell mode, scroll to choose spell)~~
 - ~~Enemy do spells~~
-- Enemies spawn with different hexahearts and drop correct hexahearts
+- ~~Enemies spawn with different hexahearts~~
+- Enemies drop hexahearts based on the ones they have!
 - Add final spell, black hole!
 ###### Art
 - Spell menu thing (bottom left) should be the corresponding hexagon, with the number if it is on cooldown!
