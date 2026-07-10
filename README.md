@@ -54,11 +54,11 @@ Hexamania description goes here
 - ~~Add final spell, black hole!~~
 - ~~Dunno if this counts as code but add a menu with a list of all the spells the player has~~
 ###### Art
-- Spell menu thing (bottom left, make it top left/right) should be the corresponding hexagon, with the number if it is on cooldown! (and darker)
+- ~~Spell menu thing (bottom left, make it top left/right) should be the corresponding hexagon, with the number if it is on cooldown! (and darker)~~
 - Layered hexagons on top of every clump's hexagons denoting if frozen/burning
 - Note for top thing: both the freezing and burning overlays should be rotated on each hexagon, burning should be 3 parts that change color seperately
-- Hexagon has eyes <3 that look where your mouse is!
 - fully draw spells (and the previews)
+- Hexagon has eyes <3 that look where your mouse is!
 - New Background, should have falling hexagons lol
 - Blur/bloom, lots of blur/bloom
 

@@ -124,21 +124,25 @@ DrawPlayerHealthBar :: proc() {
 DrawSpellMenu :: proc() {
 	if !player.spell_mode do return
 
-	color := rl.WHITE
+	texture: rl.Texture2D
 	switch player.active_spell.? {
-	case .HEALTH_PAD: color = rl.GREEN
-	case .ICE_BALL: color = rl.SKYBLUE
-	case .FIREBALL: color = rl.ORANGE
-	case .BLACK_HOLE: color = rl.PURPLE
+	case .HEALTH_PAD: texture = hexagon_textures[.HEALTH_PAD]
+	case .ICE_BALL: texture = hexagon_textures[.ICE_BALL]
+	case .FIREBALL: texture = hexagon_textures[.FIREBALL]
+	case .BLACK_HOLE: texture = hexagon_textures[.BLACK_HOLE]
 	}
 
 	cooldown := int(math.ceil(player.spell_cooldowns[player.active_spell.?]))
 	cooldown_text := string(rl.TextFormat("%d", cooldown))
-	BOX_SIZE :: f32(64)
-	BUFFER :: f32(7)
+	BOX_SIZE :: f32(96)
+	BUFFER :: f32(15)
+
+	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
+	dest := rl.Rectangle{screen_size.x - BOX_SIZE / 2 - BUFFER, BUFFER + BOX_SIZE / 2, BOX_SIZE, BOX_SIZE}
+	rot := math.mod_f32(f32(rl.GetTime()), 360) * 15
 	
-	rl.DrawRectangleRounded({BUFFER, screen_size.y - BOX_SIZE - BUFFER, BOX_SIZE, BOX_SIZE}, 0.4, 5, color)
-	DrawTextCenter(cooldown_text, {BUFFER + BOX_SIZE / 2, screen_size.y - (BUFFER + BOX_SIZE / 2)}, 32, .QUICKSAND_MEDIUM)
+	rl.DrawTexturePro(texture, src, dest, BOX_SIZE / 2, rot, rl.WHITE if cooldown <= 0 else rl.GRAY)
+	if cooldown > 0 do DrawTextCenter(cooldown_text, {screen_size.x - (BUFFER + BOX_SIZE / 2), BUFFER + BOX_SIZE / 2}, 32, .QUICKSAND_MEDIUM)
 }
 
 DrawActiveSpellPreview :: proc() {
