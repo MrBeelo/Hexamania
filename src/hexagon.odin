@@ -2,6 +2,7 @@ package main
 
 import rl "vendor:raylib"
 import "core:strings"
+import "core:math"
 
 // The size of the hexagon destination texture, which also happens to be its diameter
 HEXAGON_SIZE :: f32(32) 
@@ -14,6 +15,7 @@ HEXAGON_SIDE_LENGTH :: HEXAGON_SIZE / 2
 HEXAGON_HEIGHT :: HEXAGON_SIDE_LENGTH * 1.73 // sqrt(3) ~= 1.73
 
 hexagon_textures: [HexagonType]rl.Texture2D
+hexagon_overlays: [HexagonOverlayTexture]rl.Texture2D
 
 HexagonType :: enum {
 	RIFLE,
@@ -38,6 +40,23 @@ HexagonType :: enum {
 	BLACK_HOLE_UPGRADE_TIME,
 }
 
+HexagonOverlayTexture :: enum {
+	FILLED,
+	FREEZE,
+	BURN1,
+	BURN2,
+	BURN3,
+}
+
+HexagonFrozenOverlay :: struct {}
+HexagonBurningOverlay :: struct {}
+HexagonStaticOverlay :: struct { color: rl.Color }
+HexagonOverlay :: union {
+	HexagonFrozenOverlay,
+	HexagonBurningOverlay,
+	HexagonStaticOverlay,	
+}
+
 Hexagon :: struct {
 	type: HexagonType,
 	center: rl.Vector2, // Hexagon center, should be rotated beforehand
@@ -50,7 +69,7 @@ GetHexagonHurtBox :: proc(center: rl.Vector2) -> rl.Rectangle {
 	return rl.Rectangle{center.x - SIZE / 2, center.y - SIZE / 2, SIZE, SIZE}
 }
 
-DrawHexagon :: proc(hex: Hexagon) {
+DrawHexagon :: proc(hex: Hexagon, grace := false, overlay: Maybe(HexagonOverlay) = nil, ) {
 	texture := hexagon_textures[hex.type]
 	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
 
@@ -60,7 +79,27 @@ DrawHexagon :: proc(hex: Hexagon) {
 
 	// Since dest takes into account the fact that hex.center is rotated, rotating around
 	// the middle of it works!
-	rl.DrawTexturePro(texture, src, dest, HEXAGON_SIZE / 2, hex.rot, rl.WHITE)
+	color := rl.Color{255, 255, 255, 100} if grace else rl.WHITE
+	rl.DrawTexturePro(texture, src, dest, HEXAGON_SIZE / 2, hex.rot, color)
+
+	// Draw overlays
+	if overlay != nil do switch o in overlay.? {
+	case HexagonFrozenOverlay: rl.DrawTexturePro(hexagon_overlays[.FREEZE], src, dest, HEXAGON_SIZE / 2, hex.rot, rl.WHITE)
+	case HexagonBurningOverlay: {
+		for i in 0..=2 {
+			burn_texture: rl.Texture2D
+			switch i {
+			case 0: burn_texture = hexagon_overlays[.BURN1]
+			case 1: burn_texture = hexagon_overlays[.BURN2]
+			case 2: burn_texture = hexagon_overlays[.BURN3]
+			}
+
+			burn_color := GetBurningOverlayColor(f32(i) / 3)
+			rl.DrawTexturePro(burn_texture, src, dest, HEXAGON_SIZE / 2, hex.rot, burn_color)
+		}
+	}
+	case HexagonStaticOverlay: rl.DrawTexturePro(hexagon_overlays[.FILLED], src, dest, HEXAGON_SIZE / 2, hex.rot, o.color)
+	}
 
 	if debug_on {
 		rl.DrawRectangleLinesEx(hex.hurtbox, 1, rl.RED)
@@ -68,8 +107,19 @@ DrawHexagon :: proc(hex: Hexagon) {
 	}
 }
 
+GetBurningOverlayColor :: proc(time_delay: f32) -> rl.Color {
+	time := f32(rl.GetTime()) + time_delay
+	time = math.mod_f32(time, 1)
+	factor := math.sin(rl.PI * time)
+	return rl.ColorLerp(rl.RED, rl.ORANGE, factor)
+}
+
 LoadHexagon :: proc(name: string) -> rl.Texture2D { 
 	return rl.LoadTexture(strings.clone_to_cstring(strings.concatenate({"res/hexagon/", name, ".png"}))) 
+}
+
+LoadOverlay :: proc(name: string) -> rl.Texture2D { 
+	return rl.LoadTexture(strings.clone_to_cstring(strings.concatenate({"res/overlay/", name, ".png"}))) 
 }
 
 LoadHexagons :: proc() {
@@ -94,6 +144,14 @@ LoadHexagons :: proc() {
 		.BLACK_HOLE_UPGRADE_SUCTION_POWER = LoadHexagon("black_hole_upgrade_suction_power"),
 		.BLACK_HOLE_UPGRADE_SIZE = LoadHexagon("black_hole_upgrade_size"),
 		.BLACK_HOLE_UPGRADE_TIME = LoadHexagon("black_hole_upgrade_time"),
+	}
+
+	hexagon_overlays = {
+		.FILLED = LoadOverlay("filled"),
+		.FREEZE = LoadOverlay("freeze"),
+		.BURN1 = LoadOverlay("burn1"),
+		.BURN2 = LoadOverlay("burn2"),
+		.BURN3 = LoadOverlay("burn3"),
 	}
 }
 

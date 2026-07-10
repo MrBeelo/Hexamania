@@ -133,7 +133,10 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 }
 
 DrawHexagonClump :: proc(clump: HexagonClump) {
-	for hexagon in GetClumpHexagons(clump) do DrawHexagon(hexagon)
+	overlay: Maybe(HexagonOverlay) = nil
+	if clump.frozen_time_left > 0 do overlay = HexagonFrozenOverlay{}
+	if clump.burning.time_left > 0 do overlay = HexagonBurningOverlay{}
+	for hexagon in GetClumpHexagons(clump) do DrawHexagon(hexagon, clump.grace_period > 0, overlay)
 	if debug_on do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
 

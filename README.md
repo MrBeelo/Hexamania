@@ -27,11 +27,11 @@ Hexamania description goes here
 - ~~Add sprinting~~
 - ~~Add SIMPLE background~~
 - ~~Passively regain health~~
+- ~~Maybe make enemies collidable?~~
 
 #### DAY 3
 - ~~Powerups (circular): give either a temporary buff or a health boost idk~~
 - ~~after max, no more normal hexagons spawn, only powerup ones.~~
-- ~~Maybe make enemies collidable?~~
 - ~~SPELLSSSSS~~
 - ~~Design a couple different hexagon and powerup types~~
 - ~~Enemies naturally spawn~~
@@ -53,23 +53,24 @@ Hexamania description goes here
 - ~~Enemies drop hexahearts based on the ones they have!~~
 - ~~Add final spell, black hole!~~
 - ~~Dunno if this counts as code but add a menu with a list of all the spells the player has~~
+- ~~remove winning~~
 ###### Art
 - ~~Spell menu thing (bottom left, make it top left/right) should be the corresponding hexagon, with the number if it is on cooldown! (and darker)~~
-- Layered hexagons on top of every clump's hexagons denoting if frozen/burning
-- Note for top thing: both the freezing and burning overlays should be rotated on each hexagon, burning should be 3 parts that change color seperately
-- fully draw spells (and the previews)
-- Hexagon has eyes <3 that look where your mouse is!
-- New Background, should have falling hexagons lol
-- Blur/bloom, lots of blur/bloom
+- ~~Layered hexagons on top of every clump's hexagons denoting if frozen/burning~~
+- ~~Note for top thing: both the freezing and burning overlays should be rotated on each hexagon, burning should be 3 parts that change color seperately~~
+- ~~powerup draw :>~~
 
 #### DAY 5 (FINAL DAY)
 ###### Code
 - Balance to hell
 ###### Art
+- fully draw spells (and the previews)
+- Hexagon has eyes <3 that look where your mouse is!
+- New Background, should have falling hexagons lol
+- Blur/bloom, lots of blur/bloom
 - Death animation
 - Prettier menus, maybe look space-y or some shi
 - Transitions maybe? (for each gamestate)
-- Rest of the art, cuz I know you aint finishing it in day 4
 ###### Sound
 - Sound effects
 - Music! (should be 6/4 lol, calm and relaxing with reverb/echo)

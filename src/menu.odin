@@ -69,17 +69,15 @@ FinishMenu :: proc() -> Menu { return NewMenu(
 		NewButtonDef("RETURN", screen_size / 2 + {150, 250}, proc(){ game_state = .MAIN }, true),
 	},
 	draw = proc(buttons: []Button) {
-		has_won := player.health > 0
-
-		grade := int(GetElapsedStopwatchTime(time_survived) / 70 + f32(points) * 3)
-		if len(player.hexagon_types) == MAX_HEXAGONS do grade += 300
+		grade := int(GetElapsedStopwatchTime(time_survived) / 80 + f32(points) * 3)
+		if len(player.hexagon_types) == MAX_HEXAGONS do grade += 150
 		
-		DrawMenuTitle("YOU WIN" if has_won else "YOU DIED")
+		DrawMenuTitle("YOU DIED")
 		
 		DrawFinishStat("Time Survived: %s", 0, FloatToTimeStr(GetElapsedStopwatchTime(time_survived)))
 		DrawFinishStat("Points: %d", 1, points)
 		DrawFinishStat("Hexahearts: %d", 2, len(player.hexagon_types) - 1)
-		DrawFinishStat("Grade: %s (%d)", 3, GetGrade(grade, has_won)[0], grade)
+		DrawFinishStat("Grade: %s (%d)", 3, GetGrade(grade)[0], grade)
 		
 		for &button in buttons do DrawButton(button)
 	},
@@ -104,15 +102,14 @@ AnalysisMenu :: proc() -> Menu { return NewMenu(
 	},
 )}
 
-GetGrade :: proc(num: int, has_won := false) -> [2]string {
-	if has_won do return {"S", "You won. What did you expect?\n Great job!! And thanks for playing my game\n <3"}
-	
+GetGrade :: proc(num: int) -> [2]string {	
 	switch {
 	case num < 100: return {"F", "Yeah, that was pretty bad...\n But it's okay! Try again and you'll\n get better!"}
 	case num < 200: return {"D", "Not good, but not terrible either.\n Try getting more kills to maximize\n your hexahearts and your score!"}
 	case num < 300: return {"C", "You did average. Not bad, but you\n have potential! Staying alive for longer\n and getting more kills will boost\n your score to great heights!"}
 	case num < 400: return {"B", "Okay, that was actually pretty good!\n Keep going like this and you'll have\n secured the win in no time!"}
 	case num < 500: return {"A", "Wow! Amazing performace!\n Only thing that stopped you from getting an S rank\n is defeating every other clump.\n You got this!"}
+	case num < 600: return {"S", "Great job!! And thanks for playing my game\n <3"}
 	}
 	
 	return {}
