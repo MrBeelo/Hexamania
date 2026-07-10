@@ -4,13 +4,14 @@ import rl "vendor:raylib"
 import "core:encoding/uuid"
 import "core:math/rand"
 
-SpellType :: enum { HEALTH_PAD, ICE_BALL, FIREBALL }
+SpellType :: enum { HEALTH_PAD, ICE_BALL, FIREBALL, BLACK_HOLE }
 
 spells: [dynamic]Spell
 Spell :: union {
 	HealthPad,
 	IceBall,
 	Fireball,
+	BlackHole,
 }
 
 UpdateSpells :: proc() {
@@ -18,6 +19,7 @@ UpdateSpells :: proc() {
 	case HealthPad: UpdateHealthPad(&s, index)
 	case IceBall: UpdateIceBall(&s, index)
 	case Fireball: UpdateFireball(&s, index)
+	case BlackHole: UpdateBlackHole(&s, index)
 	}
 }
 
@@ -31,6 +33,7 @@ DrawSpellsAbove :: proc() {
 	for spell in spells do #partial switch s in spell {
 	case IceBall: DrawIceBall(s)
 	case Fireball: DrawFireball(s)
+	case BlackHole: DrawBlackHole(s)
 	}
 }
 
@@ -40,6 +43,7 @@ HasSpell :: proc(clump: HexagonClump, spell: SpellType) -> bool {
 	case .HEALTH_PAD: return hexagon_type_amounts[.HEALTH_PAD] > 0
 	case .ICE_BALL: return hexagon_type_amounts[.ICE_BALL] > 0
 	case .FIREBALL: return hexagon_type_amounts[.FIREBALL] > 0
+	case .BLACK_HOLE: return hexagon_type_amounts[.BLACK_HOLE] > 0
 	}
 
 	return false
@@ -51,10 +55,13 @@ GetSpellFromHexagonType :: proc(type: HexagonType) -> Maybe(SpellType) {
 	case .HEALTH_PAD, .HEALTH_PAD_UPGRADE_HEAL_AMOUNT, .HEALTH_PAD_UPGRADE_SIZE, .HEALTH_PAD_UPGRADE_TIME: return .HEALTH_PAD
 	case .ICE_BALL, .ICE_BALL_UPGRADE_RANGE, .ICE_BALL_UPGRADE_FLOOR_SIZE, .ICE_BALL_UPGRADE_FREEZE_TIME: return .ICE_BALL
 	case .FIREBALL, .FIREBALL_UPGRADE_SIZE, .FIREBALL_UPGRADE_TIME, .FIREBALL_UPGRADE_DAMAGE: return .FIREBALL
+	case .BLACK_HOLE, .BLACK_HOLE_UPGRADE_SUCTION_POWER, .BLACK_HOLE_UPGRADE_SIZE, .BLACK_HOLE_UPGRADE_TIME: return .BLACK_HOLE
 	}
 
 	return nil
 }
+
+SPELL_COOLDOWN :: f32(25)
 
 // HEALTH PAD
 
@@ -71,7 +78,7 @@ SummonHealthPad :: proc(clump: ^HexagonClump) {
 	health_pad := HealthPad{clump.uuid, rect, heal_amount, heal_timer, time_left}
 
 	append(&spells, health_pad)
-	clump.spell_cooldowns[.HEALTH_PAD] = 20
+	clump.spell_cooldowns[.HEALTH_PAD] = SPELL_COOLDOWN
 }
 
 UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
@@ -118,7 +125,7 @@ ThrowIceBall :: proc(clump: ^HexagonClump, vel: rl.Vector2) {
 	freeze_time := 3 + f32(hexagon_type_amounts[.ICE_BALL_UPGRADE_RANGE])
 	
 	append(&spells, IceBall{clump.uuid, clump.pos, vel, put_floor_timer, time_left, floor_size, freeze_time})
-	clump.spell_cooldowns[.ICE_BALL] = 20
+	clump.spell_cooldowns[.ICE_BALL] = SPELL_COOLDOWN
 }
 
 UpdateIceBall :: proc(ball: ^IceBall, index: int) {
@@ -167,7 +174,7 @@ ThrowFireball :: proc(clump: ^HexagonClump, vel: rl.Vector2) {
 	damage := 3 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_DAMAGE]) / 2
 	
 	append(&spells, Fireball{clump.uuid, clump.pos, vel, 3, burn_time, size, damage})
-	clump.spell_cooldowns[.FIREBALL] = 20
+	clump.spell_cooldowns[.FIREBALL] = SPELL_COOLDOWN
 }
 
 UpdateFireball :: proc(ball: ^Fireball, index: int) {
@@ -185,4 +192,58 @@ UpdateFireball :: proc(ball: ^Fireball, index: int) {
 
 DrawFireball :: proc(ball: Fireball) {
 	rl.DrawCircleV(ball.pos, ball.size, rl.ORANGE)
+}
+
+// BLACK HOLE
+
+BLACK_HOLE_SPEED :: 4 * 60
+BLACK_HOLE_DECELERATION :: 5 * 60
+
+BlackHole :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, time_left: f32, suction_power: f32, size: f32 }
+
+PlayerThrowBlackHole :: proc() {
+	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+	ThrowBlackHole(&player.clump, vel)
+}
+
+EnemyThrowBlackHole :: proc(enemy: ^Enemy, target: rl.Vector2) {
+	rot := RotationFrom2Points(enemy.pos, target)
+	inac := GetEnemyInaccuracy(enemy.ai_state)
+	rot += rand.float32_range(-inac, inac)
+	vel := VelocityFromRotation(rot)
+	ThrowBlackHole(&enemy.clump, vel)
+}
+
+ThrowBlackHole :: proc(clump: ^HexagonClump, vel: rl.Vector2) {
+	hexagon_type_amounts := GetHexagonTypeAmounts(clump^)
+	time_left := 5 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_TIME])
+	suction_power := (3 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SUCTION_POWER]) / 2) * 60
+	size := 20 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SIZE]) * 5
+	new_vel := vel * BLACK_HOLE_SPEED
+	
+	append(&spells, BlackHole{clump.uuid, clump.pos, new_vel, time_left, suction_power, size})
+	clump.spell_cooldowns[.BLACK_HOLE] = SPELL_COOLDOWN
+}
+
+UpdateBlackHole :: proc(hole: ^BlackHole, index: int) {
+	Accelerate(&hole.vel.x, 0, BLACK_HOLE_DECELERATION)
+	Accelerate(&hole.vel.y, 0, BLACK_HOLE_DECELERATION)
+	
+	for clump in GetAllClumps() {
+		if clump.uuid == hole.owner do continue
+		if rl.Vector2Distance(hole.pos, clump.pos) > hole.size * 10 do continue
+		target_vel := VelocityFrom2Points(clump.pos, hole.pos)
+		Accelerate(&clump.vel.x, target_vel.x, hole.suction_power)
+		Accelerate(&clump.vel.y, target_vel.y, hole.suction_power)
+		if ClumpIntersectsCircle(clump^, hole.pos, hole.size) do clump.vel = 0
+	}
+
+	hole.time_left -= rl.GetFrameTime()
+	if hole.time_left <= 0 && len(spells) > index do unordered_remove(&spells, index)
+	
+	hole.pos += hole.vel * rl.GetFrameTime()
+}
+
+DrawBlackHole :: proc(hole: BlackHole) {
+	rl.DrawCircleV(hole.pos, hole.size, rl.PURPLE)
 }

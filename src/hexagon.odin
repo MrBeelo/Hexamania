@@ -32,6 +32,10 @@ HexagonType :: enum {
 	FIREBALL_UPGRADE_SIZE,
 	FIREBALL_UPGRADE_TIME,
 	FIREBALL_UPGRADE_DAMAGE,
+	BLACK_HOLE,
+	BLACK_HOLE_UPGRADE_SUCTION_POWER,
+	BLACK_HOLE_UPGRADE_SIZE,
+	BLACK_HOLE_UPGRADE_TIME,
 }
 
 Hexagon :: struct {
@@ -86,6 +90,10 @@ LoadHexagons :: proc() {
 		.FIREBALL_UPGRADE_SIZE = LoadHexagon("fireball_upgrade_size"),
 		.FIREBALL_UPGRADE_TIME = LoadHexagon("fireball_upgrade_time"),
 		.FIREBALL_UPGRADE_DAMAGE = LoadHexagon("fireball_upgrade_damage"),
+		.BLACK_HOLE = LoadHexagon("black_hole"),
+		.BLACK_HOLE_UPGRADE_SUCTION_POWER = LoadHexagon("black_hole_upgrade_suction_power"),
+		.BLACK_HOLE_UPGRADE_SIZE = LoadHexagon("black_hole_upgrade_size"),
+		.BLACK_HOLE_UPGRADE_TIME = LoadHexagon("black_hole_upgrade_time"),
 	}
 }
 

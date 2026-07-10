@@ -17,7 +17,7 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {}, false, nil }
+	return Player{ NewHexagonClump({.RIFLE, .BLACK_HOLE}, 0), camera, {}, false, nil }
 }
 
 UpdatePlayer :: proc(plr: ^Player) {
@@ -79,6 +79,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 			case .HEALTH_PAD: SummonHealthPad(&plr.clump)
 			case .ICE_BALL: PlayerThrowIceBall()
 			case .FIREBALL: PlayerThrowFireball()
+			case .BLACK_HOLE: PlayerThrowBlackHole()
 			}
 			plr.spell_mode = false
 		}
@@ -91,7 +92,7 @@ ChangePlayerActiveSpell :: proc(up: bool, start_spell: SpellType, test_spell: Sp
 	index := int(test_spell)
 	index += 1 if up else -1
 	index %= len(SpellType)
-	if index < 0 do index += 4
+	if index < 0 do index += len(SpellType)
 
 	new_spell := SpellType(index)
 	if new_spell == start_spell do return
@@ -128,6 +129,7 @@ DrawSpellMenu :: proc() {
 	case .HEALTH_PAD: color = rl.GREEN
 	case .ICE_BALL: color = rl.SKYBLUE
 	case .FIREBALL: color = rl.ORANGE
+	case .BLACK_HOLE: color = rl.PURPLE
 	}
 
 	cooldown := int(math.ceil(player.spell_cooldowns[player.active_spell.?]))
@@ -156,6 +158,10 @@ DrawActiveSpellPreview :: proc() {
 	case .FIREBALL: {
 		size := 30 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_SIZE]) * 15
 		rl.DrawCircleLinesV(rl.GetMousePosition(), size * player.camera.zoom, rl.ORANGE)
+	}
+	case .BLACK_HOLE: {
+		size := 20 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SIZE]) * 5
+		rl.DrawCircleLinesV(rl.GetMousePosition(), size * player.camera.zoom, rl.PURPLE)
 	}
 	}
 }

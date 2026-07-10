@@ -131,6 +131,7 @@ GetHexagonTypeFromSpellType :: proc(spell: SpellType) -> HexagonType {
 	case .HEALTH_PAD: return .HEALTH_PAD
 	case .ICE_BALL: return .ICE_BALL
 	case .FIREBALL: return .FIREBALL
+	case .BLACK_HOLE: return .BLACK_HOLE
 	}
 	return .RIFLE
 }
@@ -142,6 +143,7 @@ GetHexagonUpgradesFromSpellType :: proc(spell: Maybe(SpellType)) -> [3]HexagonTy
 	case .HEALTH_PAD: return {.HEALTH_PAD_UPGRADE_HEAL_AMOUNT, .HEALTH_PAD_UPGRADE_SIZE, .HEALTH_PAD_UPGRADE_TIME}
 	case .ICE_BALL: return {.ICE_BALL_UPGRADE_RANGE, .ICE_BALL_UPGRADE_FLOOR_SIZE, .ICE_BALL_UPGRADE_FREEZE_TIME}
 	case .FIREBALL: return {.FIREBALL_UPGRADE_SIZE, .FIREBALL_UPGRADE_TIME, .FIREBALL_UPGRADE_DAMAGE}
+	case .BLACK_HOLE: return {.BLACK_HOLE_UPGRADE_SUCTION_POWER, .BLACK_HOLE_UPGRADE_SIZE, .BLACK_HOLE_UPGRADE_TIME}
 	}
 
 	return {.RIFLE, .RIFLE, .RIFLE}
@@ -187,6 +189,7 @@ GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
 		if hexagon_type == .HEALTH_PAD && HasSpell(player.clump, .HEALTH_PAD) do continue
 		if hexagon_type == .ICE_BALL && HasSpell(player.clump, .ICE_BALL) do continue
 		if hexagon_type == .FIREBALL && HasSpell(player.clump, .FIREBALL) do continue
+		if hexagon_type == .BLACK_HOLE && HasSpell(player.clump, .BLACK_HOLE) do continue
 
 		// From now on, it's guaranteed that the hexagon is an upgrade
 		spell := GetSpellFromHexagonType(hexagon_type)
@@ -264,7 +267,7 @@ EnemyAttack :: proc(enemy: ^Enemy, target: rl.Vector2, spell_chance: f32, spell_
 }
 
 EnemyDoRandomSpell :: proc(enemy: ^Enemy, target: rl.Vector2, spell_weights: [SpellType]int) -> bool {
-	sum := spell_weights[.HEALTH_PAD] + spell_weights[.ICE_BALL] + spell_weights[.FIREBALL]
+	sum := spell_weights[.HEALTH_PAD] + spell_weights[.ICE_BALL] + spell_weights[.FIREBALL] + spell_weights[.BLACK_HOLE]
 	if sum <= 0 do return false
 	num := rand.int_range(0, sum)
 
@@ -272,14 +275,16 @@ EnemyDoRandomSpell :: proc(enemy: ^Enemy, target: rl.Vector2, spell_weights: [Sp
 	switch {
 	case num < spell_weights[.HEALTH_PAD]: preferred = .HEALTH_PAD
 	case num < spell_weights[.HEALTH_PAD] + spell_weights[.ICE_BALL]: preferred = .ICE_BALL
-	case: preferred = .FIREBALL
+	case num < spell_weights[.HEALTH_PAD] + spell_weights[.ICE_BALL] + spell_weights[.FIREBALL]: preferred = .FIREBALL
+	case: preferred = .BLACK_HOLE
 	}
 
 	spell_order: [len(SpellType)]SpellType
 	switch preferred {
-	case .HEALTH_PAD: spell_order = {.HEALTH_PAD, .ICE_BALL, .FIREBALL}
-	case .ICE_BALL: spell_order = {.ICE_BALL, .FIREBALL, .HEALTH_PAD}
-	case .FIREBALL: spell_order = {.FIREBALL, .HEALTH_PAD, .ICE_BALL}
+	case .HEALTH_PAD: spell_order = {.HEALTH_PAD, .ICE_BALL, .FIREBALL, .BLACK_HOLE}
+	case .ICE_BALL: spell_order = {.ICE_BALL, .FIREBALL, .BLACK_HOLE, .HEALTH_PAD}
+	case .FIREBALL: spell_order = {.FIREBALL, .BLACK_HOLE, .HEALTH_PAD, .ICE_BALL}
+	case .BLACK_HOLE: spell_order = {.BLACK_HOLE, .HEALTH_PAD, .ICE_BALL, .FIREBALL}
 	}
 
 	for spell in spell_order {
@@ -291,6 +296,7 @@ EnemyDoRandomSpell :: proc(enemy: ^Enemy, target: rl.Vector2, spell_weights: [Sp
 		case .HEALTH_PAD: SummonHealthPad(&enemy.clump)
 		case .ICE_BALL: EnemyThrowIceBall(enemy, target)
 		case .FIREBALL: EnemyThrowFireball(enemy, target)
+		case .BLACK_HOLE: EnemyThrowBlackHole(enemy, target)
 		}
 		return true
 	}
@@ -325,7 +331,7 @@ HandleInspectState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 	// Fire, but not too frequently, see if target responds
 	if enemy.attack_timer.ding {
 		enemy.attack_timer.duration = rand.float32_range(7, 12)
-		spell_weights := [SpellType]int{.HEALTH_PAD = 0, .ICE_BALL = 1, .FIREBALL = 1}
+		spell_weights := [SpellType]int{.HEALTH_PAD = 0, .ICE_BALL = 1, .FIREBALL = 1, .BLACK_HOLE = 0}
 		EnemyAttack(enemy, target.pos, 10, spell_weights)
 	}
 }
@@ -357,7 +363,7 @@ HandleAggroState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 	// Fire as fast as possible
 	if enemy.attack_timer.ding {
 		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(3, 3.5)
-		spell_weights := [SpellType]int{.HEALTH_PAD = 0, .ICE_BALL = 1, .FIREBALL = 1}
+		spell_weights := [SpellType]int{.HEALTH_PAD = 0, .ICE_BALL = 2, .FIREBALL = 2, .BLACK_HOLE = 1}
 		EnemyAttack(enemy, target.pos, 25, spell_weights)
 	}
 }
@@ -381,7 +387,7 @@ HandlePanicState :: proc(enemy: ^Enemy, attacker: ^HexagonClump) {
 	// Fire as much as it can, while running away
 	if enemy.attack_timer.ding {
 		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(4, 4.5)
-		spell_weights := [SpellType]int{.HEALTH_PAD = 1, .ICE_BALL = 0, .FIREBALL = 0}
+		spell_weights := [SpellType]int{.HEALTH_PAD = 3, .ICE_BALL = 0, .FIREBALL = 0, .BLACK_HOLE = 1}
 		EnemyAttack(enemy, attacker.pos, 50, spell_weights)
 	}
 }

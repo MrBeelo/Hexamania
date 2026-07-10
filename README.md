@@ -51,9 +51,10 @@ Hexamania description goes here
 - ~~Enemy do spells~~
 - ~~Enemies spawn with different hexahearts~~
 - ~~Enemies drop hexahearts based on the ones they have!~~
-- Add final spell, black hole!
+- ~~Add final spell, black hole!~~
+- Dunno if this counts as code but add a menu with a list of all the spells the player has
 ###### Art
-- Spell menu thing (bottom left, make it top left/right) should be the corresponding hexagon, with the number if it is on cooldown!
+- Spell menu thing (bottom left, make it top left/right) should be the corresponding hexagon, with the number if it is on cooldown! (and darker)
 - Hexagon has eyes <3 that look where your mouse is!
 - fully draw spells (and the previews)
 - New Background, should have falling hexagons lol

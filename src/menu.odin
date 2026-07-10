@@ -3,7 +3,7 @@ package main
 import rl "vendor:raylib"
 import "core:fmt"
 
-GameState :: enum { PLAYING, MAIN, PAUSED, FINISH, }
+GameState :: enum { PLAYING, MAIN, PAUSED, FINISH }
 game_state := GameState.MAIN
 menus: [GameState]Menu
 
