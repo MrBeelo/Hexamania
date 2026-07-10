@@ -28,6 +28,10 @@ HexagonType :: enum {
 	ICE_BALL_UPGRADE_RANGE,
 	ICE_BALL_UPGRADE_FLOOR_SIZE,
 	ICE_BALL_UPGRADE_FREEZE_TIME,
+	FIREBALL,
+	FIREBALL_UPGRADE_SIZE,
+	FIREBALL_UPGRADE_TIME,
+	FIREBALL_UPGRADE_DAMAGE,
 }
 
 Hexagon :: struct {
@@ -78,6 +82,10 @@ LoadHexagons :: proc() {
 		.ICE_BALL_UPGRADE_RANGE = LoadHexagon("ice_ball_upgrade_range"),
 		.ICE_BALL_UPGRADE_FLOOR_SIZE = LoadHexagon("ice_ball_upgrade_floor_size"),
 		.ICE_BALL_UPGRADE_FREEZE_TIME = LoadHexagon("ice_ball_upgrade_freeze_time"),
+		.FIREBALL = LoadHexagon("fireball"),
+		.FIREBALL_UPGRADE_SIZE = LoadHexagon("fireball_upgrade_size"),
+		.FIREBALL_UPGRADE_TIME = LoadHexagon("fireball_upgrade_time"),
+		.FIREBALL_UPGRADE_DAMAGE = LoadHexagon("fireball_upgrade_damage"),
 	}
 }
 

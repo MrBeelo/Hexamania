@@ -37,7 +37,6 @@ update :: proc() {
 
 	if rl.IsKeyPressed(.F3) do debug_on = !debug_on
 	if rl.IsKeyPressed(.N) do AddHexagonToClump(&player.clump, .RIFLE)
-	if rl.IsKeyPressed(.K) do PlayerThrowIceBall()
 	
 	rl.BeginDrawing()
 	defer rl.EndDrawing()

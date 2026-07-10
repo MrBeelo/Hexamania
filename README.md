@@ -32,8 +32,8 @@ Hexamania description goes here
 - ~~Powerups (circular): give either a temporary buff or a health boost idk~~
 - ~~after max, no more normal hexagons spawn, only powerup ones.~~
 - ~~Maybe make enemies collidable?~~
-- SPELLSSSSS
-- Design a couple different hexagon and powerup types
+- ~~SPELLSSSSS~~
+- ~~Design a couple different hexagon and powerup types~~
 - ~~Enemies naturally spawn~~
 - ~~Powerups naturally spawn~~
 - ~~Enemies get bigger and stronger as time passes~~
@@ -44,10 +44,11 @@ Hexamania description goes here
 
 #### DAY 4
 ###### Code
-- Implement rifle fire rate for both players and enemies (player -> hold to auto fire)
+- Implement rifle upgrades (currently only the textures)
 - Spell previews in spell mode (like a green rect_lines for the health one, etc)
 - Better system to do player spells (right click to activate spell mode, scroll to choose spell)
 - Enemy do spells
+- Enemies spawn with different hexahearts and drop correct hexahearts
 - Balance to hell
 ###### Art
 - Hexagon has eyes <3 that look where your mouse is!
@@ -81,12 +82,12 @@ Ice area thingies are summoned from the ground (with piercing)
 After hitting an enemy, freezes them for some seconds (cant move or attack)  
 Upgrades: more range, more aoe, more freeze time  
 
-#### Black Hole
-Shoots a black hole  
-Close enemies are pulled into it  
-Upgrades: size, suction power, time  
-
 #### Fireball
 Shoots a fireball (with piercing)  
 Hit enemies get burned for some seconds (periodically take damage)  
 Upgrades: size/aoe, time, damage dealt  
+
+#### Black Hole
+Shoots a black hole  
+Close enemies are pulled into it  
+Upgrades: size, suction power, time  

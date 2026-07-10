@@ -24,7 +24,7 @@ HexagonClump :: struct {
 	grace_period: f32,
 	attacker: ^HexagonClump,
 	frozen_time_left: f32,
-	burning: struct{ time_left: f32, damage: f32 },
+	burning: struct{ damage_timer: Timer, time_left: f32, damage: f32 },
 }
 
 // Everything that has to do with sprinting.
@@ -78,6 +78,14 @@ ClumpIntersectsRect :: proc(clump: HexagonClump, rect: rl.Rectangle) -> bool {
 	return false
 }
 
+// Ditto, but circle :O
+ClumpIntersectsCircle :: proc(clump: HexagonClump, center: rl.Vector2, radius: f32) -> bool {
+	for hexagon in GetClumpHexagons(clump) {
+	 	if rl.CheckCollisionCircleRec(center, radius, hexagon.hurtbox) do return true
+	}
+	return false
+}
+
 UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2
 
@@ -105,6 +113,12 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	// Handle spells
 	if clump.frozen_time_left > 0 do clump.frozen_time_left -= rl.GetFrameTime()
 	clump.frozen_time_left = math.max(clump.frozen_time_left, 0)
+
+	UpdateTimer(&clump.burning.damage_timer)
+	if clump.burning.time_left > 0 {
+		clump.burning.time_left -= rl.GetFrameTime()
+		if clump.burning.damage_timer.ding do DamageClumpNoAttacker(clump, clump.burning.damage)
+	}
 
 	// Final velocity addition (should probably be last)
 	if clump.frozen_time_left <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
@@ -157,6 +171,12 @@ DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) 
 	clump.attacker = attacker
 
 	if clump.health <= 0 && attacker.uuid == player.uuid do points += len(clump.hexagon_types)
+}
+
+DamageClumpNoAttacker :: proc(clump: ^HexagonClump, amount: f32) {
+	if clump.grace_period > 0 do return
+	clump.health -= amount
+	clump.grace_period = 0.15
 }
 
 GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {

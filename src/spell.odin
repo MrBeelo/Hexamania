@@ -7,12 +7,14 @@ spells: [dynamic]Spell
 Spell :: union {
 	HealthPad,
 	IceBall,
+	Fireball,
 }
 
 UpdateSpells :: proc() {
 	for &spell, index in spells do switch &s in spell {
 	case HealthPad: UpdateHealthPad(&s, index)
 	case IceBall: UpdateIceBall(&s, index)
+	case Fireball: UpdateFireball(&s, index)
 	}
 }
 
@@ -20,6 +22,7 @@ DrawSpellsBelow :: proc() {
 	for spell in spells do switch s in spell {
 	case HealthPad: DrawHealthPad(s)
 	case IceBall: DrawIceBall(s)
+	case Fireball: DrawFireball(s)
 	}
 }
 
@@ -96,4 +99,42 @@ UpdateIceBall :: proc(ball: ^IceBall, index: int) {
 
 DrawIceBall :: proc(ball: IceBall) {
 	rl.DrawCircleLinesV(ball.pos, 50, rl.SKYBLUE)
+}
+
+// FIREBALL
+
+FIREBALL_SPEED :: 80
+
+Fireball :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, time_left: f32, burn_time: f32, size: f32, damage: f32 }
+
+PlayerThrowFireball :: proc() {
+	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+
+	hexagon_type_amounts := GetHexagonTypeAmounts(player.clump)
+	burn_time := 7 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_TIME])
+	size := 30 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_SIZE]) * 15
+	damage := 3 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_DAMAGE]) / 2
+	
+	append(&spells, Fireball{player.uuid, player.pos, vel, 3, burn_time, size, damage})
+}
+
+EnemyThrowFireball :: proc() {
+	// NOTE: To add tomorrow
+}
+
+UpdateFireball :: proc(ball: ^Fireball, index: int) {
+	for clump in GetAllClumps() {
+		if clump.uuid == ball.owner do continue
+		damage_timer := NewTimer(1, true, true)
+		if ClumpIntersectsCircle(clump^, ball.pos, ball.size) do clump.burning = { damage_timer, ball.burn_time, ball.damage }
+	}
+
+	ball.time_left -= rl.GetFrameTime()
+	if ball.time_left <= 0 && len(spells) > index do unordered_remove(&spells, index)
+
+	ball.pos += ball.vel * FIREBALL_SPEED * rl.GetFrameTime()
+}
+
+DrawFireball :: proc(ball: Fireball) {
+	rl.DrawCircleLinesV(ball.pos, ball.size, rl.ORANGE)
 }
