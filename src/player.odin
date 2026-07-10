@@ -57,7 +57,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 	UpdateBoundPowerups(&plr.bound_powerups)
 
 	// Pellets
-	if rl.IsMouseButtonPressed(.LEFT) do PlayerFirePellet()
+	if (rl.IsMouseButtonPressed(.LEFT) || rl.IsMouseButtonDown(.LEFT)) && player.rifle_delay <= 0 do PlayerFirePellet()
 
 	UpdateHexagonClump(&plr.clump)
 }

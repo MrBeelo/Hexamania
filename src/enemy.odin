@@ -81,9 +81,9 @@ UpdateEnemies :: proc() {
 }
 
 UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
-	RANGE :: 250
+	RANGE :: 350
 	is_clump_close, closest_clump := GetClosestClump(enemy, RANGE)
-	SetAIState(enemy, is_clump_close, closest_clump)
+	ManageAIState(enemy, is_clump_close, closest_clump)
 	
 	switch enemy.ai_state {
 	case .ROAM: HandleRoamingState(enemy)
@@ -114,11 +114,17 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	UpdateHexagonClump(&enemy.clump)
 }
 
-SetAIState :: proc(enemy: ^Enemy, is_clump_close: bool, closest_clump: ^HexagonClump) {
-	if !is_clump_close { enemy.ai_state = .ROAM; return }
-	if enemy.health <= 30 { enemy.ai_state = .PANIC; return }
-	if enemy.attacker != nil && enemy.ai_state != .PANIC { enemy.ai_state = .AGGRO; return }
-	enemy.ai_state = .INSPECT
+ManageAIState :: proc(enemy: ^Enemy, is_clump_close: bool, closest_clump: ^HexagonClump) {
+	if !is_clump_close { SetAIState(enemy, .ROAM); return }
+	if enemy.health <= 30 { SetAIState(enemy, .PANIC); return }
+	if enemy.attacker != nil && enemy.ai_state != .PANIC { SetAIState(enemy, .AGGRO); return }
+	SetAIState(enemy, .INSPECT)
+}
+
+SetAIState :: proc(enemy: ^Enemy, state: AIState) {
+	if enemy.ai_state != state do enemy.turn_timer.start_time = f32(rl.GetTime()) - enemy.turn_timer.duration
+	if enemy.ai_state != state do enemy.attack_timer.start_time = f32(rl.GetTime()) - enemy.attack_timer.duration
+	enemy.ai_state = state
 }
 
 GetClosestClump :: proc(enemy: ^Enemy, range: f32) -> (found: bool, clump: ^HexagonClump) {
@@ -180,7 +186,7 @@ HandleInspectState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 	// Fire, but not too frequently, see if target responds
 	if enemy.attack_timer.ding {
 		enemy.attack_timer.duration = rand.float32_range(5, 12)
-		EnemyFirePellet(enemy^, target.pos)
+		EnemyFirePellet(enemy, target.pos)
 	}
 }
 
@@ -210,8 +216,8 @@ HandleAggroState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 
 	// Fire as fast as possible
 	if enemy.attack_timer.ding {
-		enemy.attack_timer.duration = rand.float32_range(2, 3)
-		EnemyFirePellet(enemy^, target.pos)
+		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(1.25, 1.75)
+		EnemyFirePellet(enemy, target.pos)
 	}
 }
 
@@ -233,7 +239,7 @@ HandlePanicState :: proc(enemy: ^Enemy, attacker: ^HexagonClump) {
 
 	// Fire as much as it can, while running away
 	if enemy.attack_timer.ding {
-		enemy.attack_timer.duration = rand.float32_range(4, 6)
-		EnemyFirePellet(enemy^, attacker.pos)
+		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(2, 2.5)
+		EnemyFirePellet(enemy, attacker.pos)
 	}
 }

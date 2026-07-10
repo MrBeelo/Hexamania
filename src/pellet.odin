@@ -16,10 +16,17 @@ Pellet :: struct {
 
 PlayerFirePellet :: proc() {
 	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+	player.rifle_delay = GetRifleDelay(player.clump)
 	append(&pellets, Pellet{player.pos, vel, player.uuid, GetPelletMultipliers(player.clump)})
 }
 
-EnemyFirePellet :: proc(enemy: Enemy, target: rl.Vector2) {
+GetRifleDelay :: proc(clump: HexagonClump) -> f32 {
+	return 0.5 - f32(GetHexagonTypeAmounts(player.clump)[.RIFLE_UPGRADE_FIRE_RATE]) * 0.07
+}
+
+EnemyFirePellet :: proc(enemy: ^Enemy, target: rl.Vector2) {
+	if enemy.rifle_delay > 0 do return
+	
 	// Change the enemy's inaccuracy factor based on its AI state
 	inaccuracy: f32
 	switch enemy.ai_state {
@@ -31,6 +38,9 @@ EnemyFirePellet :: proc(enemy: Enemy, target: rl.Vector2) {
 	rot := RotationFrom2Points(enemy.pos, target)
 	rot += rand.float32_range(-inaccuracy, inaccuracy) // Enemy inaccuracies!
 	vel := VelocityFromRotation(rot)
+
+	enemy.rifle_delay = GetRifleDelay(enemy.clump)
+	
 	append(&pellets, Pellet{enemy.pos, vel, enemy.uuid, GetPelletMultipliers(enemy.clump)})
 }
 

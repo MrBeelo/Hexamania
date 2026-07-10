@@ -23,6 +23,7 @@ HexagonClump :: struct {
 	health_regen: Timer,
 	grace_period: f32,
 	attacker: ^HexagonClump,
+	rifle_delay: f32,
 	frozen_time_left: f32,
 	burning: struct{ damage_timer: Timer, time_left: f32, damage: f32 },
 }
@@ -48,7 +49,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	// Health Regen Timer
 	health_regen := NewTimer(7, true, true)
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, {}}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, 0, {}}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -119,6 +120,9 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 		clump.burning.time_left -= rl.GetFrameTime()
 		if clump.burning.damage_timer.ding do DamageClumpNoAttacker(clump, clump.burning.damage)
 	}
+
+	if clump.rifle_delay > 0 do clump.rifle_delay -= rl.GetFrameTime()
+	clump.rifle_delay = math.max(clump.rifle_delay, 0)
 
 	// Final velocity addition (should probably be last)
 	if clump.frozen_time_left <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
