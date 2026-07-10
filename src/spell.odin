@@ -242,7 +242,7 @@ UpdateBlackHole :: proc(hole: ^BlackHole, index: int) {
 	for clump in GetAllClumps() {
 		if clump.uuid == hole.owner do continue
 		if rl.Vector2Distance(hole.pos, clump.pos) > hole.size * 10 do continue
-		target_vel := VelocityFrom2Points(clump.pos, hole.pos)
+		target_vel := VelocityFrom2Points(clump.pos, hole.pos) * 60
 		Accelerate(&clump.vel.x, target_vel.x, hole.suction_power)
 		Accelerate(&clump.vel.y, target_vel.y, hole.suction_power)
 		if ClumpIntersectsCircle(clump^, hole.pos, hole.size) do clump.vel = 0
@@ -260,7 +260,7 @@ DrawBlackHole :: proc(hole: BlackHole) {
 
 GetBlackHoleStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (time_left: f32, suction_power: f32, size: f32) {
 	time_left = 5 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_TIME])
-	suction_power = (3 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SUCTION_POWER]) / 2) * 60
+	suction_power = (5 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SUCTION_POWER])) * 60
 	size = 20 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SIZE]) * 5
 	return time_left, suction_power, size
 }
