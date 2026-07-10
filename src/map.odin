@@ -13,7 +13,6 @@ DrawMap :: proc() {
 	screen_to_map_ratio := MAP_SIZE / sim_scr_size.x
 
 	// Draw map background
-	// NOTE: Should probably change
 	map_rect := rl.Rectangle{map_center.x - MAP_SIZE / 2, map_center.y - MAP_SIZE / 2, MAP_SIZE, MAP_SIZE}
 	rl.DrawRectangleRec(map_rect, rl.WHITE)
 

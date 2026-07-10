@@ -57,12 +57,12 @@ UpdateEnemies :: proc() {
 		if player.camera.zoom == 0 do return // Will cause a division by zero error, but this shouldn't happen anyway.
 		HEXAGON_DEVELOPEMENT_FACTOR :: 25 // The bigger this is, the less hexagons enemies will have (based on time)
 		
-		hexagons := math.floor_div(int(GetElapsedStopwatchTime(time_survived)), HEXAGON_DEVELOPEMENT_FACTOR) + 1
+		hexagons := math.floor_div(int(GetElapsedStopwatchTime(time_survived)), HEXAGON_DEVELOPEMENT_FACTOR) + 2
 		hexagons = rand.int_range(hexagons, hexagons + 3)
 		if hexagons <= 0 do return
+		hexagons = math.min(hexagons, MAX_HEXAGONS)
 		
 		hexagon_types := make([]HexagonType, hexagons)
-		//for i in 0..<hexagons do hexagon_types[i] = .RIFLE // NOTE: It's obvious.
 		GenEnemyHexagonTypes(&hexagon_types)
 		
 		pos := GetRandomSpawnPos()
@@ -160,10 +160,8 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	}
 	
 	if enemy.health <= 0 {
-		if GetPlayerLevel(player) == MAX_LEVEL do ThrowRandomWorldPowerup(enemy.pos); else {
-			ThrowRandomHeart(enemy.pos)
-			// NOTE: Do type stuff here to throw correct hexaheart
-		}
+		hexagon_type := GetHexagonTypeToThrow(enemy^)
+		if hexagon_type == nil do ThrowRandomWorldPowerup(enemy.pos); else do ThrowHeart(enemy.pos, hexagon_type.?)
 		
 		if len(enemies) > index do unordered_remove(&enemies, index)
 	}
@@ -179,6 +177,23 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	if enemy.time_away_from_player > 20 && len(enemies) > index do unordered_remove(&enemies, index)
 	
 	UpdateHexagonClump(&enemy.clump)
+}
+
+GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
+	if GetPlayerLevel(player) == MAX_LEVEL do return nil
+	
+	for hexagon_type in enemy.hexagon_types {
+		if hexagon_type == .RIFLE do continue
+		if hexagon_type == .HEALTH_PAD && HasSpell(player.clump, .HEALTH_PAD) do continue
+		if hexagon_type == .ICE_BALL && HasSpell(player.clump, .ICE_BALL) do continue
+		if hexagon_type == .FIREBALL && HasSpell(player.clump, .FIREBALL) do continue
+
+		// From now on, it's guaranteed that the hexagon is an upgrade
+		spell := GetSpellFromHexagonType(hexagon_type)
+		if spell == nil || (spell != nil && HasSpell(player.clump, spell.?)) do return hexagon_type
+	}
+
+	return nil
 }
 
 ManageAIState :: proc(enemy: ^Enemy, is_clump_close: bool, closest_clump: ^HexagonClump) {

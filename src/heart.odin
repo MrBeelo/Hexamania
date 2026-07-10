@@ -12,13 +12,16 @@ HexagonHeart :: struct {
 	vel: rl.Vector2,
 }
 
-ThrowRandomHeart :: proc(pos: rl.Vector2) {
-	type := rand.choice_enum(HexagonType)
-
+ThrowHeart :: proc(pos: rl.Vector2, type: HexagonType) {
 	vel_x := RangeRand({100, 150})
 	vel_y := RangeRand({100, 150})
 	
 	append(&hearts, HexagonHeart{{type, pos, 0, {}}, {vel_x, vel_y}})
+}
+
+ThrowRandomHeart :: proc(pos: rl.Vector2) {
+	type := rand.choice_enum(HexagonType)
+	ThrowHeart(pos, type)
 }
 
 UpdateHexagonHearts :: proc() { for &heart, index in hearts do UpdateHexagonHeart(&heart, index) }

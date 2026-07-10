@@ -4,7 +4,7 @@ import rl "vendor:raylib"
 import "core:encoding/uuid"
 import "core:math/rand"
 
-PELLET_SPEED :: 10 * 60
+PELLET_SPEED :: 5 * 60
 pellets: [dynamic]Pellet
 
 Pellet :: struct {

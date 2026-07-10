@@ -17,8 +17,7 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE, .ICE_BALL, .HEALTH_PAD, .FIREBALL}, 0), camera, {}, false, nil }
-	// NOTE: Player should only start with a rifle, this is temporary!
+	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {}, false, nil }
 }
 
 UpdatePlayer :: proc(plr: ^Player) {

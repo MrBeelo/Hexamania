@@ -4,6 +4,7 @@ import rl "vendor:raylib"
 import "core:math"
 import "core:math/rand"
 
+POWERUP_DECELERATION :: 5 * 60
 POWERUP_SIZE :: f32(32)
 world_powerups: [dynamic]WorldPowerup
 powerup_textures: [PowerupType]rl.Texture2D
@@ -62,8 +63,8 @@ UpdateWorldPowerups :: proc() {
 
 UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {	
 	powerup.pos += powerup.vel * rl.GetFrameTime()
-	Accelerate(&powerup.vel.x, 0, HEART_DECELERATION) // NOTE: Might want to change this
-	Accelerate(&powerup.vel.y, 0, HEART_DECELERATION)
+	Accelerate(&powerup.vel.x, 0, POWERUP_DECELERATION)
+	Accelerate(&powerup.vel.y, 0, POWERUP_DECELERATION)
 
 	DEADZONE :: f32(3)
 	if math.abs(powerup.vel.x) < DEADZONE do powerup.vel.x = 0
