@@ -216,7 +216,7 @@ HandleAggroState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 
 	// Fire as fast as possible
 	if enemy.attack_timer.ding {
-		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(1.25, 1.75)
+		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(1.75, 2.25)
 		EnemyFirePellet(enemy, target.pos)
 	}
 }
@@ -239,7 +239,7 @@ HandlePanicState :: proc(enemy: ^Enemy, attacker: ^HexagonClump) {
 
 	// Fire as much as it can, while running away
 	if enemy.attack_timer.ding {
-		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(2, 2.5)
+		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(2.25, 2.75)
 		EnemyFirePellet(enemy, attacker.pos)
 	}
 }

@@ -105,12 +105,7 @@ ResetGame :: proc() {
 	clear(&hearts)
 	clear(&world_powerups)
 	points = 0
-	StartStopwatch(&time_survived) // NOTE: Stop this when the player dies
-
-	// NOTE: Temporary, these should spawn naturally
-	/*append(&enemies, NewEnemy({.BLANK, .BLANK, .BLANK}, 100))
-	append(&enemies, NewEnemy({.BLANK, .BLANK}, -100))
-	ThrowRandomWorldPowerup(200)*/
+	StartStopwatch(&time_survived)
 }
 
 // Helper functions so that I dont have to rewrite the code again and again:

@@ -43,8 +43,8 @@ HasSpell :: proc(clump: HexagonClump, spell: SpellType) -> bool {
 
 HealthPad :: struct { owner: uuid.Identifier, rect: rl.Rectangle, heal_amount: f32, heal_timer: Timer, time_left: f32 }
 
-SummonHealthPad :: proc(clump: HexagonClump) {
-	hexagon_type_amounts := GetHexagonTypeAmounts(clump)
+SummonHealthPad :: proc(clump: ^HexagonClump) {
+	hexagon_type_amounts := GetHexagonTypeAmounts(clump^)
 	time_left := 10 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_TIME]) * 4
 	size := 150 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_SIZE]) * 100
 	heal_amount := 3 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_HEAL_AMOUNT])
@@ -54,6 +54,7 @@ SummonHealthPad :: proc(clump: HexagonClump) {
 	health_pad := HealthPad{clump.uuid, rect, heal_amount, heal_timer, time_left}
 
 	append(&spells, health_pad)
+	clump.spell_cooldowns[.HEALTH_PAD] = 20
 }
 
 UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
@@ -88,6 +89,7 @@ PlayerThrowIceBall :: proc() {
 	freeze_time := 3 + f32(hexagon_type_amounts[.ICE_BALL_UPGRADE_RANGE])
 	
 	append(&spells, IceBall{player.uuid, player.pos, vel, put_floor_timer, time_left, floor_size, freeze_time})
+	player.spell_cooldowns[.ICE_BALL] = 20
 }
 
 EnemyThrowIceBall :: proc() {
@@ -129,6 +131,7 @@ PlayerThrowFireball :: proc() {
 	damage := 3 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_DAMAGE]) / 2
 	
 	append(&spells, Fireball{player.uuid, player.pos, vel, 3, burn_time, size, damage})
+	player.spell_cooldowns[.FIREBALL] = 20
 }
 
 EnemyThrowFireball :: proc() {

@@ -16,7 +16,8 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE, .ICE_BALL}, 0), camera, {}, false, nil }
+	return Player{ NewHexagonClump({.RIFLE, .ICE_BALL, .HEALTH_PAD, .FIREBALL}, 0), camera, {}, false, nil }
+	// NOTE: Player should only start with a rifle, this is temporary!
 }
 
 UpdatePlayer :: proc(plr: ^Player) {
@@ -67,16 +68,19 @@ UpdatePlayer :: proc(plr: ^Player) {
 	}
 
 	if !plr.spell_mode {
-		if rl.IsMouseButtonDown(.LEFT) && plr.rifle_delay <= 0 do PlayerFirePellet()
+		if rl.IsMouseButtonPressed(.LEFT) && plr.rifle_delay <= 0 do PlayerFirePellet()
 	} else {
 		move := rl.GetMouseWheelMove()
 		if move > 0 do ChangePlayerActiveSpell(true, plr.active_spell.?, plr.active_spell.?)
 		if move < 0 do ChangePlayerActiveSpell(false, plr.active_spell.?, plr.active_spell.?)
 
-		if rl.IsMouseButtonPressed(.LEFT) do switch plr.active_spell {
-		case .HEALTH_PAD: SummonHealthPad(plr.clump)
-		case .ICE_BALL: PlayerThrowIceBall()
-		case .FIREBALL: PlayerThrowFireball()
+		if rl.IsMouseButtonPressed(.LEFT) && player.spell_cooldowns[player.active_spell.?] <= 0 {
+			switch plr.active_spell {
+			case .HEALTH_PAD: SummonHealthPad(&plr.clump)
+			case .ICE_BALL: PlayerThrowIceBall()
+			case .FIREBALL: PlayerThrowFireball()
+			}
+			plr.spell_mode = false
 		}
 	}	
 
@@ -114,6 +118,46 @@ DrawPlayerHealthBar :: proc() {
 	sprint_bar_size := bar_size - {BUFFER * 2, BUFFER}
 	sprint_bar_size.x = sprint_bar_size.x * player.spr.sprint_secs / MAX_SPRINT_SECS
 	rl.DrawRectangleV(shell_pos + BUFFER + {0, bar_size.y * 2 / 3}, sprint_bar_size, rl.SKYBLUE)
+}
+
+DrawSpellMenu :: proc() {
+	if !player.spell_mode do return
+
+	color := rl.WHITE
+	switch player.active_spell.? {
+	case .HEALTH_PAD: color = rl.GREEN
+	case .ICE_BALL: color = rl.SKYBLUE
+	case .FIREBALL: color = rl.ORANGE
+	}
+
+	cooldown := int(math.ceil(player.spell_cooldowns[player.active_spell.?]))
+	cooldown_text := string(rl.TextFormat("%d", cooldown))
+	BOX_SIZE :: f32(64)
+	BUFFER :: f32(7)
+	
+	rl.DrawRectangleRounded({BUFFER, screen_size.y - BOX_SIZE - BUFFER, BOX_SIZE, BOX_SIZE}, 0.4, 5, color)
+	DrawTextCenter(cooldown_text, {BUFFER + BOX_SIZE / 2, screen_size.y - (BUFFER + BOX_SIZE / 2)}, 32, .QUICKSAND_MEDIUM)
+}
+
+DrawActiveSpellPreview :: proc() {
+	if !player.spell_mode do return
+	hexagon_type_amounts := GetHexagonTypeAmounts(player.clump)
+	if player.spell_cooldowns[player.active_spell.?] > 0 do return // If the active spell is on cooldown, don't draw the preview
+	switch player.active_spell.? {
+	case .HEALTH_PAD: {
+		size := (150 + f32(hexagon_type_amounts[.HEALTH_PAD_UPGRADE_SIZE]) * 100) * player.camera.zoom
+		pos := CameraPos(player)
+		rect := rl.Rectangle{pos.x - size / 2, pos.y - size / 2, size, size}
+		rl.DrawRectangleLinesEx(rect, 5, rl.GREEN)
+	}
+	case .ICE_BALL: {
+		rl.DrawCircleLinesV(rl.GetMousePosition(), 50 * player.camera.zoom, rl.SKYBLUE)
+	}
+	case .FIREBALL: {
+		size := 30 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_SIZE]) * 15
+		rl.DrawCircleLinesV(rl.GetMousePosition(), size * player.camera.zoom, rl.ORANGE)
+	}
+	}
 }
 
 GetPlayerSpeed :: proc(plr: Player) -> f32 {

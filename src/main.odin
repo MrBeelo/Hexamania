@@ -59,11 +59,8 @@ update :: proc() {
 		// HUD
 		DrawPlayerHealthBar()
 		DrawMap()
-
-		if player.spell_mode {
-			rl.DrawRectangleV({10, screen_size.y - 32 - 10}, {32, 32}, rl.DARKBLUE)
-			DrawTextCenter(string(rl.TextFormat("%v", player.active_spell)), {26, screen_size.y - 26}, 16, .QUICKSAND_LIGHT)
-		}
+		DrawActiveSpellPreview()
+		DrawSpellMenu()
 
 		if debug_on {
 			rl.DrawText(rl.TextFormat("pos: %.2f, %.2f", player.pos.x, player.pos.y), 10, 10, 32, rl.BLACK)

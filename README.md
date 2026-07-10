@@ -45,19 +45,22 @@ Hexamania description goes here
 #### DAY 4
 ###### Code
 - ~~Implement rifle upgrades (currently only the textures)~~
-- Spell previews in spell mode (like a green rect_lines for the health one, etc)
-- Spell cooldowns! (visible in spell mode)
+- ~~Spell previews in spell mode (like a green rect_lines for the health one, etc)~~
+- ~~Spell cooldowns! (visible in spell mode)~~
 - ~~Better system to do player spells (right click to activate spell mode, scroll to choose spell)~~
 - Enemy do spells
 - Enemies spawn with different hexahearts and drop correct hexahearts
 - Balance to hell
 ###### Art
+- Spell menu thing (bottom left) should be the corresponding hexagon, with the number if it is on cooldown!
 - Hexagon has eyes <3 that look where your mouse is!
-- fully draw spells
+- fully draw spells (and the previews)
 - New Background, should have falling hexagons lol
 - Blur/bloom, lots of blur/bloom
 - Prettier menus, maybe look space-y or some shi
 - Transitions maybe? (for each gamestate)
+- Layered hexagons on top of every clump's hexagons denoting if frozen/burning
+- Note for top thing: both the freezing and burning overlays should be rotated on each hexagon, burning should be 3 parts that change color seperately
 
 #### DAY 5 (FINAL DAY)
 ###### Art

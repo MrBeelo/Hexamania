@@ -26,6 +26,7 @@ HexagonClump :: struct {
 	rifle_delay: f32,
 	frozen_time_left: f32,
 	burning: struct{ damage_timer: Timer, time_left: f32, damage: f32 },
+	spell_cooldowns: [SpellType]f32,
 }
 
 // Everything that has to do with sprinting.
@@ -49,7 +50,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	// Health Regen Timer
 	health_regen := NewTimer(7, true, true)
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, 0, {}}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, 0, {}, {}}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -123,6 +124,9 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 
 	if clump.rifle_delay > 0 do clump.rifle_delay -= rl.GetFrameTime()
 	clump.rifle_delay = math.max(clump.rifle_delay, 0)
+
+	for spell in SpellType do if clump.spell_cooldowns[spell] > 0 do clump.spell_cooldowns[spell] -= rl.GetFrameTime()
+	for spell in SpellType do clump.spell_cooldowns[spell] = math.max(clump.spell_cooldowns[spell], 0)
 
 	// Final velocity addition (should probably be last)
 	if clump.frozen_time_left <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
