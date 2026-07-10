@@ -48,9 +48,9 @@ Hexamania description goes here
 - ~~Spell previews in spell mode (like a green rect_lines for the health one, etc)~~
 - ~~Spell cooldowns! (visible in spell mode)~~
 - ~~Better system to do player spells (right click to activate spell mode, scroll to choose spell)~~
-- Enemy do spells
+- ~~Enemy do spells~~
 - Enemies spawn with different hexahearts and drop correct hexahearts
-- Balance to hell
+- Add final spell, black hole!
 ###### Art
 - Spell menu thing (bottom left) should be the corresponding hexagon, with the number if it is on cooldown!
 - Hexagon has eyes <3 that look where your mouse is!
@@ -63,6 +63,8 @@ Hexamania description goes here
 - Note for top thing: both the freezing and burning overlays should be rotated on each hexagon, burning should be 3 parts that change color seperately
 
 #### DAY 5 (FINAL DAY)
+###### Code
+- Balance to hell
 ###### Art
 - Rest of the art, cuz I know you aint finishing it in day 4
 ###### Sound

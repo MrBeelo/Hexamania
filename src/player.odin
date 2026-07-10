@@ -2,6 +2,7 @@ package main
 
 import rl "vendor:raylib"
 import "core:math"
+import "core:math/rand"
 
 BASE_PLAYER_SPEED :: 3 * 60
 PLAYER_ACCELERATION :: 5 * 60
@@ -205,4 +206,24 @@ GetLevel :: proc(hexagon_types: []HexagonType) -> int {
 	}
 
 	return 1
+}
+
+// For spawning enemies and powerups
+GetRandomSpawnPos :: proc(range: f32 = 120) -> rl.Vector2 {
+	visible_screen_size := screen_size / player.camera.zoom
+	min_dist := visible_screen_size / 2
+	max_dist := min_dist + range
+
+	pos_x, pos_y: f32
+	x_free := bool(rand.int_range(0, 2))
+	if x_free {
+		pos_x = rand.float32_range(-max_dist.x, max_dist.x)
+		pos_y = RangeRand({min_dist.y, max_dist.y})
+	} else {
+		pos_x = RangeRand({min_dist.x, max_dist.x})
+		pos_y = rand.float32_range(-max_dist.y, max_dist.y)
+	}
+	
+	pos := player.camera.target + {pos_x, pos_y}
+	return pos
 }

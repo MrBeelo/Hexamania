@@ -54,14 +54,8 @@ UpdateWorldPowerups :: proc() {
 	UpdateTimer(&powerup_spawn_timer)
 	if powerup_spawn_timer.ding {
 		if player.camera.zoom == 0 do return
-		
-		visible_screen_size := screen_size / player.camera.zoom
-		min_dist := player.camera.target + visible_screen_size / 2
-		pos_x := RangeRand({min_dist.x, min_dist.x + 70})
-		pos_y := RangeRand({min_dist.y, min_dist.y + 70})
-
-		ThrowRandomWorldPowerup({pos_x, pos_y})
-		
+		pos := GetRandomSpawnPos()
+		ThrowRandomWorldPowerup(pos)
 		powerup_spawn_timer.duration = rand.float32_range(20, 30)
 	}
 }

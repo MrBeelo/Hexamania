@@ -2,6 +2,7 @@ package main
 
 import rl "vendor:raylib"
 import "core:encoding/uuid"
+import "core:math/rand"
 
 SpellType :: enum { HEALTH_PAD, ICE_BALL, FIREBALL }
 
@@ -21,8 +22,13 @@ UpdateSpells :: proc() {
 }
 
 DrawSpellsBelow :: proc() {
-	for spell in spells do switch s in spell {
+	for spell in spells do #partial switch s in spell {
 	case HealthPad: DrawHealthPad(s)
+	}
+}
+
+DrawSpellsAbove :: proc() {
+	for spell in spells do #partial switch s in spell {
 	case IceBall: DrawIceBall(s)
 	case Fireball: DrawFireball(s)
 	}
@@ -69,7 +75,7 @@ UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
 }
 
 DrawHealthPad :: proc(pad: HealthPad) {
-	rl.DrawRectangleLinesEx(pad.rect, 5, rl.GREEN)
+	rl.DrawRectangleRec(pad.rect, rl.GREEN)
 }
 
 // ICE BALL
@@ -81,19 +87,27 @@ IceBall :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, pu
 
 PlayerThrowIceBall :: proc() {
 	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+	ThrowIceBall(&player.clump, vel)
+}
+
+EnemyThrowIceBall :: proc(enemy: ^Enemy, target: rl.Vector2) {
+	rot := RotationFrom2Points(enemy.pos, target)
+	inac := GetEnemyInaccuracy(enemy.ai_state)
+	rot += rand.float32_range(-inac, inac)
+	vel := VelocityFromRotation(rot)
+	ThrowIceBall(&enemy.clump, vel)
+}
+
+ThrowIceBall :: proc(clump: ^HexagonClump, vel: rl.Vector2) {
 	put_floor_timer := NewTimer(1, true, true)
 
-	hexagon_type_amounts := GetHexagonTypeAmounts(player.clump)
+	hexagon_type_amounts := GetHexagonTypeAmounts(clump^)
 	time_left := 3 + f32(hexagon_type_amounts[.ICE_BALL_UPGRADE_RANGE])
 	floor_size := 75 + f32(hexagon_type_amounts[.ICE_BALL_UPGRADE_RANGE]) * 25
 	freeze_time := 3 + f32(hexagon_type_amounts[.ICE_BALL_UPGRADE_RANGE])
 	
-	append(&spells, IceBall{player.uuid, player.pos, vel, put_floor_timer, time_left, floor_size, freeze_time})
-	player.spell_cooldowns[.ICE_BALL] = 20
-}
-
-EnemyThrowIceBall :: proc() {
-	// NOTE: To add tomorrow
+	append(&spells, IceBall{clump.uuid, clump.pos, vel, put_floor_timer, time_left, floor_size, freeze_time})
+	clump.spell_cooldowns[.ICE_BALL] = 20
 }
 
 UpdateIceBall :: proc(ball: ^IceBall, index: int) {
@@ -113,7 +127,7 @@ UpdateIceBall :: proc(ball: ^IceBall, index: int) {
 }
 
 DrawIceBall :: proc(ball: IceBall) {
-	rl.DrawCircleLinesV(ball.pos, 50, rl.SKYBLUE)
+	rl.DrawCircleV(ball.pos, 50, rl.SKYBLUE)
 }
 
 // FIREBALL
@@ -124,18 +138,25 @@ Fireball :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, t
 
 PlayerThrowFireball :: proc() {
 	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+	ThrowFireball(&player.clump, vel)
+}
 
-	hexagon_type_amounts := GetHexagonTypeAmounts(player.clump)
+EnemyThrowFireball :: proc(enemy: ^Enemy, target: rl.Vector2) {
+	rot := RotationFrom2Points(enemy.pos, target)
+	inac := GetEnemyInaccuracy(enemy.ai_state)
+	rot += rand.float32_range(-inac, inac)
+	vel := VelocityFromRotation(rot)
+	ThrowFireball(&enemy.clump, vel)
+}
+
+ThrowFireball :: proc(clump: ^HexagonClump, vel: rl.Vector2) {
+	hexagon_type_amounts := GetHexagonTypeAmounts(clump^)
 	burn_time := 7 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_TIME])
 	size := 30 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_SIZE]) * 15
 	damage := 3 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_DAMAGE]) / 2
 	
-	append(&spells, Fireball{player.uuid, player.pos, vel, 3, burn_time, size, damage})
-	player.spell_cooldowns[.FIREBALL] = 20
-}
-
-EnemyThrowFireball :: proc() {
-	// NOTE: To add tomorrow
+	append(&spells, Fireball{clump.uuid, clump.pos, vel, 3, burn_time, size, damage})
+	clump.spell_cooldowns[.FIREBALL] = 20
 }
 
 UpdateFireball :: proc(ball: ^Fireball, index: int) {
@@ -152,5 +173,5 @@ UpdateFireball :: proc(ball: ^Fireball, index: int) {
 }
 
 DrawFireball :: proc(ball: Fireball) {
-	rl.DrawCircleLinesV(ball.pos, ball.size, rl.ORANGE)
+	rl.DrawCircleV(ball.pos, ball.size, rl.ORANGE)
 }

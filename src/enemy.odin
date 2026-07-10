@@ -45,7 +45,7 @@ NewEnemy :: proc(hexagon_types: []HexagonType, pos: rl.Vector2, vel := rl.Vector
 }
 
 InitEnemies :: proc() {
-	enemy_spawn_timer = NewTimer(5, true, true)
+	enemy_spawn_timer = NewTimer(12, true, true)
 }
 
 UpdateEnemies :: proc() { 
@@ -55,28 +55,22 @@ UpdateEnemies :: proc() {
 	UpdateTimer(&enemy_spawn_timer)
 	if enemy_spawn_timer.ding {
 		if player.camera.zoom == 0 do return // Will cause a division by zero error, but this shouldn't happen anyway.
+		HEXAGON_DEVELOPEMENT_FACTOR :: 25 // The bigger this is, the less hexagons enemies will have (based on time)
 		
-		hexagons := math.floor_div(int(GetElapsedStopwatchTime(time_survived)), 15) + 1
+		hexagons := math.floor_div(int(GetElapsedStopwatchTime(time_survived)), HEXAGON_DEVELOPEMENT_FACTOR) + 1
 		hexagons = rand.int_range(hexagons, hexagons + 3)
 		if hexagons <= 0 do return
 		
 		hexagon_types := make([]HexagonType, hexagons)
 		for i in 0..<hexagons do hexagon_types[i] = .RIFLE // NOTE: It's obvious.
 		
-		level := GetLevel(hexagon_types)
-		visible_screen_size := screen_size / player.camera.zoom
-		min_dist := player.camera.target + visible_screen_size / 2 + (f32(level) - 1) * HEXAGON_SIZE
-		pos_x := RangeRand({min_dist.x, min_dist.x + 70})
-		pos_y := RangeRand({min_dist.y, min_dist.y + 70})
-		pos := rl.Vector2{pos_x, pos_y}
-
+		pos := GetRandomSpawnPos()
 		rot := RotationFrom2Points(pos, player.camera.target)
 		rot += rand.float32_range(-10, 10)
 		vel := VelocityFromRotation(rot)
 		
 		append(&enemies, NewEnemy(hexagon_types, pos, vel))
-		
-		enemy_spawn_timer.duration = rand.float32_range(3, 9)
+		enemy_spawn_timer.duration = rand.float32_range(10, 15)
 	}
 }
 
@@ -116,7 +110,7 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 
 ManageAIState :: proc(enemy: ^Enemy, is_clump_close: bool, closest_clump: ^HexagonClump) {
 	if !is_clump_close { SetAIState(enemy, .ROAM); return }
-	if enemy.health <= 30 { SetAIState(enemy, .PANIC); return }
+	if enemy.health <= 20 { SetAIState(enemy, .PANIC); return }
 	if enemy.attacker != nil && enemy.ai_state != .PANIC { SetAIState(enemy, .AGGRO); return }
 	SetAIState(enemy, .INSPECT)
 }
@@ -125,6 +119,16 @@ SetAIState :: proc(enemy: ^Enemy, state: AIState) {
 	if enemy.ai_state != state do enemy.turn_timer.start_time = f32(rl.GetTime()) - enemy.turn_timer.duration
 	if enemy.ai_state != state do enemy.attack_timer.start_time = f32(rl.GetTime()) - enemy.attack_timer.duration
 	enemy.ai_state = state
+}
+
+GetEnemyInaccuracy :: proc(state: AIState) -> f32 {
+	switch state {
+	case .ROAM,.INSPECT: return 15
+	case .AGGRO: return 10
+	case .PANIC: return 25
+	}
+	
+	return 0
 }
 
 GetClosestClump :: proc(enemy: ^Enemy, range: f32) -> (found: bool, clump: ^HexagonClump) {
@@ -157,9 +161,56 @@ GetDetectionRange :: proc(hexagon_types: []HexagonType) -> f32 {
 	return HEXAGON_SIZE * f32(GetLevel(hexagon_types)) * 2 + 300
 }
 
-// NOTE: HUGE NOTE
-// NOTE: ALL of the values used here (for speed and such) should be
-// NOTE: changed based on the *hexagons of the clump*
+// AI Helpers
+
+EnemyAttack :: proc(enemy: ^Enemy, target: rl.Vector2, spell_chance: f32, spell_weights: [SpellType]int) {
+	should_use_rifle := true
+	num := rand.float32_range(0, 100)
+	if spell_chance > num do should_use_rifle = false
+
+	if should_use_rifle {
+		EnemyFirePellet(enemy, target)
+	} else {
+		if !EnemyDoRandomSpell(enemy, target, spell_weights) do EnemyFirePellet(enemy, target)
+	}
+}
+
+EnemyDoRandomSpell :: proc(enemy: ^Enemy, target: rl.Vector2, spell_weights: [SpellType]int) -> bool {
+	sum := spell_weights[.HEALTH_PAD] + spell_weights[.ICE_BALL] + spell_weights[.FIREBALL]
+	if sum <= 0 do return false
+	num := rand.int_range(0, sum)
+
+	preferred: SpellType
+	switch {
+	case num < spell_weights[.HEALTH_PAD]: preferred = .HEALTH_PAD
+	case num < spell_weights[.HEALTH_PAD] + spell_weights[.ICE_BALL]: preferred = .ICE_BALL
+	case: preferred = .FIREBALL
+	}
+
+	spell_order: [len(SpellType)]SpellType
+	switch preferred {
+	case .HEALTH_PAD: spell_order = {.HEALTH_PAD, .ICE_BALL, .FIREBALL}
+	case .ICE_BALL: spell_order = {.ICE_BALL, .FIREBALL, .HEALTH_PAD}
+	case .FIREBALL: spell_order = {.FIREBALL, .HEALTH_PAD, .ICE_BALL}
+	}
+
+	for spell in spell_order {
+		if spell_weights[spell] == 0 do continue
+		if enemy.spell_cooldowns[spell] > 0 do continue
+		if !HasSpell(enemy.clump, spell) do continue
+		
+		switch spell {
+		case .HEALTH_PAD: SummonHealthPad(&enemy.clump)
+		case .ICE_BALL: EnemyThrowIceBall(enemy, target)
+		case .FIREBALL: EnemyThrowFireball(enemy, target)
+		}
+		return true
+	}
+	
+	return false
+}
+
+// AI States
 
 HandleRoamingState :: proc(enemy: ^Enemy) {
 	UpdateTimer(&enemy.turn_timer)
@@ -185,8 +236,9 @@ HandleInspectState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 
 	// Fire, but not too frequently, see if target responds
 	if enemy.attack_timer.ding {
-		enemy.attack_timer.duration = rand.float32_range(5, 12)
-		EnemyFirePellet(enemy, target.pos)
+		enemy.attack_timer.duration = rand.float32_range(7, 12)
+		spell_weights := [SpellType]int{.HEALTH_PAD = 0, .ICE_BALL = 1, .FIREBALL = 1}
+		EnemyAttack(enemy, target.pos, 10, spell_weights)
 	}
 }
 
@@ -216,8 +268,9 @@ HandleAggroState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 
 	// Fire as fast as possible
 	if enemy.attack_timer.ding {
-		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(1.75, 2.25)
-		EnemyFirePellet(enemy, target.pos)
+		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(3, 3.5)
+		spell_weights := [SpellType]int{.HEALTH_PAD = 0, .ICE_BALL = 1, .FIREBALL = 1}
+		EnemyAttack(enemy, target.pos, 25, spell_weights)
 	}
 }
 
@@ -239,7 +292,8 @@ HandlePanicState :: proc(enemy: ^Enemy, attacker: ^HexagonClump) {
 
 	// Fire as much as it can, while running away
 	if enemy.attack_timer.ding {
-		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(2.25, 2.75)
-		EnemyFirePellet(enemy, attacker.pos)
+		enemy.attack_timer.duration = GetRifleDelay(enemy.clump) * rand.float32_range(4, 4.5)
+		spell_weights := [SpellType]int{.HEALTH_PAD = 1, .ICE_BALL = 0, .FIREBALL = 0}
+		EnemyAttack(enemy, attacker.pos, 50, spell_weights)
 	}
 }

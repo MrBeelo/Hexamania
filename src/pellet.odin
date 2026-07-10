@@ -28,12 +28,7 @@ EnemyFirePellet :: proc(enemy: ^Enemy, target: rl.Vector2) {
 	if enemy.rifle_delay > 0 do return
 	
 	// Change the enemy's inaccuracy factor based on its AI state
-	inaccuracy: f32
-	switch enemy.ai_state {
-	case .ROAM,.INSPECT: inaccuracy = 3
-	case .AGGRO: inaccuracy = 10
-	case .PANIC: inaccuracy = 25
-	}
+	inaccuracy := GetEnemyInaccuracy(enemy.ai_state)
 	
 	rot := RotationFrom2Points(enemy.pos, target)
 	rot += rand.float32_range(-inaccuracy, inaccuracy) // Enemy inaccuracies!

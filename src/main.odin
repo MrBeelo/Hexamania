@@ -15,6 +15,8 @@ log :: proc(str: string, args: ..any) { fmt.printfln(strings.concatenate({"GAME:
 init :: proc() {
 	rl.SetConfigFlags({.VSYNC_HINT, .WINDOW_HIGHDPI, .MSAA_4X_HINT})
 	rl.InitWindow(i32(screen_size.x), i32(screen_size.y), "Hexamania.io")
+	rl.SetExitKey(.KEY_NULL)
+	rl.InitAudioDevice()
 	LoadHexagons()
 	LoadBackground()
 	LoadPowerups()
@@ -53,6 +55,7 @@ update :: proc() {
 		DrawPlayer(&player)
 		DrawEnemies()
 		DrawPellets()
+		DrawSpellsAbove()
 		
 		rl.EndMode2D()
 
@@ -83,6 +86,7 @@ close :: proc() {
 	UnloadBackground()
 	UnloadPowerups()
 	UnloadFonts()
-	
+
+	rl.CloseAudioDevice()
 	rl.CloseWindow() 
 }
