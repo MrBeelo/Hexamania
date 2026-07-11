@@ -59,16 +59,17 @@ Hexamania description goes here
 - ~~Layered hexagons on top of every clump's hexagons denoting if frozen/burning~~
 - ~~Note for top thing: both the freezing and burning overlays should be rotated on each hexagon, burning should be 3 parts that change color seperately~~
 - ~~powerup draw :>~~
+- ~~shader support~~
 
 #### DAY 5 (FINAL DAY)
 ###### Code
+- Hexagon has eyes <3 that look where your mouse is!
+- Death animation
+- find good shader to use (glowy)
 - Balance to hell
 ###### Art
 - fully draw spells (and the previews)
-- Hexagon has eyes <3 that look where your mouse is!
 - New Background, should have falling hexagons lol
-- Blur/bloom, lots of blur/bloom
-- Death animation
 - Prettier menus, maybe look space-y or some shi
 - Transitions maybe? (for each gamestate)
 ###### Sound

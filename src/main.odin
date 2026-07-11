@@ -17,10 +17,13 @@ init :: proc() {
 	rl.InitWindow(i32(screen_size.x), i32(screen_size.y), "Hexamania.io")
 	rl.SetExitKey(.KEY_NULL)
 	rl.InitAudioDevice()
+	
 	LoadHexagons()
 	LoadBackground()
 	LoadPowerups()
 	LoadFonts()
+	LoadShaders()
+	
 	InitMenus()
 	InitEnemies()
 }
@@ -87,6 +90,7 @@ close :: proc() {
 	UnloadBackground()
 	UnloadPowerups()
 	UnloadFonts()
+	UnloadShaders()
 
 	rl.CloseAudioDevice()
 	rl.CloseWindow() 
