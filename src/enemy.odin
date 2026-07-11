@@ -194,7 +194,11 @@ GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
 
 		// From now on, it's guaranteed that the hexagon is an upgrade
 		spell := GetSpellFromHexagonType(hexagon_type)
-		if spell == nil || (spell != nil && HasSpell(player.clump, spell.?)) do return hexagon_type
+		if spell == nil || (spell != nil && HasSpell(player.clump, spell.?)) {
+			hexagon_amounts := GetHexagonTypeAmounts(player.clump)
+			if hexagon_amounts[hexagon_type] > 3 do continue
+			return hexagon_type
+		}
 	}
 
 	return nil

@@ -69,7 +69,7 @@ Hexamania description goes here
 - Balance to hell
 ###### Art
 - fully draw spells (and the previews)
-- New Background, should have falling hexagons lol
+- ~~New Background~~
 - Prettier menus, maybe look space-y or some shi
 - Transitions maybe? (for each gamestate)
 ###### Sound

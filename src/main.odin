@@ -49,11 +49,10 @@ update :: proc() {
 	defer rl.EndDrawing()
 	rl.ClearBackground(rl.DARKBLUE)
 
-	DrawMenus()
 	if game_state == .PLAYING {
 		rl.BeginMode2D(player.camera)
 
-		DrawBackground()
+		DrawGameBackground()
 		DrawSpellsBelow()
 		DrawHexagonHearts()
 		DrawWorldPowerups()
@@ -82,6 +81,8 @@ update :: proc() {
 			rl.DrawText(rl.TextFormat("powerups: %d", len(world_powerups)), 10, 330, 32, rl.BLACK)
 		}
 	}
+
+	DrawMenus()
 
     free_all(context.temp_allocator)
 }

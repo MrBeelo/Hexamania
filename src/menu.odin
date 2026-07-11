@@ -46,6 +46,7 @@ MainMenu :: proc() -> Menu { return NewMenu(
 		NewButtonDef("PLAY", screen_size / 2, proc(){ ResetGame(); game_state = .PLAYING }),
 	},
 	draw = proc(buttons: []Button) {
+		DrawMainMenuBackground()
 		DrawMenuTitle("HEXAMANIA")
 		DrawText("Made by MrBeelo for the Raylib 6.x game jam!", {10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
 		for &button in buttons do DrawButton(button)
@@ -104,15 +105,14 @@ AnalysisMenu :: proc() -> Menu { return NewMenu(
 
 GetGrade :: proc(num: int) -> [2]string {	
 	switch {
-	case num < 100: return {"F", "Yeah, that was pretty bad...\n But it's okay! Try again and you'll\n get better!"}
-	case num < 200: return {"D", "Not good, but not terrible either.\n Try getting more kills to maximize\n your hexahearts and your score!"}
-	case num < 300: return {"C", "You did average. Not bad, but you\n have potential! Staying alive for longer\n and getting more kills will boost\n your score to great heights!"}
-	case num < 400: return {"B", "Okay, that was actually pretty good!\n Keep going like this and you'll have\n secured the win in no time!"}
+	case num < 50: return {"F", "Yeah, that was pretty bad...\n But it's okay! Try again and you'll\n get better!"}
+	case num < 120: return {"D", "Not good, but not terrible either.\n Try getting more kills to maximize\n your hexahearts and your score!"}
+	case num < 250: return {"C", "You did average. Not bad, but you\n have potential! Staying alive for longer\n and getting more kills will boost\n your score to great heights!"}
+	case num < 350: return {"B", "Okay, that was actually pretty good!\n Keep going like this and you'll have\n secured the win in no time!"}
 	case num < 500: return {"A", "Wow! Amazing performace!\n Only thing that stopped you from getting an S rank\n is defeating every other clump.\n You got this!"}
-	case num < 600: return {"S", "Great job!! And thanks for playing my game\n <3"}
 	}
 	
-	return {}
+	return {"S", "Great job!! And thanks for playing my game\n <3"}
 }
 
 ResetGame :: proc() {
