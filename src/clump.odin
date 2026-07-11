@@ -27,6 +27,8 @@ HexagonClump :: struct {
 	frozen_time_left: f32,
 	burning: struct{ damage_timer: Timer, time_left: f32, damage: f32 },
 	spell_cooldowns: [SpellType]f32,
+	kill_happiness_time: f32,
+	dead_time: f32,
 }
 
 // Everything that has to do with sprinting.
@@ -50,7 +52,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	// Health Regen Timer
 	health_regen := NewTimer(5, true, true)
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, 0, {}, {}}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, 0, {}, {}, 0, 0}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -128,6 +130,10 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	for spell in SpellType do if clump.spell_cooldowns[spell] > 0 do clump.spell_cooldowns[spell] -= rl.GetFrameTime()
 	for spell in SpellType do clump.spell_cooldowns[spell] = math.max(clump.spell_cooldowns[spell], 0)
 
+	// Expressions
+	if clump.kill_happiness_time > 0 do clump.kill_happiness_time -= rl.GetFrameTime()
+	clump.kill_happiness_time = math.max(clump.kill_happiness_time, 0)
+
 	// Final velocity addition (should probably be last)
 	if clump.frozen_time_left <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
 }
@@ -182,7 +188,10 @@ DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) 
 	clump.grace_period = 0.15
 	clump.attacker = attacker
 
-	if clump.health <= 0 && attacker.uuid == player.uuid do points += len(clump.hexagon_types)
+	if clump.health <= 0 {
+		attacker.kill_happiness_time = 2
+	 	if attacker.uuid == player.uuid do points += len(clump.hexagon_types)
+	}
 }
 
 DamageClumpNoAttacker :: proc(clump: ^HexagonClump, amount: f32) {

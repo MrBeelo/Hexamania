@@ -2,28 +2,43 @@ package main
 
 import rl "vendor:raylib"
 
-face, cores: rl.Texture2D
+faces: [FaceExpression]rl.Texture2D
+cores: rl.Texture2D
+
+FaceExpression :: enum {
+	NORMAL,
+	CARET,
+	DEAD,
+}
 
 LoadFace :: proc() {
-	face = rl.LoadTexture("res/face.png")
-	cores = rl.LoadTexture("res/cores.png")
+	faces = {
+		.NORMAL = rl.LoadTexture("res/face/normal_face.png"),
+		.CARET = rl.LoadTexture("res/face/caret_face.png"),
+		.DEAD = rl.LoadTexture("res/face/dead_face.png"),
+	}
+	
+	cores = rl.LoadTexture("res/face/cores.png")
 }
 
 UnloadFace :: proc() {
-	rl.UnloadTexture(face)
+	for face in faces do rl.UnloadTexture(face)
 	rl.UnloadTexture(cores)
 }
 
-DrawFace :: proc(pos: rl.Vector2, vel: rl.Vector2, level: int) {
+DrawFace :: proc(pos: rl.Vector2, vel: rl.Vector2, level: int, expression: FaceExpression) {
+	texture := faces[expression]
 	size := GetFaceSize(level)
-	face_src := rl.Rectangle{0, 0, f32(face.width), f32(face.height)}
+	face_src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
 	face_dest := rl.Rectangle{pos.x, pos.y, size, size}
-	rl.DrawTexturePro(face, face_src, face_dest, size / 2, 0, rl.WHITE)
+	rl.DrawTexturePro(texture, face_src, face_dest, size / 2, 0, rl.WHITE)
 
-	core_src := rl.Rectangle{0, 0, f32(cores.width), f32(cores.height)}
-	core_dest := rl.Rectangle{pos.x, pos.y, size, size}
-	core_dest.x += vel.x; core_dest.y += vel.y
-	rl.DrawTexturePro(cores, core_src, core_dest, size / 2, 0, rl.WHITE)
+	if expression == .NORMAL {
+		core_src := rl.Rectangle{0, 0, f32(cores.width), f32(cores.height)}
+		core_dest := rl.Rectangle{pos.x, pos.y, size, size}
+		core_dest.x += vel.x; core_dest.y += vel.y
+		rl.DrawTexturePro(cores, core_src, core_dest, size / 2, 0, rl.WHITE)
+	}
 }
 
 GetFaceSize :: proc(level: int) -> f32 {
@@ -37,11 +52,17 @@ GetFaceSize :: proc(level: int) -> f32 {
 	return 32
 }
 
+GetFaceExpression :: proc(clump: HexagonClump) -> FaceExpression {
+	if clump.dead_time > 0 do return .DEAD
+	if clump.kill_happiness_time > 0 do return .CARET
+	return .NORMAL
+}
+
 DrawPlayerFace :: proc() {
 	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
-	DrawFace(player.pos, vel, GetPlayerLevel(player))
+	DrawFace(player.pos, vel, GetPlayerLevel(player), GetFaceExpression(player.clump))
 }
 
 DrawEnemyFace :: proc(enemy: Enemy) {
-	DrawFace(enemy.pos, rl.Vector2Normalize(enemy.vel), GetLevel(enemy.hexagon_types))
+	DrawFace(enemy.pos, rl.Vector2Normalize(enemy.vel), GetLevel(enemy.hexagon_types), GetFaceExpression(enemy.clump))
 }
