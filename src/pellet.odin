@@ -43,7 +43,7 @@ EnemyFirePellet :: proc(enemy: ^Enemy, target: rl.Vector2) {
 }
 
 GetRifleStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (speed: f32, damage: f32, fire_rate: f32) {
-	speed = 300 * (1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_PELLET_SPEED]) * 3 / 10)
+	speed = 380 * (1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_PELLET_SPEED]) * 1 / 5)
 	damage = 9 * (1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_DAMAGE]) * 3 / 10)
 	fire_rate = 0.5 - f32(GetHexagonTypeAmounts(player.clump)[.RIFLE_UPGRADE_FIRE_RATE]) * 0.05
 	return speed, damage, fire_rate

@@ -49,7 +49,7 @@ MainMenu :: proc() -> Menu { return NewMenu(
 		DrawMainMenuBackground()
 		DrawMenuTitle("HEXAMANIA")
 		DrawText("Made by MrBeelo for the Raylib 6.x game jam!", {10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
-		DrawText("0.4", {screen_size.x - 32 - 10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
+		DrawText("0.5", {screen_size.x - 32 - 10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
 		for &button in buttons do DrawButton(button)
 	},
 )}

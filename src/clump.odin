@@ -177,8 +177,6 @@ HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 		for hexagon in GetClumpHexagons(clump^) do for enemy_hexagon in GetClumpHexagons(enemy_clump^) {
 			if rl.Vector2Distance(hexagon.center, enemy_hexagon.center) > 100 do continue
 			if !rl.CheckCollisionRecs(hexagon.hurtbox, enemy_hexagon.hurtbox) do continue
-			DamageClump(clump, 3, enemy_clump)
-			DamageClump(enemy_clump, 3, clump)
 			clump.vel = -1.3
 			enemy_clump.vel *= -1.3
 			clump.collision_grace_period = 0.2 * f32(GetLevel(clump.hexagon_types) + GetLevel(enemy_clump.hexagon_types))

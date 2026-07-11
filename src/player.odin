@@ -5,7 +5,7 @@ import "core:math"
 import "core:math/rand"
 
 BASE_PLAYER_SPEED :: 3 * 60
-PLAYER_ACCELERATION :: 5 * 60
+PLAYER_ACCELERATION :: 7 * 60
 
 Player :: struct {
 	using clump: HexagonClump,
@@ -195,7 +195,7 @@ GetPlayerSpeed :: proc(plr: Player) -> f32 {
 HandlePlayerCamera :: proc(plr: ^Player) {	
 	for i in 0..=1 {
 		diff := plr.pos[i] - plr.camera.target[i]
-		threshold := screen_size[i] / 5 / plr.camera.zoom
+		threshold := screen_size[i] / 10 / plr.camera.zoom
 
 		if diff > threshold do plr.camera.target[i] = plr.pos[i] - threshold
 		if diff < -threshold do plr.camera.target[i] = plr.pos[i] + threshold
