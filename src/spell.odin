@@ -85,24 +85,28 @@ SPELL_COOLDOWN :: f32(25)
 
 // HEALTH PAD
 
-HealthPad :: struct { owner: uuid.Identifier, rect: rl.Rectangle, heal_amount: f32, heal_timer: Timer, time_left: f32 }
+HealthPad :: struct { owner: uuid.Identifier, pos: rl.Vector2, size: f32, max_size: f32, heal_amount: f32, heal_timer: Timer, time_left: f32, rot: f32 }
 
 SummonHealthPad :: proc(clump: ^HexagonClump) {
 	time_left, size, heal_amount := GetHealthPadStats(GetHexagonTypeAmounts(clump^))
 
-	rect := rl.Rectangle{clump.pos.x - size / 2, clump.pos.y - size / 2, size, size}
+	//rect := rl.Rectangle{clump.pos.x - size / 2, clump.pos.y - size / 2, size, size}
 	heal_timer := NewTimer(1, true, true)
-	health_pad := HealthPad{clump.uuid, rect, heal_amount, heal_timer, time_left}
+	rot := f32(rand.int_range(0, 4)) * 90
+	health_pad := HealthPad{clump.uuid, clump.pos, size, size, heal_amount, heal_timer, time_left, rot}
 
 	append(&spells, health_pad)
 	clump.spell_cooldowns[.HEALTH_PAD] = SPELL_COOLDOWN
 }
 
 UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
+	if pad.time_left <= 0.3 do pad.size = pad.max_size * (pad.time_left / 0.3)
+	
 	UpdateTimer(&pad.heal_timer)
 	if pad.heal_timer.ding do for clump in GetAllClumps() {
 		if clump.uuid != pad.owner do continue
-		if ClumpIntersectsRect(clump^, pad.rect) do HealClump(clump, pad.heal_amount)
+		rect := rl.Rectangle{pad.pos.x - pad.size / 2, pad.pos.y - pad.size / 2, pad.size, pad.size}
+		if ClumpIntersectsRect(clump^, rect) do HealClump(clump, pad.heal_amount)
 	}
 
 	pad.time_left -= rl.GetFrameTime()
@@ -112,7 +116,8 @@ UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
 DrawHealthPad :: proc(pad: HealthPad) {
 	src := rl.Rectangle{0, 0, f32(spell_textures[.HEALTH].width), f32(spell_textures[.HEALTH].height)}
 	color := rl.Color{255, 255, 255, 100} if pad.owner != player.uuid else rl.WHITE
-	rl.DrawTexturePro(spell_textures[.HEALTH], src, pad.rect, {}, 0, color)
+	rect := rl.Rectangle{pad.pos.x, pad.pos.y, pad.size, pad.size}
+	rl.DrawTexturePro(spell_textures[.HEALTH], src, rect, pad.size / 2, pad.rot, color)
 }
 
 GetHealthPadStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (time_left: f32, size: f32, heal_amount: f32) {
@@ -259,10 +264,10 @@ GetFireballStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (burn_time: 
 
 // BLACK HOLE
 
-BLACK_HOLE_SPEED :: 8 * 60
+BLACK_HOLE_SPEED :: 6 * 60
 BLACK_HOLE_DECELERATION :: 5 * 60
 
-BlackHole :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, time_left: f32, suction_power: f32, size: f32 }
+BlackHole :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, time_left: f32, suction_power: f32, size: f32, max_size: f32 }
 
 PlayerThrowBlackHole :: proc() {
 	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
@@ -281,7 +286,7 @@ ThrowBlackHole :: proc(clump: ^HexagonClump, vel: rl.Vector2) {
 	time_left, suction_power, size := GetBlackHoleStats(GetHexagonTypeAmounts(clump^))
 	new_vel := vel * BLACK_HOLE_SPEED
 	
-	append(&spells, BlackHole{clump.uuid, clump.pos, new_vel, time_left, suction_power, size})
+	append(&spells, BlackHole{clump.uuid, clump.pos, new_vel, time_left, suction_power, size, size})
 	clump.spell_cooldowns[.BLACK_HOLE] = SPELL_COOLDOWN
 }
 
@@ -301,6 +306,8 @@ UpdateBlackHole :: proc(hole: ^BlackHole, index: int) {
 
 	hole.time_left -= rl.GetFrameTime()
 	if hole.time_left <= 0 && len(spells) > index do unordered_remove(&spells, index)
+
+	if hole.time_left <= 1 do hole.size = hole.max_size * hole.time_left
 	
 	hole.pos += hole.vel * rl.GetFrameTime()
 }
