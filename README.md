@@ -65,6 +65,7 @@ Hexamania description goes here
 ###### Code
 - ~~Hexagon has eyes <3 that look where your mouse is!~~
 - ~~Death animation~~
+- enemy health bars
 - find good shader to use (glowy)
 ###### Balancing
 - ~~More hexagons = more max health~~
@@ -76,6 +77,8 @@ Hexamania description goes here
 - ~~increase fov~~
 - ~~increase enemy amount by a bit~~
 - ~~hexahearts follow you everywhere~~
+- ~~limit enemy's velocity too~~
+- ~~enemies dont attack you if not in screen~~
 ###### Art
 - redo in-game HUD
 - fully draw spells (and the previews) & make ice ball a spear

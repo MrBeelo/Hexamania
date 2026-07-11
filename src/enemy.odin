@@ -76,6 +76,12 @@ UpdateEnemies :: proc() {
 	}
 }
 
+GetMaxEnemyVelocity :: proc(enemy: Enemy) -> f32 {
+	max_speed := f32(70)
+	if player.spr.sprinting do max_speed *= 1.5
+	return max_speed
+}
+
 GenEnemyHexagonTypes :: proc(hexagon_types: ^[]HexagonType) {
 	length := len(hexagon_types)
 	
@@ -168,6 +174,10 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 		
 		if len(enemies) > index do unordered_remove(&enemies, index)
 	}
+
+	// For safety :)
+	max_velocity := GetMaxEnemyVelocity(enemy^)
+	enemy.vel = clamp(enemy.vel.x, -max_velocity, max_velocity)
 
 	Accelerate(&enemy.vel.x, enemy.target_vel.x, ENEMY_ACCELERATION)
 	Accelerate(&enemy.vel.y, enemy.target_vel.y, ENEMY_ACCELERATION)
@@ -268,6 +278,7 @@ GetDetectionRange :: proc(hexagon_types: []HexagonType) -> f32 {
 // AI Helpers
 
 EnemyAttack :: proc(enemy: ^Enemy, target: rl.Vector2, spell_chance: f32, spell_weights: [SpellType]int) {
+	if !ClumpIntersectsRect(enemy.clump, GetWorldCameraRect()) do return
 	should_use_rifle := true
 	num := rand.float32_range(0, 100)
 	if spell_chance > num do should_use_rifle = false

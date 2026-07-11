@@ -252,3 +252,9 @@ GetRandomSpawnPos :: proc(range: f32 = 120) -> rl.Vector2 {
 	pos := player.camera.target + {pos_x, pos_y}
 	return pos
 }
+
+GetWorldCameraRect :: proc(cam := player.camera) -> rl.Rectangle {
+	size := screen_size * cam.zoom
+	pos := cam.target - size / 2
+	return {pos.x, pos.y, size.x, size.y}
+}

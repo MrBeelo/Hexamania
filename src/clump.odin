@@ -30,6 +30,7 @@ HexagonClump :: struct {
 	kill_happiness_time: f32,
 	dead_time: f32,
 	can_shoot: bool,
+	collision_grace_period: f32,
 }
 
 // Everything that has to do with sprinting.
@@ -58,7 +59,8 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	health_regen := NewTimer(5, true, true)
 	health := GetMaxHealth(len(hexagon_types))
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, 0, {}, {}, 0, 0, true}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 
+		0, nil, 0, 0, {}, {}, 0, 0, true, 0}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -107,6 +109,7 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	if clump.health_regen.ding do HealClump(clump, 2)
 	clump.health = math.clamp(clump.health, 0, GetMaxHealth(len(clump.hexagon_types)))
 	if clump.grace_period > 0 do clump.grace_period -= rl.GetFrameTime()
+	if clump.collision_grace_period > 0 do clump.collision_grace_period -= rl.GetFrameTime()
 
 	// Sprinting logic
 	if clump.spr.sprinting {
@@ -164,20 +167,21 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 }
 
 HandleClumpCollisions :: proc(clump: ^HexagonClump) {
-	if clump.grace_period > 0 do return
+	if clump.collision_grace_period > 0 do return
 	if clump.dead_time > 0 do return
 	for enemy_clump in GetAllClumps() {
+		if enemy_clump.collision_grace_period > 0 do continue
 		if enemy_clump.dead_time > 0 do continue
 		if clump.uuid == enemy_clump.uuid do continue
-		if enemy_clump.grace_period > 0 do continue
 		
 		for hexagon in GetClumpHexagons(clump^) do for enemy_hexagon in GetClumpHexagons(enemy_clump^) {
 			if rl.Vector2Distance(hexagon.center, enemy_hexagon.center) > 100 do continue
 			if !rl.CheckCollisionRecs(hexagon.hurtbox, enemy_hexagon.hurtbox) do continue
 			DamageClump(clump, 3, enemy_clump)
 			DamageClump(enemy_clump, 3, clump)
-			clump.vel *= -1.3
+			clump.vel = -1.3
 			enemy_clump.vel *= -1.3
+			clump.collision_grace_period = 0.2 * f32(GetLevel(clump.hexagon_types) + GetLevel(enemy_clump.hexagon_types))
 		}
 	}
 }
