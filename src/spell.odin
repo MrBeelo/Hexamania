@@ -6,7 +6,7 @@ import "core:math"
 import "core:math/rand"
 
 SpellType :: enum { HEALTH_PAD, ICE_BALL, FIREBALL, BLACK_HOLE }
-spell_textures: [SpellType]rl.Texture2D
+spell_textures: [enum{HEALTH, ICE, FIRE1, FIRE2, FIRE3, HOLE, CIRCLE_OVERLAY}]rl.Texture2D
 
 spells: [dynamic]Spell
 Spell :: union {
@@ -18,11 +18,16 @@ Spell :: union {
 
 LoadSpells :: proc() {
 	spell_textures = {
-		.HEALTH_PAD = rl.LoadTexture("res/spell/ice_ball_texture.png"),
-		.ICE_BALL = rl.LoadTexture("res/spell/ice_ball_texture.png"),
-		.FIREBALL = rl.LoadTexture("res/spell/ice_ball_texture.png"),
-		.BLACK_HOLE = rl.LoadTexture("res/spell/ice_ball_texture.png"),
+		.HEALTH = rl.LoadTexture("res/spell/health_pad_texture.png"),
+		.ICE = rl.LoadTexture("res/spell/ice_ball_texture.png"),
+		.FIRE1 = rl.LoadTexture("res/spell/fireball_texture1.png"),
+		.FIRE2 = rl.LoadTexture("res/spell/fireball_texture2.png"),
+		.FIRE3 = rl.LoadTexture("res/spell/fireball_texture3.png"),
+		.HOLE = rl.LoadTexture("res/spell/black_hole_texture.png"),
+		.CIRCLE_OVERLAY = rl.LoadTexture("res/spell/circle_overlay.png"),
 	}
+
+	for texture in spell_textures do rl.SetTextureFilter(texture, .BILINEAR)
 }
 
 UnloadSpells :: proc() {
@@ -105,8 +110,9 @@ UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
 }
 
 DrawHealthPad :: proc(pad: HealthPad) {
-	color := rl.Color{0, 228, 48, 100} if pad.owner != player.uuid else rl.GREEN
-	rl.DrawRectangleRec(pad.rect, color)
+	src := rl.Rectangle{0, 0, f32(spell_textures[.HEALTH].width), f32(spell_textures[.HEALTH].height)}
+	color := rl.Color{255, 255, 255, 100} if pad.owner != player.uuid else rl.WHITE
+	rl.DrawTexturePro(spell_textures[.HEALTH], src, pad.rect, {}, 0, color)
 }
 
 GetHealthPadStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (time_left: f32, size: f32, heal_amount: f32) {
@@ -157,10 +163,10 @@ UpdateIceBall :: proc(ball: ^IceBall, index: int) {
 }
 
 DrawIceBall :: proc(ball: IceBall) {
-	texture := spell_textures[.ICE_BALL]
+	texture := spell_textures[.ICE]
 	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
 	dest := rl.Rectangle{ball.pos.x, ball.pos.y, ICE_BALL_SIZE, ICE_BALL_SIZE}
-	color := rl.Color{255, 255, 255, 100} if ball.owner == player.uuid else rl.WHITE
+	color := rl.WHITE
 	rot := math.mod_f32(f32(rl.GetTime() * 100), 360)
 	rl.DrawTexturePro(texture, src, dest, ICE_BALL_SIZE / 2, rot, color)
 }
@@ -228,13 +234,25 @@ UpdateFireball :: proc(ball: ^Fireball, index: int) {
 }
 
 DrawFireball :: proc(ball: Fireball) {
-	color := rl.Color{255, 161, 0, 100} if ball.owner == player.uuid else rl.ORANGE
-	rl.DrawCircleV(ball.pos, ball.size, color)
+	for i in 0..=2 {
+		texture: rl.Texture2D
+		switch i {
+		case 0: texture = spell_textures[.FIRE1]
+		case 1: texture = spell_textures[.FIRE2]
+		case 2: texture = spell_textures[.FIRE3]
+		}
+
+		src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
+		dest := rl.Rectangle{ball.pos.x, ball.pos.y, ball.size, ball.size}
+		color := GetBurningOverlayColor(f32(i) / 3)
+		rot := math.mod_f32(f32(rl.GetTime() * 100), 360)
+		rl.DrawTexturePro(texture, src, dest, ball.size / 2, rot, color)
+	}	
 }
 
 GetFireballStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (burn_time: f32, size: f32, damage: f32) {
 	burn_time = 7 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_TIME])
-	size = 15 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_SIZE]) * 5
+	size = 30 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_SIZE]) * 10
 	damage = 3 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_DAMAGE]) / 2
 	return burn_time, size, damage
 }
@@ -288,13 +306,23 @@ UpdateBlackHole :: proc(hole: ^BlackHole, index: int) {
 }
 
 DrawBlackHole :: proc(hole: BlackHole) {
-	color := rl.Color{200, 122, 255, 100} if hole.owner == player.uuid else rl.PURPLE
-	rl.DrawCircleV(hole.pos, hole.size, color)
+	src := rl.Rectangle{0, 0, f32(spell_textures[.HOLE].width), f32(spell_textures[.HOLE].height)}
+	
+	DELAY :: 2
+	time := f32(rl.GetTime())
+	time = math.mod_f32(time, DELAY)
+	factor := math.sin(rl.PI * time / DELAY)
+	color := rl.ColorLerp(rl.Color{14, 0, 49, 255}, rl.Color{20, 0, 71, 255}, factor)
+	if hole.owner == player.uuid do color.a = 200
+	
+	dest := rl.Rectangle{hole.pos.x, hole.pos.y, hole.size, hole.size}
+
+	rl.DrawTexturePro(spell_textures[.HOLE], src, dest, hole.size / 2, 0, color)
 }
 
 GetBlackHoleStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (time_left: f32, suction_power: f32, size: f32) {
 	time_left = 5 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_TIME])
 	suction_power = (6 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SUCTION_POWER]) * 3 / 2) * 60
-	size = 20 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SIZE]) * 5
+	size = 60 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SIZE]) * 10
 	return time_left, suction_power, size
 }

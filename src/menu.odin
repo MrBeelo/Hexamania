@@ -71,7 +71,7 @@ FinishMenu :: proc() -> Menu { return NewMenu(
 		NewButtonDef("RETURN", screen_size / 2 + {150, 250}, proc(){ game_state = .MAIN }, true),
 	},
 	draw = proc(buttons: []Button) {
-		grade := int(GetElapsedStopwatchTime(time_survived) / 80 + f32(points) * 3)
+		grade := int(GetElapsedStopwatchTime(time_survived) / 50 + f32(points) * 3)
 		if len(player.hexagon_types) == MAX_HEXAGONS do grade += 150
 		
 		DrawMenuTitle("YOU DIED")

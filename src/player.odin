@@ -5,7 +5,7 @@ import "core:math"
 import "core:math/rand"
 
 BASE_PLAYER_SPEED :: 3 * 60
-PLAYER_ACCELERATION :: 7 * 60
+PLAYER_ACCELERATION :: 8 * 60
 
 Player :: struct {
 	using clump: HexagonClump,
@@ -17,7 +17,7 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {}, false, nil }
+	return Player{ NewHexagonClump({.RIFLE, .HEALTH_PAD, .ICE_BALL, .FIREBALL, .BLACK_HOLE}, 0), camera, {}, false, nil }
 }
 
 GetMaxPlayerVelocity :: proc(plr: Player) -> f32 {
@@ -167,21 +167,30 @@ DrawActiveSpellPreview :: proc() {
 		size *= player.camera.zoom
 		pos := CameraPos(player)
 		rect := rl.Rectangle{pos.x - size / 2, pos.y - size / 2, size, size}
-		rl.DrawRectangleLinesEx(rect, 5, rl.GREEN)
+		rl.DrawRectangleRoundedLinesEx(rect, 0.2, 10, 7, rl.GREEN)
 	}
 	case .ICE_BALL: {
+		src := rl.Rectangle{0, 0, f32(spell_textures[.CIRCLE_OVERLAY].width), f32(spell_textures[.CIRCLE_OVERLAY].height)}
 		size := ICE_BALL_SIZE * player.camera.zoom
-		rl.DrawCircleLinesV(rl.GetMousePosition(), size, rl.SKYBLUE)
+		dest := rl.Rectangle{rl.GetMousePosition().x, rl.GetMousePosition().y, size, size}
+		rot := math.mod_f32(f32(rl.GetTime()), 360) * 50
+		rl.DrawTexturePro(spell_textures[.CIRCLE_OVERLAY], src, dest, size / 2, rot, rl.SKYBLUE)
 	}
 	case .FIREBALL: {
+		src := rl.Rectangle{0, 0, f32(spell_textures[.CIRCLE_OVERLAY].width), f32(spell_textures[.CIRCLE_OVERLAY].height)}
 		_, size, _ := GetFireballStats(hexagon_type_amounts)
 		size *= player.camera.zoom
-		rl.DrawCircleLinesV(rl.GetMousePosition(), size, rl.ORANGE)
+		dest := rl.Rectangle{rl.GetMousePosition().x, rl.GetMousePosition().y, size, size}
+		rot := math.mod_f32(f32(rl.GetTime()), 360) * 50
+		rl.DrawTexturePro(spell_textures[.CIRCLE_OVERLAY], src, dest, size / 2, rot, rl.ORANGE)
 	}
 	case .BLACK_HOLE: {
+		src := rl.Rectangle{0, 0, f32(spell_textures[.CIRCLE_OVERLAY].width), f32(spell_textures[.CIRCLE_OVERLAY].height)}
 		_, _, size := GetBlackHoleStats(hexagon_type_amounts)
 		size *= player.camera.zoom
-		rl.DrawCircleLinesV(rl.GetMousePosition(), size, rl.PURPLE)
+		dest := rl.Rectangle{rl.GetMousePosition().x, rl.GetMousePosition().y, size, size}
+		rot := math.mod_f32(f32(rl.GetTime()), 360) * 50
+		rl.DrawTexturePro(spell_textures[.CIRCLE_OVERLAY], src, dest, size / 2, rot, rl.PURPLE)
 	}
 	}
 }
