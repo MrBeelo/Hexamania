@@ -3,6 +3,7 @@ package main
 import rl "vendor:raylib"
 import "core:math"
 import "core:math/rand"
+import "core:slice"
 
 ENEMY_ACCELERATION :: 3 * 60
 
@@ -34,9 +35,9 @@ Enemy :: struct {
 	time_away_from_player: f32,
 }
 
-NewEnemy :: proc(hexagon_types: []HexagonType, pos: rl.Vector2, vel := rl.Vector2{}, health := MAX_HEALTH) -> Enemy {
+NewEnemy :: proc(hexagon_types: []HexagonType, pos: rl.Vector2, vel := rl.Vector2{}) -> Enemy {
 	rot := rand.float32_range(-180, 180)
-	clump := NewHexagonClump(hexagon_types, pos, vel, rot, health)
+	clump := NewHexagonClump(hexagon_types, pos, vel, rot)
 	
 	switch_timer := NewTimer(2, true, true, true)
 	fire_timer := NewTimer(5, true, true)
@@ -71,7 +72,7 @@ UpdateEnemies :: proc() {
 		vel := VelocityFromRotation(rot)
 		
 		append(&enemies, NewEnemy(hexagon_types, pos, vel))
-		enemy_spawn_timer.duration = rand.float32_range(10, 15)
+		enemy_spawn_timer.duration = rand.float32_range(7, 12)
 	}
 }
 
@@ -183,6 +184,12 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 
 GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
 	if GetPlayerLevel(player) == MAX_LEVEL do return nil
+
+	for spell in SpellType {
+		hexagon_type := GetHexagonTypeFromSpellType(spell)
+		if slice.contains(enemy.hexagon_types, hexagon_type) && !HasSpell(player.clump, spell) do return hexagon_type
+	}
+	
 	shuffled := Shuffle(enemy.hexagon_types)
 	
 	for hexagon_type in shuffled {
@@ -196,7 +203,7 @@ GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
 		spell := GetSpellFromHexagonType(hexagon_type)
 		if spell == nil || (spell != nil && HasSpell(player.clump, spell.?)) {
 			hexagon_amounts := GetHexagonTypeAmounts(player.clump)
-			if hexagon_amounts[hexagon_type] > 3 do continue // Max of 4 upgrades
+			if hexagon_amounts[hexagon_type] > 2 do continue // Max of 3 upgrades
 			return hexagon_type
 		}
 	}

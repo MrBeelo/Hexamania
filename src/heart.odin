@@ -10,13 +10,14 @@ hearts: [dynamic]HexagonHeart
 HexagonHeart :: struct {
 	using hexagon: Hexagon,
 	vel: rl.Vector2,
+	time_alive: f32,
 }
 
 ThrowHeart :: proc(pos: rl.Vector2, type: HexagonType) {
 	vel_x := RangeRand({100, 150})
 	vel_y := RangeRand({100, 150})
 	
-	append(&hearts, HexagonHeart{{type, pos, 0, {}}, {vel_x, vel_y}})
+	append(&hearts, HexagonHeart{{type, pos, 0, {}}, {vel_x, vel_y}, 0})
 }
 
 ThrowRandomHeart :: proc(pos: rl.Vector2) {
@@ -27,6 +28,7 @@ ThrowRandomHeart :: proc(pos: rl.Vector2) {
 UpdateHexagonHearts :: proc() { for &heart, index in hearts do UpdateHexagonHeart(&heart, index) }
 
 UpdateHexagonHeart :: proc(heart: ^HexagonHeart, index: int) {
+	heart.time_alive += rl.GetFrameTime()
 	heart.rot += rl.GetFrameTime() * (math.abs(heart.vel.x) + math.abs(heart.vel.y)) / 2
 	
 	heart.center += heart.vel * rl.GetFrameTime()
@@ -39,19 +41,17 @@ UpdateHexagonHeart :: proc(heart: ^HexagonHeart, index: int) {
 	
 	heart.hurtbox = GetHexagonHurtBox(heart.center)
 
-	RANGE :: f32(100)
-	lowest_dist := RANGE
+	lowest_dist := f32(9999)
 	closest_box: rl.Rectangle
 	for hexagon in GetClumpHexagons(player.clump) {
 		dist := rl.Vector2Distance(heart.center, hexagon.center)
-		if dist >= RANGE do continue
 		if dist < lowest_dist {
 			lowest_dist = dist
 			closest_box = hexagon.hurtbox
 		}
 	}
 	
-	if lowest_dist < RANGE do heart.vel = VelocityFrom2Points(heart.center, player.pos) * (100 - lowest_dist)
+	heart.vel = VelocityFrom2Points(heart.center, player.pos) * (1 + heart.time_alive) * 30
 	
 	if rl.CheckCollisionRecs(closest_box, heart.hurtbox) {
 		if len(hearts) > index do unordered_remove(&hearts, index)

@@ -66,10 +66,19 @@ Hexamania description goes here
 - ~~Hexagon has eyes <3 that look where your mouse is!~~
 - ~~Death animation~~
 - find good shader to use (glowy)
-- Balance to hell
+###### Balancing
+- ~~More hexagons = more max health~~
+- ~~buff spells, nerf weapon~~
+- ~~remove the "ice floor" thing~~
+- ~~fireball: huge explosion when hit, no piercing~~
+- ~~black hole, not being able to attack if colliding with it~~
+- ~~limit absolute max speed~~
+- ~~increase fov~~
+- ~~increase enemy amount by a bit~~
+- ~~hexahearts follow you everywhere~~
 ###### Art
 - redo in-game HUD
-- fully draw spells (and the previews)
+- fully draw spells (and the previews) & make ice ball a spear
 - ~~New Background~~
 - Prettier menus, maybe look space-y or some shi
 - Transitions maybe? (for each gamestate)

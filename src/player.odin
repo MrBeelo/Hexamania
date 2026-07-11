@@ -17,7 +17,13 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {}, false, nil }
+	return Player{ NewHexagonClump({.RIFLE, .ICE_BALL}, 0), camera, {}, false, nil }
+}
+
+GetMaxPlayerVelocity :: proc(plr: Player) -> f32 {
+	max_speed := GetPlayerSpeed(plr)
+	if player.spr.sprinting do max_speed *= 1.5
+	return max_speed
 }
 
 UpdatePlayer :: proc(plr: ^Player) {
@@ -52,6 +58,11 @@ UpdatePlayer :: proc(plr: ^Player) {
 	}
 
 	plr.spr.sprinting = Holding(.SPRINT) && plr.spr.sprint_secs > 0
+
+	// Clamp player velocity for safety
+	max_vel := GetMaxPlayerVelocity(plr^)
+	plr.vel.x = clamp(plr.vel.x, -max_vel, max_vel)
+	plr.vel.y = clamp(plr.vel.y, -max_vel, max_vel)
 
 	// Camera Management
 	HandlePlayerCamera(plr)
@@ -114,7 +125,7 @@ DrawPlayerHealthBar :: proc() {
 
 	BUFFER :: f32(3)
 	health_bar_size := bar_size - {BUFFER * 2, BUFFER}
-	health_bar_size.x = health_bar_size.x * player.health / MAX_HEALTH
+	health_bar_size.x = health_bar_size.x * player.health / GetMaxHealth(len(player.hexagon_types))
 	rl.DrawRectangleV(shell_pos + BUFFER, health_bar_size, rl.RED)
 
 	sprint_bar_size := bar_size - {BUFFER * 2, BUFFER}
@@ -199,10 +210,10 @@ CameraPos :: proc(plr: Player) -> rl.Vector2 {
 
 GetCameraZoom :: proc(level: int) -> f32 {
 	switch level {
-	case 1: return 1.7
-	case 2: return 1.5
-	case 3: return 1.3
-	case 4: return 1.1
+	case 1: return 1.1
+	case 2: return 0.9
+	case 3: return 0.8
+	case 4: return 0.7
 	}
 
 	return 1

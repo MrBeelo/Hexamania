@@ -17,6 +17,7 @@ Pellet :: struct {
 }
 
 PlayerFirePellet :: proc() {
+	if !player.can_shoot do return
 	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
 	speed, damage, fire_rate := GetRifleStats(GetHexagonTypeAmounts(player.clump))
 	player.rifle_delay = fire_rate
@@ -24,6 +25,7 @@ PlayerFirePellet :: proc() {
 }
 
 EnemyFirePellet :: proc(enemy: ^Enemy, target: rl.Vector2) {
+	if !enemy.can_shoot do return
 	if enemy.rifle_delay > 0 do return
 	
 	// Change the enemy's inaccuracy factor based on its AI state
@@ -41,9 +43,9 @@ EnemyFirePellet :: proc(enemy: ^Enemy, target: rl.Vector2) {
 }
 
 GetRifleStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (speed: f32, damage: f32, fire_rate: f32) {
-	speed = PELLET_BASE_SPEED * (1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_PELLET_SPEED]) * 2 / 5)
-	damage = PELLET_BASE_DAMAGE * (1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_DAMAGE]) * 3 / 10)
-	fire_rate = 0.5 - f32(GetHexagonTypeAmounts(player.clump)[.RIFLE_UPGRADE_FIRE_RATE]) * 0.07
+	speed = 250 * (1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_PELLET_SPEED]) / 5)
+	damage = 7 * (1 + f32(hexagon_type_amounts[.RIFLE_UPGRADE_DAMAGE]) / 5)
+	fire_rate = 0.5 - f32(GetHexagonTypeAmounts(player.clump)[.RIFLE_UPGRADE_FIRE_RATE]) * 0.05
 	return speed, damage, fire_rate
 }
 

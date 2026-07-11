@@ -24,6 +24,7 @@ init :: proc() {
 	LoadFonts()
 	LoadShaders()
 	LoadFace()
+	LoadSpells()
 	
 	InitMenus()
 	InitEnemies()
@@ -68,6 +69,7 @@ update :: proc() {
 		DrawMap()
 		DrawActiveSpellPreview()
 		DrawSpellMenu()
+		DrawBoundPowerups(player.bound_powerups)
 
 		if debug_on {
 			rl.DrawText(rl.TextFormat("pos: %.2f, %.2f", player.pos.x, player.pos.y), 10, 10, 32, rl.BLACK)
@@ -94,6 +96,7 @@ close :: proc() {
 	UnloadFonts()
 	UnloadShaders()
 	UnloadFace()
+	UnloadSpells()
 
 	rl.CloseAudioDevice()
 	rl.CloseWindow() 

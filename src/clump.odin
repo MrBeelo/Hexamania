@@ -7,7 +7,7 @@ import "core:encoding/uuid"
 
 MAX_LEVEL :: 4
 MAX_HEXAGONS :: 1 + 6 + 12 + 18
-MAX_HEALTH :: f32(100)
+BASE_MAX_HEALTH :: f32(100)
 MAX_SPRINT_SECS :: f32(5)
 REGEN_SPRINT_TIME :: f32(2.5)
 
@@ -19,7 +19,7 @@ HexagonClump :: struct {
 	rot: f32,
 	health: f32,
 	uuid: uuid.Identifier,
-	spr: SprintPackaage,
+	spr: SprintPackage,
 	health_regen: Timer,
 	grace_period: f32,
 	attacker: ^HexagonClump,
@@ -29,16 +29,21 @@ HexagonClump :: struct {
 	spell_cooldowns: [SpellType]f32,
 	kill_happiness_time: f32,
 	dead_time: f32,
+	can_shoot: bool,
 }
 
 // Everything that has to do with sprinting.
-SprintPackaage :: struct {
+SprintPackage :: struct {
 	sprinting: bool,
 	sprint_secs: f32,
 	time_since_last_sprint: f32,
 }
 
-NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel := rl.Vector2{}, rot := f32(0), health := MAX_HEALTH) -> HexagonClump {
+GetMaxHealth :: proc(hexagons: int) -> f32 {
+	return BASE_MAX_HEALTH + (f32(hexagons) - 1) * 5
+}
+
+NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel := rl.Vector2{}, rot := f32(0)) -> HexagonClump {
 	if len(hexagon_types) > MAX_HEXAGONS do return HexagonClump{}
 
 	// Copy the hexagon_types parameter to clump
@@ -51,8 +56,9 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 
 	// Health Regen Timer
 	health_regen := NewTimer(5, true, true)
+	health := GetMaxHealth(len(hexagon_types))
 	
-	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, 0, {}, {}, 0, 0}
+	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, 0, {}, {}, 0, 0, true}
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -91,12 +97,15 @@ ClumpIntersectsCircle :: proc(clump: HexagonClump, center: rl.Vector2, radius: f
 }
 
 UpdateHexagonClump :: proc(clump: ^HexagonClump) {
+	clump.can_shoot = true
+	if clump.frozen_time_left > 0 do clump.can_shoot = false
+	
 	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2
 
 	// Health Regen Stuff
 	UpdateTimer(&clump.health_regen)
 	if clump.health_regen.ding do HealClump(clump, 2)
-	clump.health = math.clamp(clump.health, 0, MAX_HEALTH)
+	clump.health = math.clamp(clump.health, 0, GetMaxHealth(len(clump.hexagon_types)))
 	if clump.grace_period > 0 do clump.grace_period -= rl.GetFrameTime()
 
 	// Sprinting logic
@@ -138,7 +147,7 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	if clump.health <= 0 do clump.dead_time += rl.GetFrameTime()
 
 	// Final velocity addition (should probably be last)
-	if clump.frozen_time_left <= 0 && clump.dead_time <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
+	if clump.frozen_time_left <= 0 && clump.dead_time <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (1.5 if clump.spr.sprinting else 1)
 }
 
 DrawHexagonClump :: proc(clump: HexagonClump) {

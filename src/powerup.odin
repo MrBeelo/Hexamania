@@ -91,7 +91,7 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 
 		value := powerup.value
 		if player.bound_powerups[powerup.type].time_remaining > 0 do value = math.max(player.bound_powerups[powerup.type].value, powerup.value)
-		time_remaining := player.bound_powerups[powerup.type].time_remaining + 10 // NOTE: Static powerup time! Change.
+		time_remaining := player.bound_powerups[powerup.type].time_remaining + 10
 		player.bound_powerups[powerup.type] = BoundPowerup{value, time_remaining}
 
 		// Add health as soon as bound powerup is acquired
@@ -117,6 +117,23 @@ UpdateBoundPowerups :: proc(bound_powerups: ^[PowerupType]BoundPowerup) {
 	for &powerup in bound_powerups {
 		if powerup.time_remaining > 0 do powerup.time_remaining -= rl.GetFrameTime()
 		powerup.time_remaining = math.max(powerup.time_remaining, 0) // Sets the minimum value of this to 0, as a safeguard
+	}
+}
+
+DrawBoundPowerups :: proc(bound_powerups: [PowerupType]BoundPowerup) {
+	SIZE :: 64
+	BUFFER :: 10
+	for powerup, type in bound_powerups {
+		switch type {
+		case .HEALTH: continue
+		case .DAMAGE, .SPEED: {
+			if powerup.time_remaining <= 0 do continue
+			src := rl.Rectangle{0, 0, f32(powerup_textures[type].width), f32(powerup_textures[type].height)}
+			pos := screen_size - {(SIZE + BUFFER if type == .SPEED else 0) + SIZE / 2 + BUFFER, MAP_SIZE + SIZE / 2 + BUFFER}
+			dest := rl.Rectangle{pos.x, pos.y, SIZE, SIZE}
+			rl.DrawTexturePro(powerup_textures[type], src, dest, SIZE / 2, 0, rl.WHITE)
+		}
+		}
 	}
 }
 
