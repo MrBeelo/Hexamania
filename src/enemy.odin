@@ -154,14 +154,14 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	is_clump_close, closest_clump := GetClosestClump(enemy, RANGE)
 	ManageAIState(enemy, is_clump_close, closest_clump)
 	
-	switch enemy.ai_state {
+	if enemy.dead_time <= 0 do switch enemy.ai_state {
 	case .ROAM: HandleRoamingState(enemy)
 	case .INSPECT: { assert(closest_clump != nil); HandleInspectState(enemy, closest_clump) }
 	case .AGGRO: { assert(enemy.attacker != nil); HandleAggroState(enemy, enemy.attacker) }
 	case .PANIC: { assert(closest_clump != nil); HandlePanicState(enemy, closest_clump) }
 	}
 	
-	if enemy.health <= 0 {
+	if enemy.dead_time > 0.5 {
 		hexagon_type := GetHexagonTypeToThrow(enemy^)
 		if hexagon_type == nil do ThrowRandomWorldPowerup(enemy.pos); else do ThrowHeart(enemy.pos, hexagon_type.?)
 		

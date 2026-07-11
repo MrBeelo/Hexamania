@@ -95,7 +95,7 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 
 	// Health Regen Stuff
 	UpdateTimer(&clump.health_regen)
-	if clump.health_regen.ding do clump.health += 2
+	if clump.health_regen.ding do HealClump(clump, 2)
 	clump.health = math.clamp(clump.health, 0, MAX_HEALTH)
 	if clump.grace_period > 0 do clump.grace_period -= rl.GetFrameTime()
 
@@ -134,15 +134,22 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	if clump.kill_happiness_time > 0 do clump.kill_happiness_time -= rl.GetFrameTime()
 	clump.kill_happiness_time = math.max(clump.kill_happiness_time, 0)
 
+	// Dying stuff
+	if clump.health <= 0 do clump.dead_time += rl.GetFrameTime()
+
 	// Final velocity addition (should probably be last)
-	if clump.frozen_time_left <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
+	if clump.frozen_time_left <= 0 && clump.dead_time <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (2 if clump.spr.sprinting else 1)
 }
 
 DrawHexagonClump :: proc(clump: HexagonClump) {
 	overlay: Maybe(HexagonOverlay) = nil
 	if clump.frozen_time_left > 0 do overlay = HexagonFrozenOverlay{}
 	if clump.burning.time_left > 0 do overlay = HexagonBurningOverlay{}
-	for hexagon in GetClumpHexagons(clump) do DrawHexagon(hexagon, clump.grace_period > 0, overlay)
+
+	opacity: u8 = 100 if clump.grace_period > 0 else 255
+	if clump.dead_time > 0 do opacity = u8(255 * (1 - clump.dead_time * 2))
+	
+	for hexagon in GetClumpHexagons(clump) do DrawHexagon(hexagon, opacity, overlay)
 	
 	if debug_on do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
@@ -200,6 +207,11 @@ DamageClumpNoAttacker :: proc(clump: ^HexagonClump, amount: f32) {
 	clump.grace_period = 0.15
 }
 
+HealClump :: proc(clump: ^HexagonClump, amount: f32) {
+	if clump.health <= 0 do return
+	clump.health += amount
+}
+
 GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {
 	hexagons := make([]Hexagon, len(clump.hexagon_types))
 	for hexagon_type, index in clump.hexagon_types {
@@ -210,7 +222,7 @@ GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {
 		average_offset := GetAverageOffset(len(clump.hexagon_types))
 
 		// Local center here is the non rotated center of the hexagon
-		local_center := clump.pos + offset - average_offset
+		local_center := clump.pos + (offset - average_offset) * math.max(1 + clump.dead_time * 2, 0)
 
 		// Rotated center is the actual center of the hexagon
 		rotated_center := RotatePoint(local_center, clump.pos, clump.rot)

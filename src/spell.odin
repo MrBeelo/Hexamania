@@ -82,7 +82,7 @@ UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
 	UpdateTimer(&pad.heal_timer)
 	if pad.heal_timer.ding do for clump in GetAllClumps() {
 		if clump.uuid != pad.owner do continue
-		if ClumpIntersectsRect(clump^, pad.rect) do clump.health += pad.heal_amount
+		if ClumpIntersectsRect(clump^, pad.rect) do HealClump(clump, pad.heal_amount)
 	}
 
 	pad.time_left -= rl.GetFrameTime()

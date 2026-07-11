@@ -64,7 +64,7 @@ Hexamania description goes here
 #### DAY 5 (FINAL DAY)
 ###### Code
 - ~~Hexagon has eyes <3 that look where your mouse is!~~
-- Death animation
+- ~~Death animation~~
 - find good shader to use (glowy)
 - Balance to hell
 ###### Art

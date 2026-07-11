@@ -69,7 +69,7 @@ GetHexagonHurtBox :: proc(center: rl.Vector2) -> rl.Rectangle {
 	return rl.Rectangle{center.x - SIZE / 2, center.y - SIZE / 2, SIZE, SIZE}
 }
 
-DrawHexagon :: proc(hex: Hexagon, grace := false, overlay: Maybe(HexagonOverlay) = nil, ) {
+DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOverlay) = nil, ) {
 	texture := hexagon_textures[hex.type]
 	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
 
@@ -79,7 +79,7 @@ DrawHexagon :: proc(hex: Hexagon, grace := false, overlay: Maybe(HexagonOverlay)
 
 	// Since dest takes into account the fact that hex.center is rotated, rotating around
 	// the middle of it works!
-	color := rl.Color{255, 255, 255, 100} if grace else rl.WHITE
+	color := rl.Color{255, 255, 255, opacity}
 	rl.DrawTexturePro(texture, src, dest, HEXAGON_SIZE / 2, hex.rot, color)
 
 	// Draw overlays

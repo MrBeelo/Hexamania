@@ -22,7 +22,7 @@ NewPlayer :: proc() -> Player {
 
 UpdatePlayer :: proc(plr: ^Player) {
 	// Manage death
-	if plr.health <= 0 {
+	if plr.dead_time > 0.5 {
 		StopStopwatch(&time_survived)
 		game_state = .FINISH
 	}
