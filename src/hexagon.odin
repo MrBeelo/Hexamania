@@ -111,7 +111,7 @@ GetBurningOverlayColor :: proc(time_delay: f32) -> rl.Color {
 	time := f32(rl.GetTime()) + time_delay
 	time = math.mod_f32(time, 1)
 	factor := math.sin(rl.PI * time)
-	return rl.ColorLerp(rl.RED, rl.ORANGE, factor)
+	return rl.ColorLerp(rl.RED, rl.Color{244, 60, 0, 255}, factor)
 }
 
 LoadHexagon :: proc(name: string) -> rl.Texture2D { 
