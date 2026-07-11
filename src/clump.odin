@@ -156,7 +156,9 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 
 HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 	if clump.grace_period > 0 do return
+	if clump.dead_time > 0 do return
 	for enemy_clump in GetAllClumps() {
+		if enemy_clump.dead_time > 0 do continue
 		if clump.uuid == enemy_clump.uuid do continue
 		if enemy_clump.grace_period > 0 do continue
 		

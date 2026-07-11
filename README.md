@@ -68,6 +68,7 @@ Hexamania description goes here
 - find good shader to use (glowy)
 - Balance to hell
 ###### Art
+- redo in-game HUD
 - fully draw spells (and the previews)
 - ~~New Background~~
 - Prettier menus, maybe look space-y or some shi
