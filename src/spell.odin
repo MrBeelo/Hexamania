@@ -294,7 +294,7 @@ DrawBlackHole :: proc(hole: BlackHole) {
 
 GetBlackHoleStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (time_left: f32, suction_power: f32, size: f32) {
 	time_left = 5 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_TIME])
-	suction_power = (5 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SUCTION_POWER])) * 60
+	suction_power = (6 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SUCTION_POWER]) * 3 / 2) * 60
 	size = 20 + f32(hexagon_type_amounts[.BLACK_HOLE_UPGRADE_SIZE]) * 5
 	return time_left, suction_power, size
 }
