@@ -6,6 +6,7 @@ import "core:math/rand"
 
 POWERUP_DECELERATION :: 5 * 60
 POWERUP_SIZE :: f32(32)
+BOUND_POWERUP_TIME :: 10
 world_powerups: [dynamic]WorldPowerup
 powerup_textures: [PowerupType]rl.Texture2D
 powerup_spawn_timer: Timer
@@ -91,7 +92,7 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 
 		value := powerup.value
 		if player.bound_powerups[powerup.type].time_remaining > 0 do value = math.max(player.bound_powerups[powerup.type].value, powerup.value)
-		time_remaining := player.bound_powerups[powerup.type].time_remaining + 10
+		time_remaining := player.bound_powerups[powerup.type].time_remaining + BOUND_POWERUP_TIME
 		player.bound_powerups[powerup.type] = BoundPowerup{value, time_remaining}
 
 		// Add health as soon as bound powerup is acquired
@@ -131,7 +132,12 @@ DrawBoundPowerups :: proc(bound_powerups: [PowerupType]BoundPowerup) {
 			src := rl.Rectangle{0, 0, f32(powerup_textures[type].width), f32(powerup_textures[type].height)}
 			pos := screen_size - {(SIZE + BUFFER if type == .SPEED else 0) + SIZE / 2 + BUFFER, MAP_SIZE + SIZE / 2 + BUFFER}
 			dest := rl.Rectangle{pos.x, pos.y, SIZE, SIZE}
-			rl.DrawTexturePro(powerup_textures[type], src, dest, SIZE / 2, 0, rl.WHITE)
+
+			opacity := f32(255)
+			if powerup.time_remaining < BOUND_POWERUP_TIME do opacity *= (powerup.time_remaining / f32(BOUND_POWERUP_TIME))
+			color := rl.Color{255, 255, 255, u8(opacity)}
+			
+			rl.DrawTexturePro(powerup_textures[type], src, dest, SIZE / 2, 0, color)
 		}
 		}
 	}
