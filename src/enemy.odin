@@ -246,6 +246,7 @@ DrawEnemies :: proc() { for enemy in enemies do DrawEnemy(enemy) }
 
 DrawEnemy :: proc(enemy: Enemy) {
 	DrawHexagonClump(enemy.clump)
+	DrawEnemyFace(enemy)
 	if debug_on do DrawDebugText(enemy.pos, "%.0f hp, %v, %s", enemy.health, enemy.ai_state, ShortUUID(enemy.uuid))
 }
 

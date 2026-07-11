@@ -48,7 +48,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	id := uuid.generate_v7()
 
 	// Health Regen Timer
-	health_regen := NewTimer(7, true, true)
+	health_regen := NewTimer(5, true, true)
 	
 	return HexagonClump{new_hexagon_types, center, 0, 0, health, id, {false, 5, 5}, health_regen, 0, nil, 0, 0, {}, {}}
 }
@@ -93,7 +93,7 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 
 	// Health Regen Stuff
 	UpdateTimer(&clump.health_regen)
-	if clump.health_regen.ding do clump.health += 1
+	if clump.health_regen.ding do clump.health += 2
 	clump.health = math.clamp(clump.health, 0, MAX_HEALTH)
 	if clump.grace_period > 0 do clump.grace_period -= rl.GetFrameTime()
 
@@ -137,6 +137,7 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 	if clump.frozen_time_left > 0 do overlay = HexagonFrozenOverlay{}
 	if clump.burning.time_left > 0 do overlay = HexagonBurningOverlay{}
 	for hexagon in GetClumpHexagons(clump) do DrawHexagon(hexagon, clump.grace_period > 0, overlay)
+	
 	if debug_on do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
 

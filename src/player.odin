@@ -17,8 +17,7 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE, .ICE_BALL, .FIREBALL, .BLACK_HOLE}, 0), camera, {}, false, nil }
-	// NOTE: duh
+	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {}, false, nil }
 }
 
 UpdatePlayer :: proc(plr: ^Player) {
@@ -103,6 +102,7 @@ ChangePlayerActiveSpell :: proc(up: bool, start_spell: SpellType, test_spell: Sp
 
 DrawPlayer :: proc(plr: ^Player) {
 	DrawHexagonClump(plr.clump)
+	DrawPlayerFace()
 	if debug_on do DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
 }
 
@@ -199,10 +199,10 @@ CameraPos :: proc(plr: Player) -> rl.Vector2 {
 
 GetCameraZoom :: proc(level: int) -> f32 {
 	switch level {
-	case 1: return 1.2
-	case 2: return 1.1
-	case 3: return 0.9
-	case 4: return 0.7
+	case 1: return 1.7
+	case 2: return 1.5
+	case 3: return 1.3
+	case 4: return 1.1
 	}
 
 	return 1
