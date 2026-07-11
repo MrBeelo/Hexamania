@@ -4,7 +4,9 @@ import rl "vendor:raylib"
 import "core:math"
 
 BACKGROUND_SIZE :: rl.Vector2{1024, 1024}
-BACKGROUND_DURATION :: f32(20)
+MAIN_MENU_BACKGROUND_DURATION :: f32(7)
+GAME_BACKGROUND_DURATION :: f32(20)
+BACKGROUND_SPEED :: f32(5)
 background: rl.Texture2D
 
 LoadBackground :: proc() {
@@ -21,15 +23,15 @@ DrawGameBackground :: proc() {
 	spots := GetAllBackgroundSpots(start_pos, BACKGROUND_SIZE)
 	for spot in spots {
 		dest := rl.Rectangle{spot.x, spot.y, BACKGROUND_SIZE.x, BACKGROUND_SIZE.y}
-		DrawBackground(dest, GetBackgroundColors())
+		DrawBackground(dest, GetBackgroundColors(GAME_BACKGROUND_DURATION))
 	}
 }
 
 DrawMainMenuBackground :: proc() {
 	for i in 0..=1 {
-		dest := rl.Rectangle{0 - math.mod_f32(f32(rl.GetTime() * 4), BACKGROUND_SIZE.x) + f32(i) * BACKGROUND_SIZE.x, 
+		dest := rl.Rectangle{0 - math.mod_f32(f32(rl.GetTime()) * BACKGROUND_SPEED, BACKGROUND_SIZE.x) + f32(i) * BACKGROUND_SIZE.x, 
 			0, BACKGROUND_SIZE.x, BACKGROUND_SIZE.y}
-		DrawBackground(dest, GetBackgroundColors())
+		DrawBackground(dest, GetBackgroundColors(MAIN_MENU_BACKGROUND_DURATION))
 	}
 }
 
@@ -39,7 +41,7 @@ DrawBackground :: proc(dest: rl.Rectangle, main_color: rl.Color, hexa_color: rl.
 	rl.DrawTexturePro(background, src, dest, {}, 0, hexa_color)
 }
 
-GetBackgroundColors :: proc(duration := BACKGROUND_DURATION) -> (main: rl.Color, hexa: rl.Color) {
+GetBackgroundColors :: proc(duration: f32) -> (main: rl.Color, hexa: rl.Color) {
 	time := f32(rl.GetTime())
 	time = math.mod_f32(time, duration)
 	factor := math.sin(rl.PI * time / duration)

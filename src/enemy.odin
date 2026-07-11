@@ -196,7 +196,7 @@ GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
 		spell := GetSpellFromHexagonType(hexagon_type)
 		if spell == nil || (spell != nil && HasSpell(player.clump, spell.?)) {
 			hexagon_amounts := GetHexagonTypeAmounts(player.clump)
-			if hexagon_amounts[hexagon_type] > 3 do continue
+			if hexagon_amounts[hexagon_type] > 3 do continue // Max of 4 upgrades
 			return hexagon_type
 		}
 	}

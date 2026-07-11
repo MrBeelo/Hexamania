@@ -6,7 +6,7 @@ import "core:strings"
 
 screen_size := rl.Vector2{720, 720}
 should_close := false
-debug_on := true
+debug_on := false
 
 player: Player
 
