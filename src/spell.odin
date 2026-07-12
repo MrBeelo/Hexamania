@@ -222,6 +222,7 @@ UpdateFireball :: proc(ball: ^Fireball, index: int) {
 			clump.burning = { damage_timer, ball.burn_time, ball.damage }
 			exploded = true
 			exploded_clump_uuid = clump.uuid
+			rl.PlaySound(explosion)
 		}
 	}
 

@@ -27,6 +27,7 @@ init :: proc() {
 	LoadFace()
 	LoadSpells()
 	LoadUI()
+	LoadSounds()
 	
 	InitMenus()
 	InitEnemies()
@@ -103,6 +104,7 @@ close :: proc() {
 	UnloadFace()
 	UnloadSpells()
 	UnloadUI()
+	UnloadSounds()
 
 	rl.CloseAudioDevice()
 	rl.CloseWindow() 

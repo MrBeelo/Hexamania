@@ -22,6 +22,8 @@ PlayerFirePellet :: proc() {
 	speed, damage, fire_rate := GetRifleStats(GetHexagonTypeAmounts(player.clump))
 	player.rifle_delay = fire_rate
 	append(&pellets, Pellet{player.pos, vel, player.uuid, speed, damage})
+	rl.SetSoundVolume(shoot, 1)
+	rl.PlaySound(shoot)
 }
 
 EnemyFirePellet :: proc(enemy: ^Enemy, target: rl.Vector2) {

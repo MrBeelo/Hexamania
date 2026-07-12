@@ -22,7 +22,7 @@ UpdateButton :: proc(bt: ^Button) {
 	top_left_pos := bt.center - (text_size / 2)
 	button_rect := rl.Rectangle{top_left_pos.x, top_left_pos.y, text_size.x, text_size.y}
 	hovered := rl.CheckCollisionPointRec(rl.GetMousePosition(), button_rect)
-	if hovered && rl.IsMouseButtonPressed(.LEFT) do bt.function()
+	if hovered && rl.IsMouseButtonPressed(.LEFT) { bt.function(); rl.PlaySound(ui_confirm) }
 }
 
 DrawButton :: proc(bt: Button) {

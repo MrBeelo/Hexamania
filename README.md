@@ -82,12 +82,11 @@ Hexamania description goes here
 - ~~fully draw spells (and the previews)~~
 - ~~New Background~~
 - ~~Prettier menus, maybe look space-y or some shi~~
-###### Sound
-- Sound effects
-- Music! (should be 6/4 lol, calm and relaxing with reverb/echo)
 
 #### DAY 6 (FINAL FINAL DAY)
 - redo health bar
+- Sound effects
+- Music! (should be 6/4 lol, calm and relaxing with reverb/echo)
 
 ## HEXAHEARTS
 

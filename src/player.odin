@@ -103,6 +103,9 @@ UpdatePlayer :: proc(plr: ^Player) {
 			case .BLACK_HOLE: PlayerThrowBlackHole()
 			}
 			plr.spell_mode = false
+
+			rl.SetSoundVolume(fire_spell, 1)
+			rl.PlaySound(fire_spell)
 		}
 	}	
 
