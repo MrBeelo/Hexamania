@@ -121,28 +121,6 @@ UpdateBoundPowerups :: proc(bound_powerups: ^[PowerupType]BoundPowerup) {
 	}
 }
 
-DrawBoundPowerups :: proc(bound_powerups: [PowerupType]BoundPowerup) {
-	SIZE :: 64
-	BUFFER :: 10
-	for powerup, type in bound_powerups {
-		switch type {
-		case .HEALTH: continue
-		case .DAMAGE, .SPEED: {
-			if powerup.time_remaining <= 0 do continue
-			src := rl.Rectangle{0, 0, f32(powerup_textures[type].width), f32(powerup_textures[type].height)}
-			pos := screen_size - {(SIZE + BUFFER if type == .SPEED else 0) + SIZE / 2 + BUFFER, MAP_SIZE + SIZE / 2 + BUFFER}
-			dest := rl.Rectangle{pos.x, pos.y, SIZE, SIZE}
-
-			opacity := f32(255)
-			if powerup.time_remaining < BOUND_POWERUP_TIME do opacity *= (powerup.time_remaining / f32(BOUND_POWERUP_TIME))
-			color := rl.Color{255, 255, 255, u8(opacity)}
-			
-			rl.DrawTexturePro(powerup_textures[type], src, dest, SIZE / 2, 0, color)
-		}
-		}
-	}
-}
-
 LoadPowerups :: proc() {
 	powerup_textures = {
 		.HEALTH = rl.LoadTexture("res/powerup/health.png"),

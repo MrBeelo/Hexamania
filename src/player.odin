@@ -117,84 +117,6 @@ DrawPlayer :: proc(plr: ^Player) {
 	if debug_on do DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
 }
 
-DrawPlayerHealthBar :: proc() {
-	bar_size := rl.Vector2{screen_size.x / 2, 32}
-	
-	shell_pos := rl.Vector2{screen_size.x / 2 - bar_size.x / 2, screen_size.y - bar_size.y}
-	rl.DrawRectangleV(shell_pos, bar_size, rl.BLACK)
-
-	BUFFER :: f32(3)
-	health_bar_size := bar_size - {BUFFER * 2, BUFFER}
-	health_bar_size.x = health_bar_size.x * player.health / GetMaxHealth(len(player.hexagon_types))
-	rl.DrawRectangleV(shell_pos + BUFFER, health_bar_size, rl.RED)
-
-	sprint_bar_size := bar_size - {BUFFER * 2, BUFFER}
-	sprint_bar_size.x = sprint_bar_size.x * player.spr.sprint_secs / MAX_SPRINT_SECS
-	rl.DrawRectangleV(shell_pos + BUFFER + {0, bar_size.y * 2 / 3}, sprint_bar_size, rl.SKYBLUE)
-}
-
-DrawSpellMenu :: proc() {
-	if !player.spell_mode do return
-
-	texture: rl.Texture2D
-	switch player.active_spell.? {
-	case .HEALTH_PAD: texture = hexagon_textures[.HEALTH_PAD]
-	case .ICE_BALL: texture = hexagon_textures[.ICE_BALL]
-	case .FIREBALL: texture = hexagon_textures[.FIREBALL]
-	case .BLACK_HOLE: texture = hexagon_textures[.BLACK_HOLE]
-	}
-
-	cooldown := int(math.ceil(player.spell_cooldowns[player.active_spell.?]))
-	cooldown_text := string(rl.TextFormat("%d", cooldown))
-	BOX_SIZE :: f32(96)
-	BUFFER :: f32(15)
-
-	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
-	dest := rl.Rectangle{screen_size.x - BOX_SIZE / 2 - BUFFER, BUFFER + BOX_SIZE / 2, BOX_SIZE, BOX_SIZE}
-	rot := math.mod_f32(f32(rl.GetTime()), 360) * 15
-	
-	rl.DrawTexturePro(texture, src, dest, BOX_SIZE / 2, rot, rl.WHITE if cooldown <= 0 else rl.GRAY)
-	if cooldown > 0 do DrawTextCenter(cooldown_text, {screen_size.x - (BUFFER + BOX_SIZE / 2), BUFFER + BOX_SIZE / 2}, 32, .QUICKSAND_MEDIUM)
-}
-
-DrawActiveSpellPreview :: proc() {
-	if !player.spell_mode do return
-	hexagon_type_amounts := GetHexagonTypeAmounts(player.clump)
-	if player.spell_cooldowns[player.active_spell.?] > 0 do return // If the active spell is on cooldown, don't draw the preview
-	switch player.active_spell.? {
-	case .HEALTH_PAD: {
-		_, size, _ := GetHealthPadStats(hexagon_type_amounts)
-		size *= player.camera.zoom
-		pos := CameraPos(player)
-		rect := rl.Rectangle{pos.x - size / 2, pos.y - size / 2, size, size}
-		rl.DrawRectangleRoundedLinesEx(rect, 0.2, 10, 7, rl.GREEN)
-	}
-	case .ICE_BALL: {
-		src := rl.Rectangle{0, 0, f32(spell_textures[.CIRCLE_OVERLAY].width), f32(spell_textures[.CIRCLE_OVERLAY].height)}
-		size := ICE_BALL_SIZE * player.camera.zoom
-		dest := rl.Rectangle{rl.GetMousePosition().x, rl.GetMousePosition().y, size, size}
-		rot := math.mod_f32(f32(rl.GetTime()), 360) * 50
-		rl.DrawTexturePro(spell_textures[.CIRCLE_OVERLAY], src, dest, size / 2, rot, rl.SKYBLUE)
-	}
-	case .FIREBALL: {
-		src := rl.Rectangle{0, 0, f32(spell_textures[.CIRCLE_OVERLAY].width), f32(spell_textures[.CIRCLE_OVERLAY].height)}
-		_, size, _ := GetFireballStats(hexagon_type_amounts)
-		size *= player.camera.zoom
-		dest := rl.Rectangle{rl.GetMousePosition().x, rl.GetMousePosition().y, size, size}
-		rot := math.mod_f32(f32(rl.GetTime()), 360) * 50
-		rl.DrawTexturePro(spell_textures[.CIRCLE_OVERLAY], src, dest, size / 2, rot, rl.ORANGE)
-	}
-	case .BLACK_HOLE: {
-		src := rl.Rectangle{0, 0, f32(spell_textures[.CIRCLE_OVERLAY].width), f32(spell_textures[.CIRCLE_OVERLAY].height)}
-		_, _, size := GetBlackHoleStats(hexagon_type_amounts)
-		size *= player.camera.zoom
-		dest := rl.Rectangle{rl.GetMousePosition().x, rl.GetMousePosition().y, size, size}
-		rot := math.mod_f32(f32(rl.GetTime()), 360) * 50
-		rl.DrawTexturePro(spell_textures[.CIRCLE_OVERLAY], src, dest, size / 2, rot, rl.PURPLE)
-	}
-	}
-}
-
 GetPlayerSpeed :: proc(plr: Player) -> f32 {
 	speed := f32(BASE_PLAYER_SPEED)
 	if plr.bound_powerups[.SPEED].time_remaining > 0 do speed *= plr.bound_powerups[.SPEED].value
@@ -210,7 +132,9 @@ HandlePlayerCamera :: proc(plr: ^Player) {
 		if diff < -threshold do plr.camera.target[i] = plr.pos[i] + threshold
 	}
 
-	plr.camera.zoom = GetCameraZoom(GetPlayerLevel(plr^))
+	target_zoom := GetCameraZoom(GetPlayerLevel(plr^))
+	if plr.camera.zoom < target_zoom do plr.camera.zoom += rl.GetFrameTime()
+	if plr.camera.zoom > target_zoom do plr.camera.zoom -= rl.GetFrameTime()
 }
 
 CameraPos :: proc(plr: Player) -> rl.Vector2 {

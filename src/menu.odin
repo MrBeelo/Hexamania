@@ -2,6 +2,7 @@ package main
 
 import rl "vendor:raylib"
 import "core:fmt"
+import "core:strings"
 
 GameState :: enum { PLAYING, MAIN, PAUSED, FINISH, ANALYSIS }
 game_state := GameState.MAIN
@@ -60,6 +61,7 @@ PausedMenu :: proc() -> Menu { return NewMenu(
 		NewButtonDef("LEAVE", screen_size / 2 + {0, 100}, proc(){ game_state = .MAIN }),
 	},
 	draw = proc(buttons: []Button) {
+		DrawMainMenuBackground()
 		DrawMenuTitle("PAUSED")
 		for &button in buttons do DrawButton(button)
 	},
@@ -68,12 +70,13 @@ PausedMenu :: proc() -> Menu { return NewMenu(
 FinishMenu :: proc() -> Menu { return NewMenu(
 	buttons = []Button{
 		NewButtonDef("PLAY AGAIN", screen_size / 2 + {-150, 250}, proc(){ ResetGame(); game_state = .PLAYING }, true),
-		NewButtonDef("RETURN", screen_size / 2 + {150, 250}, proc(){ game_state = .MAIN }, true),
+		NewButtonDef("LEAVE", screen_size / 2 + {150, 250}, proc(){ game_state = .MAIN }, true),
 	},
 	draw = proc(buttons: []Button) {
 		grade := int(GetElapsedStopwatchTime(time_survived) / 50 + f32(points) * 3)
 		if len(player.hexagon_types) == MAX_HEXAGONS do grade += 150
-		
+
+		DrawMainMenuBackground()
 		DrawMenuTitle("YOU DIED")
 		
 		DrawFinishStat("Time Survived: %s", 0, FloatToTimeStr(GetElapsedStopwatchTime(time_survived)))
@@ -90,15 +93,16 @@ AnalysisMenu :: proc() -> Menu { return NewMenu(
 		NewButtonDef("BACK", screen_size / 2 + {0, 250}, proc(){ game_state = .PLAYING }, true),
 	},
 	draw = proc(buttons: []Button) {
+		DrawMainMenuBackground()
 		DrawMenuTitle("ANALYSIS")
 
 		hexagon_type_amounts := GetHexagonTypeAmounts(player.clump)
 
-		DrawAnalysisStat("RIFLE: %.0f px/s, %.0f dmg, %.2f f.r.", 0, GetRifleStats(hexagon_type_amounts))
-		if HasSpell(player.clump, .HEALTH_PAD) do DrawAnalysisStat("HEALTH PAD: %.0f s, %.0f px, %.0f hp", 1, GetHealthPadStats(hexagon_type_amounts))
-		if HasSpell(player.clump, .ICE_BALL) do DrawAnalysisStat("ICE BALL: %.0f s, %.0f px, %.0f s", 2, GetIceBallStats(hexagon_type_amounts))
-		if HasSpell(player.clump, .FIREBALL) do DrawAnalysisStat("FIREBALL: %.0f s, %.0f px, %.0f dmg", 3, GetFireballStats(hexagon_type_amounts))
-		if HasSpell(player.clump, .BLACK_HOLE) do DrawAnalysisStat("BLACK HOLE: %.0f s, %.0f s.p., %.0f px", 4, GetBlackHoleStats(hexagon_type_amounts))
+		DrawAnalysisStat("RIFLE: Pellets shoot at %.0f px/s speed,\n dealing %.0f damage, with %.2f/s fire rate.", 0, GetRifleStats(hexagon_type_amounts))
+		if HasSpell(player.clump, .HEALTH_PAD) do DrawAnalysisStat("HEALTH PAD: Lasts for %.0f seconds,\n %.0f pixels long, and heals %.0f hp each second.", 1, GetHealthPadStats(hexagon_type_amounts))
+		if HasSpell(player.clump, .ICE_BALL) do DrawAnalysisStat("ICE BALL: Lasts for %.0f seconds,\n %.0f pixels long, freezes enemies for %.0f seconds.", 2, GetIceBallStats(hexagon_type_amounts))
+		if HasSpell(player.clump, .FIREBALL) do DrawAnalysisStat("FIREBALL: Lasts for %.0f seconds,\n %.0f pixels long, dealing %.0f damage every second.", 3, GetFireballStats(hexagon_type_amounts))
+		if HasSpell(player.clump, .BLACK_HOLE) do DrawAnalysisStat("BLACK HOLE: Lasts for %.0f seconds,\n with %.0f suction power, and %.0f pixels long.", 4, GetBlackHoleStats(hexagon_type_amounts))
 		
 		for &button in buttons do DrawButton(button)
 	},
@@ -124,6 +128,7 @@ ResetGame :: proc() {
 	clear(&world_powerups)
 	points = 0
 	StartStopwatch(&time_survived)
+	session_playthroughs += 1
 }
 
 // Helper functions so that I dont have to rewrite the code again and again:
@@ -138,12 +143,15 @@ NewButtonDef :: proc(text: string, center: rl.Vector2, function: proc(), small :
 
 DrawFinishStat :: proc(text: string, index: int, args: ..any) {
 	str := string(fmt.ctprintf(text, ..args))
-	pos := rl.Vector2{screen_size.x / 2 - 300, screen_size.y / 2 - 200 + f32(index) * 40}
+	pos := rl.Vector2{screen_size.x / 2 - 300, screen_size.y / 2 - 150 + f32(index) * 40}
 	DrawText(str, pos, 32, spacing = 3)
 }
 
 DrawAnalysisStat :: proc(text: string, index: int, args: ..any) {
 	str := string(fmt.ctprintf(text, ..args))
 	pos := rl.Vector2{screen_size.x / 2 - 300, screen_size.y / 2 - 150 + f32(index) * 50}
-	DrawText(str, pos, 32, spacing = 3)
+	strs := strings.split(str, "\n")
+	assert(len(strs) == 2)
+	DrawText(strs[0], pos, 24, spacing = 3)
+	DrawText(strs[1], pos + {0, 25}, 24, spacing = 3)
 }

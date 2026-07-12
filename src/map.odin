@@ -13,8 +13,15 @@ DrawMap :: proc() {
 	screen_to_map_ratio := MAP_SIZE / sim_scr_size.x
 
 	// Draw map background
-	map_rect := rl.Rectangle{map_center.x - MAP_SIZE / 2, map_center.y - MAP_SIZE / 2, MAP_SIZE, MAP_SIZE}
-	rl.DrawRectangleRec(map_rect, rl.WHITE)
+	BUFFER :: 20
+	map_rect := rl.Rectangle{map_center.x - MAP_SIZE / 2, map_center.y - MAP_SIZE / 2, MAP_SIZE + BUFFER, MAP_SIZE + BUFFER}
+
+	BORDER_THICK :: 7
+	border_rect := rl.Rectangle{map_rect.x - BORDER_THICK, map_rect.y - BORDER_THICK, map_rect.width + BORDER_THICK + BUFFER, 
+		map_rect.height + BORDER_THICK + BUFFER}
+	
+	rl.DrawRectangleRounded(border_rect, 0.3, 10, rl.BLACK)
+	rl.DrawRectangleRounded(map_rect, 0.3, 10, rl.LIGHTGRAY)
 
 	// Draw screen border 
 	screen_border_rect := rl.Rectangle{map_center.x - MAP_SIZE / 2 * map_zoom, map_center.y - MAP_SIZE / 2 * map_zoom, 

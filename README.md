@@ -65,6 +65,7 @@ Hexamania description goes here
 ###### Code
 - ~~Hexagon has eyes <3 that look where your mouse is!~~
 - ~~Death animation~~
+- Add tutorial
 - find good shader to use (glowy)
 ###### Balancing
 - ~~More hexagons = more max health~~
@@ -79,15 +80,15 @@ Hexamania description goes here
 - ~~limit enemy's velocity too~~
 - ~~enemies dont attack you if not in screen~~
 ###### Art
-- redo in-game HUD
-- enemy health bars
 - ~~fully draw spells (and the previews)~~
 - ~~New Background~~
-- Prettier menus, maybe look space-y or some shi
-- Transitions maybe? (for each gamestate)
+- ~~Prettier menus, maybe look space-y or some shi~~
 ###### Sound
 - Sound effects
 - Music! (should be 6/4 lol, calm and relaxing with reverb/echo)
+
+#### DAY 6 (FINAL FINAL DAY)
+- redo health bar
 
 ## HEXAHEARTS
 

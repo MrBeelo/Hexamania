@@ -7,6 +7,7 @@ import "core:strings"
 screen_size := rl.Vector2{720, 720}
 should_close := false
 debug_on := false
+session_playthroughs := 0
 
 player: Player
 
@@ -25,6 +26,7 @@ init :: proc() {
 	LoadShaders()
 	LoadFace()
 	LoadSpells()
+	LoadUI()
 	
 	InitMenus()
 	InitEnemies()
@@ -57,8 +59,8 @@ update :: proc() {
 		DrawSpellsBelow()
 		DrawHexagonHearts()
 		DrawWorldPowerups()
-		DrawPlayer(&player)
 		DrawEnemies()
+		DrawPlayer(&player)
 		DrawPellets()
 		DrawSpellsAbove()
 		
@@ -97,6 +99,7 @@ close :: proc() {
 	UnloadShaders()
 	UnloadFace()
 	UnloadSpells()
+	UnloadUI()
 
 	rl.CloseAudioDevice()
 	rl.CloseWindow() 

@@ -300,7 +300,7 @@ UpdateBlackHole :: proc(hole: ^BlackHole, index: int) {
 		target_vel := VelocityFrom2Points(clump.pos, hole.pos) * 60
 		Accelerate(&clump.vel.x, target_vel.x, hole.suction_power)
 		Accelerate(&clump.vel.y, target_vel.y, hole.suction_power)
-		if ClumpIntersectsCircle(clump^, hole.pos, hole.size) do clump.vel = 0
+		if ClumpIntersectsCircle(clump^, hole.pos, hole.size / 2) do clump.vel = 0
 		if rl.Vector2Distance(clump.pos, hole.pos) - hole.size - (f32(GetLevel(clump.hexagon_types)) - 1) * HEXAGON_SIZE < 100 do clump.can_shoot = false
 	}
 

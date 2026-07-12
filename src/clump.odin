@@ -123,9 +123,6 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	if clump.spr.time_since_last_sprint > REGEN_SPRINT_TIME do clump.spr.sprint_secs += rl.GetFrameTime()
 	clump.spr.sprint_secs = math.clamp(clump.spr.sprint_secs, 0, MAX_SPRINT_SECS)
 
-	// Collision logic
-	HandleClumpCollisions(clump)
-
 	// Handle spells
 	if clump.frozen_time_left > 0 do clump.frozen_time_left -= rl.GetFrameTime()
 	clump.frozen_time_left = math.max(clump.frozen_time_left, 0)
@@ -149,6 +146,9 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	// Dying stuff
 	if clump.health <= 0 do clump.dead_time += rl.GetFrameTime()
 
+	// Collision logic
+	HandleClumpCollisions(clump)
+
 	// Final velocity addition (should probably be last)
 	if clump.frozen_time_left <= 0 && clump.dead_time <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (1.5 if clump.spr.sprinting else 1)
 }
@@ -166,6 +166,9 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 	if debug_on do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
 
+// This is a broken buggy mess. I don't have time to implement good collisions
+// I don't care anymore.
+
 HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 	if clump.collision_grace_period > 0 do return
 	if clump.dead_time > 0 do return
@@ -177,12 +180,14 @@ HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 		for hexagon in GetClumpHexagons(clump^) do for enemy_hexagon in GetClumpHexagons(enemy_clump^) {
 			if rl.Vector2Distance(hexagon.center, enemy_hexagon.center) > 100 do continue
 			if !rl.CheckCollisionRecs(hexagon.hurtbox, enemy_hexagon.hurtbox) do continue
-			clump.vel = -1.3
-			enemy_clump.vel *= -1.3
-			clump.collision_grace_period = 0.2 * f32(GetLevel(clump.hexagon_types) + GetLevel(enemy_clump.hexagon_types))
+			DamageClump(clump, 2, enemy_clump)
+			DamageClump(enemy_clump, 2, clump)
+			clump.collision_grace_period = 0.5
+			enemy_clump.collision_grace_period = 0.5
 		}
 	}
 }
+
 
 GetAllClumps :: proc() -> []^HexagonClump {
 	result := make([]^HexagonClump, len(enemies) + 1)
