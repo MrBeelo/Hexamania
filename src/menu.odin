@@ -44,7 +44,7 @@ DrawMenus :: proc() {
 
 MainMenu :: proc() -> Menu { return NewMenu(
 	buttons = []Button{
-		NewButtonDef("PLAY", screen_size / 2, proc(){ ResetGame(); game_state = .PLAYING }),
+		NewButtonDef("PLAY", screen_size / 2, proc(){ ResetGame(); game_state = .PLAYING; player.can_shoot = false }),
 	},
 	draw = proc(buttons: []Button) {
 		DrawMainMenuBackground()

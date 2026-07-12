@@ -17,7 +17,7 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE, .HEALTH_PAD, .ICE_BALL, .FIREBALL, .BLACK_HOLE}, 0), camera, {}, false, nil }
+	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {}, false, nil }
 }
 
 GetMaxPlayerVelocity :: proc(plr: Player) -> f32 {
@@ -40,14 +40,18 @@ UpdatePlayer :: proc(plr: ^Player) {
 	// Movement
 	if Holding(.UP) {
 	 	Accelerate(&plr.vel.y, -speed, PLAYER_ACCELERATION)
+		has_moved = true
 	} else if Holding(.DOWN) {
 		Accelerate(&plr.vel.y, speed, PLAYER_ACCELERATION)
+		has_moved = true
 	} else do Accelerate(&plr.vel.y, 0, PLAYER_ACCELERATION)
 	
 	if Holding(.LEFT) {
 	 	Accelerate(&plr.vel.x, -speed, PLAYER_ACCELERATION)
+		has_moved = true
 	} else if Holding(.RIGHT) {
 	 	Accelerate(&plr.vel.x, speed, PLAYER_ACCELERATION)
+		has_moved = true
 	} else do Accelerate(&plr.vel.x, 0, PLAYER_ACCELERATION)
 
 	// Clamp velocities down to 0 if they are low and player isn't moving
@@ -58,6 +62,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 	}
 
 	plr.spr.sprinting = Holding(.SPRINT) && plr.spr.sprint_secs > 0
+	if Holding(.SPRINT) do has_sprinted = true
 
 	// Clamp player velocity for safety
 	max_vel := GetMaxPlayerVelocity(plr^)
@@ -71,6 +76,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 	UpdateBoundPowerups(&plr.bound_powerups)
 
 	if rl.IsMouseButtonPressed(.RIGHT) {
+		has_opened_spell_menu = true
 		if plr.active_spell == nil {
 			for spell in SpellType do if HasSpell(plr.clump, spell) { plr.active_spell = spell; plr.spell_mode = true }
 		} else {
@@ -79,13 +85,17 @@ UpdatePlayer :: proc(plr: ^Player) {
 	}
 
 	if !plr.spell_mode {
-		if rl.IsMouseButtonPressed(.LEFT) && plr.rifle_delay <= 0 do PlayerFirePellet()
+		if rl.IsMouseButtonPressed(.LEFT) && plr.rifle_delay <= 0 && player.can_shoot {
+			has_shot = true
+			PlayerFirePellet()
+		}
 	} else {
 		move := rl.GetMouseWheelMove()
 		if move > 0 do ChangePlayerActiveSpell(true, plr.active_spell.?, plr.active_spell.?)
 		if move < 0 do ChangePlayerActiveSpell(false, plr.active_spell.?, plr.active_spell.?)
 
 		if rl.IsMouseButtonPressed(.LEFT) && player.spell_cooldowns[player.active_spell.?] <= 0 {
+			has_used_spell = true
 			switch plr.active_spell {
 			case .HEALTH_PAD: SummonHealthPad(&plr.clump)
 			case .ICE_BALL: PlayerThrowIceBall()

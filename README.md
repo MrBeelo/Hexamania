@@ -65,8 +65,7 @@ Hexamania description goes here
 ###### Code
 - ~~Hexagon has eyes <3 that look where your mouse is!~~
 - ~~Death animation~~
-- Add tutorial
-- find good shader to use (glowy)
+- ~~Add tutorial~~
 ###### Balancing
 - ~~More hexagons = more max health~~
 - ~~buff spells, nerf weapon~~

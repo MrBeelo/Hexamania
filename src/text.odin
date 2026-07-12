@@ -50,6 +50,7 @@ DrawDebugText :: proc(pos: rl.Vector2, txt: cstring, args: ..any) {
 }
 
 DrawText :: proc(text: string, pos: rl.Vector2, size: f32, type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
+	if text == "" do return
 	font := GetFont({type, size})
 	str := strings.clone_to_cstring(text)
 
@@ -62,6 +63,7 @@ DrawText :: proc(text: string, pos: rl.Vector2, size: f32, type := FontType.QUIC
 }
 
 DrawTextCenter :: proc(text: string, center: rl.Vector2, size: f32, type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
+	if text == "" do return
 	font := GetFont({type, size})
 	text_size := MeasureText(text, size, type, spacing)
 	str := strings.clone_to_cstring(text)

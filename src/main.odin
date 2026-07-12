@@ -41,6 +41,8 @@ update :: proc() {
 		UpdateEnemies()
 		UpdateWorldPowerups()
 		UpdateSpells()
+		UpdateToolbar()
+		
 		if rl.IsKeyPressed(.ESCAPE) do game_state = .PAUSED
 		if rl.IsKeyPressed(.LEFT_CONTROL) do game_state = .ANALYSIS
 	}
@@ -72,6 +74,7 @@ update :: proc() {
 		DrawActiveSpellPreview()
 		DrawSpellMenu()
 		DrawBoundPowerups(player.bound_powerups)
+		DrawToolbar()
 
 		if debug_on {
 			rl.DrawText(rl.TextFormat("pos: %.2f, %.2f", player.pos.x, player.pos.y), 10, 10, 32, rl.BLACK)
