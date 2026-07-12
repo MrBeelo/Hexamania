@@ -49,14 +49,17 @@ UpdateToolbar :: proc() {
 		toolbar_messages = {"LEVEL UP", ""}
 	}
 	
-	if IsUpgrade(last_hexagon_found) && has_found_upgrade && upgrade_message_time <= 0 && hexagon_found_time > 0 {
+	can_show_upgrade_text := (has_found_upgrade && upgrade_message_time <= 0 && session_playthroughs == 1) || session_playthroughs != 1
+	can_show_spell_text := (has_found_spell && has_opened_spell_menu && has_used_spell && session_playthroughs == 1) || session_playthroughs != 1
+	
+	if IsUpgrade(last_hexagon_found) && can_show_upgrade_text && hexagon_found_time > 0 {
 		hexagon_found_time -= rl.GetFrameTime()
 		msg1 := rl.TextFormat("Found new upgrade for %s", GetHexagonName(GetCorrespondingSpellAsHexagon(last_hexagon_found)))
 		msg2 := rl.TextFormat("%s", GetHexagonName(last_hexagon_found))
 		toolbar_messages = {string(msg1), string(msg2)}
 	}
 	
-	if IsSpell(last_hexagon_found) && has_found_spell && has_opened_spell_menu && has_used_spell && hexagon_found_time > 0 {
+	if IsSpell(last_hexagon_found) && can_show_spell_text && hexagon_found_time > 0 {
 		hexagon_found_time -= rl.GetFrameTime()
 		msg1 := rl.TextFormat("Found new spell: %s", GetHexagonName(last_hexagon_found))
 		msg2: string

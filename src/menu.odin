@@ -7,6 +7,7 @@ import "core:strings"
 GameState :: enum { PLAYING, MAIN, PAUSED, FINISH, ANALYSIS }
 game_state := GameState.MAIN
 menus: [GameState]Menu
+death_sequence_time_left := f32(0)
 
 Menu :: struct {
 	buttons: []Button,
@@ -72,19 +73,46 @@ FinishMenu :: proc() -> Menu { return NewMenu(
 		NewButtonDef("PLAY AGAIN", screen_size / 2 + {-150, 250}, proc(){ ResetGame(); game_state = .PLAYING; player.can_shoot = false }, true),
 		NewButtonDef("LEAVE", screen_size / 2 + {150, 250}, proc(){ game_state = .MAIN }, true),
 	},
+	update = proc(buttons: []Button) {
+		if death_sequence_time_left <= 0 do for &button in buttons do UpdateButton(&button)
+	},
 	draw = proc(buttons: []Button) {
+		if death_sequence_time_left > 0 do death_sequence_time_left -= rl.GetFrameTime()
+	
 		grade := int(GetElapsedStopwatchTime(time_survived) / 50 + f32(points) * 3)
 		if len(player.hexagon_types) == MAX_HEXAGONS do grade += 150
 
 		DrawMainMenuBackground()
+		
 		DrawMenuTitle("YOU DIED")
 		
-		DrawFinishStat("Time Survived: %s", 0, FloatToTimeStr(GetElapsedStopwatchTime(time_survived)))
-		DrawFinishStat("Points: %d", 1, points)
-		DrawFinishStat("Hexahearts: %d", 2, len(player.hexagon_types) - 1)
-		DrawFinishStat("Grade: %s (%d)", 3, GetGrade(grade)[0], grade)
+		if death_sequence_time_left > 7 && death_sequence_time_left < 8 {
+			DrawFinishStat("Time Survived:", 0)
+		} else if death_sequence_time_left <= 7 {
+			DrawFinishStat("Time Survived: %s", 0, FloatToTimeStr(GetElapsedStopwatchTime(time_survived)))
+		}
 		
-		for &button in buttons do DrawButton(button)
+		if death_sequence_time_left > 5 && death_sequence_time_left < 6 {
+			DrawFinishStat("Points:", 1)
+		} else if death_sequence_time_left <= 5 {
+			DrawFinishStat("Points: %d", 1, points)
+		}
+		
+		if death_sequence_time_left > 3 && death_sequence_time_left < 4 {
+			DrawFinishStat("Hexagons Obtained:", 2)
+		} else if death_sequence_time_left <= 3 {
+			DrawFinishStat("Hexagons Obtained: %d", 2, len(player.hexagon_types) - 1)
+		}
+		
+		if death_sequence_time_left <= 2 {
+			DrawTextCenter("Your grade:", screen_size / 2 + {175, -150}, 32, spacing = 2)
+		}
+		
+		if death_sequence_time_left <= 1 {
+			DrawTextCenter(GetGrade(grade)[0], screen_size / 2 + {175, -50}, 128)
+		}
+				
+		if death_sequence_time_left <= 0 do for &button in buttons do DrawButton(button)
 	},
 )}
 

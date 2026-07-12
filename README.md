@@ -61,7 +61,7 @@ Hexamania description goes here
 - ~~powerup draw :>~~
 - ~~shader support~~
 
-#### DAY 5 (FINAL DAY)
+#### DAY 5
 ###### Code
 - ~~Hexagon has eyes <3 that look where your mouse is!~~
 - ~~Death animation~~
@@ -83,11 +83,11 @@ Hexamania description goes here
 - ~~New Background~~
 - ~~Prettier menus, maybe look space-y or some shi~~
 
-#### DAY 6 (FINAL FINAL DAY)
+#### DAY 6 (FINAL DAY)
 - ~~finish tutorial~~
 - ~~redo health bar~~
 - Sound effects
-- death sequence
+- ~~death sequence~~
 - Music! (should be 6/4 lol, calm and relaxing with reverb/echo)
 
 ## HEXAHEARTS

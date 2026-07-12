@@ -31,6 +31,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 	if plr.dead_time > 0.5 {
 		StopStopwatch(&time_survived)
 		game_state = .FINISH
+		death_sequence_time_left = 10
 	}
 	
 	// Manage speed
