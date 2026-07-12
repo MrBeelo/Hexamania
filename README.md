@@ -84,8 +84,10 @@ Hexamania description goes here
 - ~~Prettier menus, maybe look space-y or some shi~~
 
 #### DAY 6 (FINAL FINAL DAY)
-- redo health bar
+- ~~finish tutorial~~
+- ~~redo health bar~~
 - Sound effects
+- death sequence
 - Music! (should be 6/4 lol, calm and relaxing with reverb/echo)
 
 ## HEXAHEARTS

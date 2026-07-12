@@ -17,7 +17,7 @@ Player :: struct {
 
 NewPlayer :: proc() -> Player {
 	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
-	return Player{ NewHexagonClump({.RIFLE}, 0), camera, {}, false, nil }
+	return Player{ NewHexagonClump({.RIFLE, .RIFLE}, 0), camera, {}, false, nil }
 }
 
 GetMaxPlayerVelocity :: proc(plr: Player) -> f32 {
@@ -56,7 +56,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 
 	// Clamp velocities down to 0 if they are low and player isn't moving
 	if !Holding(.HORIZ) && !Holding(.VERT) {
-		DEADZONE :: f32(3)
+		DEADZONE :: f32(10)
 		if math.abs(plr.vel.x) < DEADZONE do plr.vel.x = 0
 		if math.abs(plr.vel.y) < DEADZONE do plr.vel.y = 0
 	}

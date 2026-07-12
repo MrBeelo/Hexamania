@@ -158,3 +158,50 @@ LoadHexagons :: proc() {
 UnloadHexagons :: proc() {
 	for texture in hexagon_textures do rl.UnloadTexture(texture)
 }
+
+IsUpgrade :: proc(type: HexagonType) -> bool {
+	if type == .RIFLE do return false
+	if type == .HEALTH_PAD do return false
+	if type == .ICE_BALL do return false
+	if type == .FIREBALL do return false
+	if type == .BLACK_HOLE do return false
+	return true
+}
+
+IsSpell :: proc(type: HexagonType) -> bool {
+	return !IsUpgrade(type)
+}
+
+GetHexagonName :: proc(type: HexagonType) -> string {
+	/*str := string(rl.TextFormat("%v", type))
+	str, _ = strings.replace(str, "_", " ", -1)
+	str = strings.to_lower(str)
+	return str*/
+	switch type {
+	case .RIFLE: return "the Rifle"
+	case .RIFLE_UPGRADE_FIRE_RATE: return "Increased fire rate"
+	case .RIFLE_UPGRADE_PELLET_SPEED: return "Increased pellet speed"
+	case .RIFLE_UPGRADE_DAMAGE: return "Increased pellet damage"
+	case .HEALTH_PAD: return "Health Pad"
+	case .HEALTH_PAD_UPGRADE_HEAL_AMOUNT: return "Increased heal amount"
+	case .HEALTH_PAD_UPGRADE_SIZE: return "Increased pad size"
+	case .HEALTH_PAD_UPGRADE_TIME: return "Increased duration"
+	case .ICE_BALL: return "Ice Ball"
+	case .ICE_BALL_UPGRADE_RANGE: return "Increased range"
+	case .ICE_BALL_UPGRADE_FLOOR_SIZE: return "Increased size"
+	case .ICE_BALL_UPGRADE_FREEZE_TIME: return "Increased freeze time"
+	case .FIREBALL: return "Fireball"
+	case .FIREBALL_UPGRADE_SIZE: return "Increased size"
+	case .FIREBALL_UPGRADE_TIME: return "Increased duration"
+	case .FIREBALL_UPGRADE_DAMAGE: return "Increased burn damage"
+	case .BLACK_HOLE: return "Black Hole"
+	case .BLACK_HOLE_UPGRADE_SUCTION_POWER: return "Increased suction power"
+	case .BLACK_HOLE_UPGRADE_SIZE: return "Increased size"
+	case .BLACK_HOLE_UPGRADE_TIME: return "Increased duration"
+	}
+	return "ERROR"
+}
+
+GetCorrespondingSpellAsHexagon :: proc(type: HexagonType) -> HexagonType {
+	return GetHexagonTypeFromSpellType(GetSpellFromHexagonType(type))
+}

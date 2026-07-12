@@ -133,8 +133,9 @@ GenEnemyHexagonTypes :: proc(hexagon_types: ^[]HexagonType) {
 	}
 }
 
-GetHexagonTypeFromSpellType :: proc(spell: SpellType) -> HexagonType {
+GetHexagonTypeFromSpellType :: proc(spell: Maybe(SpellType)) -> HexagonType {
 	switch spell {
+	case nil: return .RIFLE
 	case .HEALTH_PAD: return .HEALTH_PAD
 	case .ICE_BALL: return .ICE_BALL
 	case .FIREBALL: return .FIREBALL

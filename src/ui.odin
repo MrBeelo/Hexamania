@@ -18,14 +18,26 @@ UnloadUI :: proc() {
 }
 
 DrawPlayerHealthBar :: proc() {
-	bar_size := rl.Vector2{256, 32}
+	BUFFER :: f32(5)
+	SHELL_BUFFER :: f32(3)
+	bar_size := rl.Vector2{256, 48}
 		
-	shell_pos := rl.Vector2{-3, screen_size.y - bar_size.y}
-	shell_rect := rl.Rectangle{shell_pos.x, shell_pos.y, bar_size.x, bar_size.y}
+	shell_pos := rl.Vector2{-BUFFER, screen_size.y - bar_size.y - BUFFER}
+	shell_rect := rl.Rectangle{shell_pos.x, shell_pos.y, bar_size.x + BUFFER * 2, bar_size.y + BUFFER * 2}
 	rl.DrawRectangleRounded(shell_rect, 0.3, 10, rl.BLACK)
+	
+	health_bar_size := bar_size + 5
+	health_bar_size.x = health_bar_size.x * player.health / GetMaxHealth(len(player.hexagon_types))
+	health_bar_rect := rl.Rectangle{shell_pos.x, shell_pos.y + 5, health_bar_size.x, health_bar_size.y}
+	rl.DrawRectangleRounded(health_bar_rect, 0.3, 10, rl.RED)
+	
+	sprint_bar_size := bar_size + 5
+	sprint_bar_size.x = sprint_bar_size.x * player.spr.sprint_secs / MAX_SPRINT_SECS
+	sprint_bar_rect := rl.Rectangle{shell_pos.x, shell_pos.y + 45, sprint_bar_size.x, sprint_bar_size.y}
+	rl.DrawRectangleRec(sprint_bar_rect, rl.SKYBLUE)
 
-	BUFFER :: f32(3)
-	health_bar_size := bar_size - {BUFFER * 2, BUFFER}
+	
+	/*health_bar_size := bar_size - {BUFFER * 2, BUFFER}
 	health_bar_size.x = health_bar_size.x * player.health / GetMaxHealth(len(player.hexagon_types))
 	health_bar_rect := rl.Rectangle{shell_pos.x + BUFFER, shell_pos.y + BUFFER, health_bar_size.x, health_bar_size.y}
 	rl.DrawRectangleRounded(health_bar_rect, 0.3, 10, rl.RED)
@@ -34,7 +46,7 @@ DrawPlayerHealthBar :: proc() {
 	sprint_bar_size.x = sprint_bar_size.x * player.spr.sprint_secs / MAX_SPRINT_SECS
 	sprint_bar_rect := rl.Rectangle{shell_pos.x + BUFFER, shell_pos.y + BUFFER + bar_size.y * 2 / 3, 
 		sprint_bar_size.x, sprint_bar_size.y}
-	rl.DrawRectangleRounded(sprint_bar_rect, 0.3, 10, rl.SKYBLUE)
+		rl.DrawRectangleRounded(sprint_bar_rect, 0.3, 10, rl.SKYBLUE)*/
 }
 
 DrawSpellMenu :: proc() {

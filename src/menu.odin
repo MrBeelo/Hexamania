@@ -50,14 +50,14 @@ MainMenu :: proc() -> Menu { return NewMenu(
 		DrawMainMenuBackground()
 		DrawMenuTitle("HEXAMANIA")
 		DrawText("Made by MrBeelo for the Raylib 6.x game jam!", {10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
-		DrawText("0.5", {screen_size.x - 32 - 10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
+		DrawText("0.8", {screen_size.x - 32 - 10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
 		for &button in buttons do DrawButton(button)
 	},
 )}
 
 PausedMenu :: proc() -> Menu { return NewMenu(
 	buttons = []Button{
-		NewButtonDef("CONTINUE", screen_size / 2, proc(){ game_state = .PLAYING }),
+		NewButtonDef("CONTINUE", screen_size / 2, proc(){ game_state = .PLAYING; player.can_shoot = false }),
 		NewButtonDef("LEAVE", screen_size / 2 + {0, 100}, proc(){ game_state = .MAIN }),
 	},
 	draw = proc(buttons: []Button) {
@@ -69,7 +69,7 @@ PausedMenu :: proc() -> Menu { return NewMenu(
 
 FinishMenu :: proc() -> Menu { return NewMenu(
 	buttons = []Button{
-		NewButtonDef("PLAY AGAIN", screen_size / 2 + {-150, 250}, proc(){ ResetGame(); game_state = .PLAYING }, true),
+		NewButtonDef("PLAY AGAIN", screen_size / 2 + {-150, 250}, proc(){ ResetGame(); game_state = .PLAYING; player.can_shoot = false }, true),
 		NewButtonDef("LEAVE", screen_size / 2 + {150, 250}, proc(){ game_state = .MAIN }, true),
 	},
 	draw = proc(buttons: []Button) {
@@ -90,7 +90,7 @@ FinishMenu :: proc() -> Menu { return NewMenu(
 
 AnalysisMenu :: proc() -> Menu { return NewMenu(
 	buttons = []Button {
-		NewButtonDef("BACK", screen_size / 2 + {0, 250}, proc(){ game_state = .PLAYING }, true),
+		NewButtonDef("BACK", screen_size / 2 + {0, 250}, proc(){ game_state = .PLAYING; player.can_shoot = false }, true),
 	},
 	draw = proc(buttons: []Button) {
 		DrawMainMenuBackground()

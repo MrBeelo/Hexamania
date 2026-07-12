@@ -56,6 +56,8 @@ UpdateHexagonHeart :: proc(heart: ^HexagonHeart, index: int) {
 	if rl.CheckCollisionRecs(closest_box, heart.hurtbox) {
 		if len(hearts) > index do unordered_remove(&hearts, index)
 		AddHexagonToClump(&player.clump, heart.type)
+		last_hexagon_found = heart.type
+		hexagon_found_time = 5
 		
 		if heart.type == .HEALTH_PAD || heart.type == .ICE_BALL || heart.type == .FIREBALL || heart.type == .BLACK_HOLE {
 			has_found_spell = true

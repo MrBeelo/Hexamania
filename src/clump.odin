@@ -41,7 +41,7 @@ SprintPackage :: struct {
 }
 
 GetMaxHealth :: proc(hexagons: int) -> f32 {
-	return BASE_MAX_HEALTH + (f32(hexagons) - 1) * 5
+	return BASE_MAX_HEALTH + (f32(hexagons) - 2) * 5
 }
 
 NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel := rl.Vector2{}, rot := f32(0)) -> HexagonClump {
@@ -228,6 +228,7 @@ DamageClumpNoAttacker :: proc(clump: ^HexagonClump, amount: f32) {
 HealClump :: proc(clump: ^HexagonClump, amount: f32) {
 	if clump.health <= 0 do return
 	clump.health += amount
+	if clump.health > GetMaxHealth(len(clump.hexagon_types)) do clump.health = GetMaxHealth(len(clump.hexagon_types))
 }
 
 GetClumpHexagons :: proc(clump: HexagonClump) -> []Hexagon {

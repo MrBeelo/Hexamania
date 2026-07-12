@@ -218,7 +218,7 @@ UpdateFireball :: proc(ball: ^Fireball, index: int) {
 		if clump.uuid == ball.owner do continue
 		if ClumpIntersectsCircle(clump^, ball.pos, ball.size) { 
 			if len(spells) > index do unordered_remove(&spells, index)
-			DamageClumpNoAttacker(clump, 40)
+			DamageClumpNoAttacker(clump, 65)
 			clump.burning = { damage_timer, ball.burn_time, ball.damage }
 			exploded = true
 			exploded_clump_uuid = clump.uuid
