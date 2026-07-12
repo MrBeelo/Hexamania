@@ -28,11 +28,7 @@ GetMaxPlayerVelocity :: proc(plr: Player) -> f32 {
 
 UpdatePlayer :: proc(plr: ^Player) {
 	// Manage death
-	if plr.dead_time > 0.5 {
-		StopStopwatch(&time_survived)
-		game_state = .FINISH
-		death_sequence_time_left = 10
-	}
+	if plr.dead_time > 0.5 do StartDeathSequence()
 	
 	// Manage speed
 	speed := GetPlayerSpeed(plr^)

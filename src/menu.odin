@@ -74,10 +74,13 @@ FinishMenu :: proc() -> Menu { return NewMenu(
 		NewButtonDef("LEAVE", screen_size / 2 + {150, 250}, proc(){ game_state = .MAIN }, true),
 	},
 	update = proc(buttons: []Button) {
-		if death_sequence_time_left <= 0 do for &button in buttons do UpdateButton(&button)
+		if death_sequence_time_left <= 0 {
+			for &button in buttons do UpdateButton(&button)
+			should_play_death_music = false
+		}
 	},
 	draw = proc(buttons: []Button) {
-		if death_sequence_time_left > 0 do death_sequence_time_left -= rl.GetFrameTime()
+		death_sequence_time_left -= rl.GetFrameTime()
 	
 		grade := int(GetElapsedStopwatchTime(time_survived) / 50 + f32(points) * 3)
 		if len(player.hexagon_types) == MAX_HEXAGONS do grade += 150
@@ -135,6 +138,14 @@ AnalysisMenu :: proc() -> Menu { return NewMenu(
 		for &button in buttons do DrawButton(button)
 	},
 )}
+
+StartDeathSequence :: proc() {
+	StopStopwatch(&time_survived)
+	game_state = .FINISH
+	death_sequence_time_left = 10
+	should_play_death_music = true
+	rl.PlayMusicStream(death_music)
+}
 
 GetGrade :: proc(num: int) -> [2]string {	
 	switch {

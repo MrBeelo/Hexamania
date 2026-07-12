@@ -28,6 +28,7 @@ init :: proc() {
 	LoadSpells()
 	LoadUI()
 	LoadSounds()
+	LoadMusic()
 	
 	InitMenus()
 	InitEnemies()
@@ -46,10 +47,11 @@ update :: proc() {
 		
 		if rl.IsKeyPressed(.ESCAPE) do game_state = .PAUSED
 		if rl.IsKeyPressed(.LEFT_CONTROL) do game_state = .ANALYSIS
+		if rl.IsKeyPressed(.K) do player.health = -1
 	}
 
+	UpdateMusic()
 	if rl.IsKeyPressed(.F3) do debug_on = !debug_on
-	//if rl.IsKeyPressed(.N) do AddHexagonToClump(&player.clump, .RIFLE)
 	
 	rl.BeginDrawing()
 	defer rl.EndDrawing()
@@ -105,6 +107,7 @@ close :: proc() {
 	UnloadSpells()
 	UnloadUI()
 	UnloadSounds()
+	UnloadMusic()
 
 	rl.CloseAudioDevice()
 	rl.CloseWindow() 

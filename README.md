@@ -87,8 +87,9 @@ Hexamania description goes here
 - ~~finish tutorial~~
 - ~~redo health bar~~
 - Sound effects
+- add the .io thing on the logo
 - ~~death sequence~~
-- Music! (should be 6/4 lol, calm and relaxing with reverb/echo)
+- ~~Music! (should be 6/4 lol, calm and relaxing with reverb/echo)~~
 
 ## HEXAHEARTS
 
