@@ -89,7 +89,7 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 	
 	if rl.CheckCollisionRecs(closest_box, powerup.hurtbox) {
 		if len(world_powerups) > index do unordered_remove(&world_powerups, index)
-		
+		rl.PlaySound(merge)
 		has_found_powerup = true
 
 		value := powerup.value

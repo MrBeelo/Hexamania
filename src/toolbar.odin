@@ -16,6 +16,7 @@ has_used_spell: bool
 level_up_time: f32
 last_hexagon_found: HexagonType
 hexagon_found_time := f32(0)
+has_killed_enemy: bool
 
 UpdateToolbar :: proc() {
 	toolbar_messages = {}
@@ -38,6 +39,8 @@ UpdateToolbar :: proc() {
 				toolbar_messages = {"You can see your active powerups", "above the map."}
 			}
 		}
+		if has_killed_enemy && !has_found_spell && !has_found_upgrade do toolbar_messages = {"Pick up its heart to", "MERGE with it!"}
+		if !has_killed_enemy do toolbar_messages = {"Go find an enemy and kill them!", "(look for red dots in your map for help)"}
 		if !has_shot do toolbar_messages = {"Left Click to Shoot", ""}
 		if !has_sprinted do toolbar_messages = {"Left Shift to Sprint", ""}
 		if !has_moved do toolbar_messages = {"WASD / Arrow Keys to Move", ""}

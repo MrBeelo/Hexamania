@@ -86,8 +86,9 @@ Hexamania description goes here
 #### DAY 6 (FINAL DAY)
 - ~~finish tutorial~~
 - ~~redo health bar~~
-- Sound effects
-- add the .io thing on the logo
+- ~~Sound effects~~
+- ~~add the .io thing on the logo~~
+- ~~has_killed_enemy info~~
 - ~~death sequence~~
 - ~~Music! (should be 6/4 lol, calm and relaxing with reverb/echo)~~
 

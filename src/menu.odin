@@ -50,8 +50,9 @@ MainMenu :: proc() -> Menu { return NewMenu(
 	draw = proc(buttons: []Button) {
 		DrawMainMenuBackground()
 		DrawMenuTitle("HEXAMANIA")
+		DrawText(".io", {screen_size.x / 2 + 250, 80}, 32, spacing = 2)
 		DrawText("Made by MrBeelo for the Raylib 6.x game jam!", {10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
-		DrawText("0.8", {screen_size.x - 32 - 10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
+		DrawText("1.0", {screen_size.x - 32 - 10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
 		for &button in buttons do DrawButton(button)
 	},
 )}

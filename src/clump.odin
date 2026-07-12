@@ -217,12 +217,15 @@ DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) 
 		attacker.kill_happiness_time = 2
 	 	if attacker.uuid == player.uuid do points += len(clump.hexagon_types)
 	}
+	
+	if clump.uuid == player.uuid do rl.PlaySound(damaged)
 }
 
 DamageClumpNoAttacker :: proc(clump: ^HexagonClump, amount: f32) {
 	if clump.grace_period > 0 do return
 	clump.health -= amount
 	clump.grace_period = 0.15
+	if clump.uuid == player.uuid do rl.PlaySound(damaged)
 }
 
 HealClump :: proc(clump: ^HexagonClump, amount: f32) {
