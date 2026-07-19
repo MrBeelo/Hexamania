@@ -5,16 +5,38 @@ You're basically a little hexagon guy and you shoot at other hexagons
 to get their hearts, merge them with your hexagon body, and become bigger.  
 Like all good .io games, of course, the enemies are just bots.  
 
-HUGE NOTE: I am aware of a bug that instantly crashes the game after some point.  
-It has something to do with exceeded memory (details can be found on the console)  
-I have to admit that not playtesting enough to catch this was a huge mistake in my part,  
-I also didn't bother optimizing any of the code, I assumed it wouldn't matter since this is  
-a really small game, and it would run fine, even without the optimizations.  
-I'll probably not be updating this game anymore, or at least not until the voting period is over,  
-so there's a good chance this crash is engraved into the game forever!  
-I've learned from my mistakes :D  
+This is my first game jam, I dove straight in without any sort of preperation...  
+It was more difficult than I expected, originally the plan was to make a relatively  
+small game, but as time passed, I wanted to add more and more things.  
 
-Below is the game plan (each bullet is exactly how I had written it while making the game lol)
+Originally, I was planning to finish the code by the second day, art by the third  
+and sound by the fourth, which would've left 2 extra days of bugfixing, playtesting,  
+and balancing. Unfortunately, I ended up finishing the code on the last day, which  
+meant I had to do the code, art, and sound simultaneously. This isn't because I'm a  
+slow programmer (okay maybe it is), it's because I wasn't very in-depth when making the  
+game plan. From a glance, it seemed like there weren't that many things to do, so I adjusted  
+the plan accordingally. However, I realised that my "tasks" for each day were way too vague,  
+they had additional sub-tasks that I didn't take into account, that ended up costing me  
+a lot of time.  
+
+I went in thinking that I shouldn't have worried about the cleanness(?) of my code. In general,  
+I did a lot of copy pasting, and applied some design philosophies that are pretty bad. This cost me  
+a memory leak that I decided to ingore, that ended up making the game unplayable after some point! (this is fixed)  
+If I end up updating the game, I'd like to clean the code up a lot.  
+
+There were also some bugs and QoLs that I didn't have the time to fix,  
+most notably a bug that crashed the game because of a memory leak, as mentioned above.  
+I ended up fixing this and a few more, and I will probably be fixing the rest of them at a later date.  
+
+In general I was pretty happy with how it turned out, even though my score isn't the best,  
+I'm satisfied enough, as I had no idea what I was doing. I will probably be updating the game,  
+as I like the idea and want to completely finish the project. I ended up not adding a lot of things  
+because of the time constraint, so there's a chance I'll be adding those, but at the same time, I want  
+to keep the game about the same as it was at launch.
+
+Below is the game roadmap. Note that this isn't like it was at launch, as I ended up having to  
+move/postpone a lot of tasks. These are exactly how I had written them while making the plan.  
+(some were added later)  
 
 #### DAY 1
 - Start out in the center of a map, nothing else around you
@@ -103,3 +125,6 @@ Below is the game plan (each bullet is exactly how I had written it while making
 - has_killed_enemy info
 - death sequence
 - Music! (should be 6/4 lol, calm and relaxing with reverb/echo)
+
+Ultimately, some of these (like shaders and collisions) weren't added. I had some prototype  
+versions, but they ended up being too buggy or didn't fit in, so I had to scrap them.

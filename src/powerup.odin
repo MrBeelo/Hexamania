@@ -76,7 +76,7 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 	RANGE :: f32(100)
 	lowest_dist := RANGE
 	closest_box: rl.Rectangle
-	for hexagon in GetClumpHexagons(player.clump) {
+	for hexagon in player.clump.hexagons {
 		dist := rl.Vector2Distance(powerup.pos, hexagon.center)
 		if dist >= RANGE do continue
 		if dist < lowest_dist {

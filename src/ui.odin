@@ -61,7 +61,7 @@ DrawSpellMenu :: proc() {
 	}
 
 	cooldown := int(math.ceil(player.spell_cooldowns[player.active_spell.?]))
-	cooldown_text := string(rl.TextFormat("%d", cooldown))
+	cooldown_text := rl.TextFormat("%d", cooldown)
 	BOX_SIZE :: f32(96)
 	BUFFER :: f32(15)
 

@@ -28,7 +28,7 @@ MODE := web
 ODIN_PATH := $(shell odin root)
 
 # Path to emscripten compiler. (needed for web building only)
-EMCC := emcc
+EMCC := /usr/lib/emscripten/emcc
 
 #--SCRIPT--
 

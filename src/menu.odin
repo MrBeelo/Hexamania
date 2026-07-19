@@ -1,8 +1,6 @@
 package main
 
 import rl "vendor:raylib"
-import "core:fmt"
-import "core:strings"
 
 GameState :: enum { PLAYING, MAIN, PAUSED, FINISH, ANALYSIS }
 game_state := GameState.MAIN
@@ -52,7 +50,7 @@ MainMenu :: proc() -> Menu { return NewMenu(
 		DrawMenuTitle("HEXAMANIA")
 		DrawText(".io", {screen_size.x / 2 + 250, 80}, 32, spacing = 2)
 		DrawText("Made by MrBeelo for the Raylib 6.x game jam!", {10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
-		DrawText("1.0", {screen_size.x - 32 - 10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
+		DrawText("1.1", {screen_size.x - 32 - 10, screen_size.y - 24 - 10}, 24, .QUICKSAND_LIGHT, spacing = 2)
 		for &button in buttons do DrawButton(button)
 	},
 )}
@@ -97,15 +95,15 @@ FinishMenu :: proc() -> Menu { return NewMenu(
 		}
 		
 		if death_sequence_time_left > 5 && death_sequence_time_left < 6 {
-			DrawFinishStat("Points:", 1)
+			DrawFinishStat("Kills:", 1)
 		} else if death_sequence_time_left <= 5 {
-			DrawFinishStat("Points: %d", 1, points)
+			DrawFinishStat("Kills: %d", 1, kills)
 		}
 		
 		if death_sequence_time_left > 3 && death_sequence_time_left < 4 {
 			DrawFinishStat("Hexagons Obtained:", 2)
 		} else if death_sequence_time_left <= 3 {
-			DrawFinishStat("Hexagons Obtained: %d", 2, len(player.hexagon_types) - 1)
+			DrawFinishStat("Hexagons Obtained: %d", 2, len(player.hexagon_types) - 2)
 		}
 		
 		if death_sequence_time_left <= 2 {
@@ -148,7 +146,7 @@ StartDeathSequence :: proc() {
 	rl.PlayMusicStream(death_music)
 }
 
-GetGrade :: proc(num: int) -> [2]string {	
+GetGrade :: proc(num: int) -> [2]cstring {	
 	switch {
 	case num < 50: return {"F", "Yeah, that was pretty bad...\n But it's okay! Try again and you'll\n get better!"}
 	case num < 120: return {"D", "Not good, but not terrible either.\n Try getting more kills to maximize\n your hexahearts and your score!"}
@@ -167,31 +165,37 @@ ResetGame :: proc() {
 	clear(&hearts)
 	clear(&world_powerups)
 	points = 0
+	
 	StartStopwatch(&time_survived)
 	session_playthroughs += 1
+
+	powerup_message_time = 10
+	upgrade_message_time = 10
+	hexagon_found_time = 0
 }
 
 // Helper functions so that I dont have to rewrite the code again and again:
 
-DrawMenuTitle :: proc(text: string) {
+DrawMenuTitle :: proc(text: cstring) {
 	DrawTextCenter(text, {screen_size.x / 2, 70}, 96, .QUICKSAND_HEAVY, border_info = {true, 3, rl.BLACK})
 }
 
-NewButtonDef :: proc(text: string, center: rl.Vector2, function: proc(), small := false) -> Button {
+NewButtonDef :: proc(text: cstring, center: rl.Vector2, function: proc(), small := false) -> Button {
 	return NewButton(text, center, function, 64 if !small else 48, .QUICKSAND_MEDIUM, {rl.WHITE, rl.YELLOW}, 5)
 }
 
-DrawFinishStat :: proc(text: string, index: int, args: ..any) {
-	str := string(fmt.ctprintf(text, ..args))
+DrawFinishStat :: proc(text: cstring, index: int, args: ..any) {
+	str := rl.TextFormat(text, ..args)
 	pos := rl.Vector2{screen_size.x / 2 - 300, screen_size.y / 2 - 150 + f32(index) * 40}
 	DrawText(str, pos, 32, spacing = 3)
 }
 
-DrawAnalysisStat :: proc(text: string, index: int, args: ..any) {
-	str := string(fmt.ctprintf(text, ..args))
+DrawAnalysisStat :: proc(text: cstring, index: int, args: ..any) {
+	str := rl.TextFormat(text, ..args)
 	pos := rl.Vector2{screen_size.x / 2 - 300, screen_size.y / 2 - 150 + f32(index) * 50}
-	strs := strings.split(str, "\n")
-	assert(len(strs) == 2)
+	count: i32
+	strs := rl.TextSplit(str, '\n', &count)
+	//strs := strings.split(str, "\n")
 	DrawText(strs[0], pos, 24, spacing = 3)
 	DrawText(strs[1], pos + {0, 25}, 24, spacing = 3)
 }

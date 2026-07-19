@@ -2,7 +2,7 @@ package main
 
 import rl "vendor:raylib"
 
-toolbar_messages: [2]string
+toolbar_messages: [2]cstring
 has_moved: bool
 has_sprinted: bool
 has_shot: bool
@@ -59,20 +59,20 @@ UpdateToolbar :: proc() {
 		hexagon_found_time -= rl.GetFrameTime()
 		msg1 := rl.TextFormat("Found new upgrade for %s", GetHexagonName(GetCorrespondingSpellAsHexagon(last_hexagon_found)))
 		msg2 := rl.TextFormat("%s", GetHexagonName(last_hexagon_found))
-		toolbar_messages = {string(msg1), string(msg2)}
+		toolbar_messages = {msg1, msg2}
 	}
 	
 	if IsSpell(last_hexagon_found) && can_show_spell_text && hexagon_found_time > 0 {
 		hexagon_found_time -= rl.GetFrameTime()
 		msg1 := rl.TextFormat("Found new spell: %s", GetHexagonName(last_hexagon_found))
-		msg2: string
+		msg2: cstring
 		#partial switch last_hexagon_found {
 		case .HEALTH_PAD: msg2 = "Throw a health pad down to heal yourself!"
 		case .ICE_BALL: msg2 = "Throw an ice ball to freeze enemies!"
 		case .FIREBALL: msg2 = "Throw a fireball to burn enemies!"
 		case .BLACK_HOLE: msg2 = "Throw a black hole to suck enemies to it!"
 		}
-		toolbar_messages = {string(msg1), msg2}
+		toolbar_messages = {msg1, msg2}
 	}
 }
 

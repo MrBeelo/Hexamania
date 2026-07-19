@@ -103,7 +103,7 @@ UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
 	if pad.time_left <= 0.3 do pad.size = pad.max_size * (pad.time_left / 0.3)
 	
 	UpdateTimer(&pad.heal_timer)
-	if pad.heal_timer.ding do for clump in GetAllClumps() {
+	if pad.heal_timer.ding do for clump in hexagon_clumps {
 		if clump.uuid != pad.owner do continue
 		rect := rl.Rectangle{pad.pos.x - pad.size / 2, pad.pos.y - pad.size / 2, pad.size, pad.size}
 		if ClumpIntersectsRect(clump^, rect) do HealClump(clump, pad.heal_amount)
@@ -156,7 +156,7 @@ ThrowIceBall :: proc(clump: ^HexagonClump, vel: rl.Vector2) {
 }
 
 UpdateIceBall :: proc(ball: ^IceBall, index: int) {
-	for clump in GetAllClumps() {
+	for clump in hexagon_clumps {
 		if clump.uuid == ball.owner do continue
 		if ClumpIntersectsCircle(clump^, ball.pos, ball.size) do clump.frozen_time_left = ball.freeze_time
 	}
@@ -214,7 +214,7 @@ UpdateFireball :: proc(ball: ^Fireball, index: int) {
 	exploded_clump_uuid: uuid.Identifier
 	damage_timer := NewTimer(1, true, true)
 	
-	for clump in GetAllClumps() {
+	for clump in hexagon_clumps {
 		if clump.uuid == ball.owner do continue
 		if ClumpIntersectsCircle(clump^, ball.pos, ball.size) { 
 			if len(spells) > index do unordered_remove(&spells, index)
@@ -226,7 +226,7 @@ UpdateFireball :: proc(ball: ^Fireball, index: int) {
 		}
 	}
 
-	if exploded do for nearby_clump in GetAllClumps() {
+	if exploded do for nearby_clump in hexagon_clumps {
 		if nearby_clump.uuid == exploded_clump_uuid || nearby_clump.uuid == ball.owner do return
 		if ClumpIntersectsCircle(nearby_clump^, ball.pos, ball.size * 3) { 
 			nearby_clump.burning = { damage_timer, ball.burn_time, ball.damage }
@@ -295,7 +295,7 @@ UpdateBlackHole :: proc(hole: ^BlackHole, index: int) {
 	Accelerate(&hole.vel.x, 0, BLACK_HOLE_DECELERATION)
 	Accelerate(&hole.vel.y, 0, BLACK_HOLE_DECELERATION)
 	
-	for clump in GetAllClumps() {
+	for clump in hexagon_clumps {
 		if clump.uuid == hole.owner do continue
 		if rl.Vector2Distance(hole.pos, clump.pos) > hole.size * 25 do continue
 		target_vel := VelocityFrom2Points(clump.pos, hole.pos) * 60

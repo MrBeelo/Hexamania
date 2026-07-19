@@ -28,7 +28,8 @@ UpdateMusic :: proc() {
 		if rl.IsMusicStreamPlaying(main_menu_music) do rl.StopMusicStream(main_menu_music)
 	}
 	
-	if game_state == .PLAYING { 
+	if game_state == .PLAYING || game_state == .PAUSED || game_state == .ANALYSIS { 
+		rl.SetMusicVolume(game_music, 1 if game_state == .PLAYING else 0.3)
 		if !rl.IsMusicStreamPlaying(game_music) do rl.PlayMusicStream(game_music)
 	} else {
 		if rl.IsMusicStreamPlaying(game_music) do rl.StopMusicStream(game_music)

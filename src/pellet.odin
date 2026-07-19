@@ -57,7 +57,7 @@ UpdatePellet :: proc(pellet: ^Pellet, index: int) {
 	pellet.pos += pellet.vel * pellet.speed * rl.GetFrameTime()
 	if rl.Vector2Distance(pellet.pos, player.pos) > screen_size.x do if len(pellets) > index do unordered_remove(&pellets, index)
 
-	for clump in GetAllClumps() do if clump.uuid != pellet.owner && clump.grace_period <= 0 do for hexagon in GetClumpHexagons(clump^) {
+	for clump in hexagon_clumps do if clump.uuid != pellet.owner && clump.grace_period <= 0 do for hexagon in clump.hexagons {
 		if rl.Vector2Distance(pellet.pos, hexagon.center) > 100 do continue
 		if rl.CheckCollisionPointRec(pellet.pos, hexagon.hurtbox) {
 			DamageClump(clump, pellet.damage, GetClumpFromUUID(pellet.owner))

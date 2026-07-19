@@ -35,6 +35,7 @@ init :: proc() {
 }
 
 update :: proc() {
+	ResetHexagonClumps()
 	UpdateMenus()
 	if game_state == .PLAYING {
 		UpdatePlayer(&player)

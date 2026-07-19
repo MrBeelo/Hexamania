@@ -43,7 +43,7 @@ UpdateHexagonHeart :: proc(heart: ^HexagonHeart, index: int) {
 
 	lowest_dist := f32(9999)
 	closest_box: rl.Rectangle
-	for hexagon in GetClumpHexagons(player.clump) {
+	for hexagon in player.clump.hexagons {
 		dist := rl.Vector2Distance(heart.center, hexagon.center)
 		if dist < lowest_dist {
 			lowest_dist = dist

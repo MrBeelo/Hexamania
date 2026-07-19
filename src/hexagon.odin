@@ -84,7 +84,7 @@ DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOver
 
 	// Draw overlays
 	if overlay != nil do switch o in overlay.? {
-	case HexagonFrozenOverlay: rl.DrawTexturePro(hexagon_overlays[.FREEZE], src, dest, HEXAGON_SIZE / 2, hex.rot, rl.WHITE)
+	case HexagonFrozenOverlay: rl.DrawTexturePro(hexagon_overlays[.FREEZE], src, dest, HEXAGON_SIZE / 2, hex.rot, color)
 	case HexagonBurningOverlay: {
 		for i in 0..=2 {
 			burn_texture: rl.Texture2D
@@ -94,7 +94,7 @@ DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOver
 			case 2: burn_texture = hexagon_overlays[.BURN3]
 			}
 
-			burn_color := GetBurningOverlayColor(f32(i) / 3)
+			burn_color := GetBurningOverlayColor(f32(i) / 3, opacity)
 			rl.DrawTexturePro(burn_texture, src, dest, HEXAGON_SIZE / 2, hex.rot, burn_color)
 		}
 	}
@@ -107,11 +107,13 @@ DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOver
 	}
 }
 
-GetBurningOverlayColor :: proc(time_delay: f32) -> rl.Color {
+GetBurningOverlayColor :: proc(time_delay: f32, opacity := u8(255)) -> rl.Color {
 	time := f32(rl.GetTime()) + time_delay
 	time = math.mod_f32(time, 1)
 	factor := math.sin(rl.PI * time)
-	return rl.ColorLerp(rl.RED, rl.Color{244, 60, 0, 255}, factor)
+	color := rl.ColorLerp(rl.RED, rl.Color{244, 60, 0, 255}, factor)
+	color.a = opacity
+	return color
 }
 
 LoadHexagon :: proc(name: string) -> rl.Texture2D { 

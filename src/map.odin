@@ -29,7 +29,7 @@ DrawMap :: proc() {
 	rl.DrawRectangleLinesEx(screen_border_rect, 2, rl.BLUE)
 
 	// Draw clumps (entities)
-	for clump in GetAllClumps() {
+	for clump in hexagon_clumps {
 		color := rl.BLUE if clump.uuid == player.uuid else rl.RED
 		DrawInMap(clump.pos, color, screen_to_map_ratio, map_rect)
 	}

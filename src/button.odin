@@ -3,7 +3,7 @@ package main
 import rl "vendor:raylib"
 
 Button :: struct {
-	text: string,
+	text: cstring,
 	center: rl.Vector2, 
 	function: proc(),
 	size: f32,
@@ -12,7 +12,7 @@ Button :: struct {
 	spacing: f32,
 }
 
-NewButton :: proc(text: string, center: rl.Vector2, function: proc(), size: f32,
+NewButton :: proc(text: cstring, center: rl.Vector2, function: proc(), size: f32,
 font_type := FontType.QUICKSAND_MEDIUM, colors: [2]rl.Color = rl.WHITE, spacing := f32(5)) -> Button {
 	return Button{text, center, function, size, font_type, colors, spacing}
 }

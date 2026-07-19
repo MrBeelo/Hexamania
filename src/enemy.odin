@@ -251,7 +251,7 @@ GetClosestClump :: proc(enemy: ^Enemy, range: f32) -> (found: bool, clump: ^Hexa
 	closest_clump: ^HexagonClump = nil
 	
 	level := f32(GetLevel(enemy.hexagon_types))
-	for other_clump in GetAllClumps() {
+	for other_clump in hexagon_clumps {
 		if enemy.uuid == other_clump.uuid do continue
 		other_level := f32(GetLevel(other_clump.hexagon_types))
 		dist := rl.Vector2Distance(enemy.pos, other_clump.pos) - HEXAGON_SIZE * (level + other_level - 2)
