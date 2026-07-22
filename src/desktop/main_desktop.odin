@@ -5,6 +5,6 @@ import game ".."
 
 main :: proc() {
 	game.init()
-	for !rl.WindowShouldClose() && !game.should_close do game.update()
+	for !rl.WindowShouldClose() do game.update()
 	game.close()
 }

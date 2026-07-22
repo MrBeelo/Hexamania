@@ -16,7 +16,7 @@ Player :: struct {
 }
 
 NewPlayer :: proc() -> Player {
-	camera := rl.Camera2D{screen_size / 2, 0, 0, 1}
+	camera := rl.Camera2D{SCREEN_SIZE / 2, 0, 0, 1}
 	return Player{ NewHexagonClump({.RIFLE, .RIFLE}, 0), camera, {}, false, nil }
 }
 
@@ -124,7 +124,7 @@ ChangePlayerActiveSpell :: proc(up: bool, start_spell: SpellType, test_spell: Sp
 DrawPlayer :: proc(plr: ^Player) {
 	DrawHexagonClump(plr.clump)
 	DrawPlayerFace()
-	if debug_on do DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
+	if DEBUG_ON do DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
 }
 
 GetPlayerSpeed :: proc(plr: Player) -> f32 {
@@ -136,7 +136,7 @@ GetPlayerSpeed :: proc(plr: Player) -> f32 {
 HandlePlayerCamera :: proc(plr: ^Player) {	
 	for i in 0..=1 {
 		diff := plr.pos[i] - plr.camera.target[i]
-		threshold := screen_size[i] / 10 / plr.camera.zoom
+		threshold := SCREEN_SIZE[i] / 10 / plr.camera.zoom
 
 		if diff > threshold do plr.camera.target[i] = plr.pos[i] - threshold
 		if diff < -threshold do plr.camera.target[i] = plr.pos[i] + threshold
@@ -178,7 +178,7 @@ GetLevel :: proc(hexagon_types: []HexagonType) -> int {
 
 // For spawning enemies and powerups
 GetRandomSpawnPos :: proc(range: f32 = 120) -> rl.Vector2 {
-	visible_screen_size := screen_size / player.camera.zoom
+	visible_screen_size := SCREEN_SIZE / player.camera.zoom
 	min_dist := visible_screen_size / 2
 	max_dist := min_dist + range
 
@@ -197,7 +197,7 @@ GetRandomSpawnPos :: proc(range: f32 = 120) -> rl.Vector2 {
 }
 
 GetWorldCameraRect :: proc(cam := player.camera) -> rl.Rectangle {
-	size := screen_size * cam.zoom
+	size := SCREEN_SIZE * cam.zoom
 	pos := cam.target - size / 2
 	return {pos.x, pos.y, size.x, size.y}
 }

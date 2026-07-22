@@ -8,8 +8,8 @@ DrawMap :: proc() {
 	if player.camera.zoom == 0 do return
 
 	map_zoom :: 0.5
-	sim_scr_size := (screen_size / player.camera.zoom) / map_zoom
-	map_center := screen_size - MAP_SIZE / 2
+	sim_scr_size := (SCREEN_SIZE / player.camera.zoom) / map_zoom
+	map_center := SCREEN_SIZE - MAP_SIZE / 2
 	screen_to_map_ratio := MAP_SIZE / sim_scr_size.x
 
 	// Draw map background

@@ -22,7 +22,7 @@ DrawPlayerHealthBar :: proc() {
 	SHELL_BUFFER :: f32(3)
 	bar_size := rl.Vector2{256, 48}
 		
-	shell_pos := rl.Vector2{-BUFFER, screen_size.y - bar_size.y - BUFFER}
+	shell_pos := rl.Vector2{-BUFFER, SCREEN_SIZE.y - bar_size.y - BUFFER}
 	shell_rect := rl.Rectangle{shell_pos.x, shell_pos.y, bar_size.x + BUFFER * 2, bar_size.y + BUFFER * 2}
 	rl.DrawRectangleRounded(shell_rect, 0.3, 10, rl.BLACK)
 	
@@ -66,11 +66,11 @@ DrawSpellMenu :: proc() {
 	BUFFER :: f32(15)
 
 	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
-	dest := rl.Rectangle{screen_size.x - BOX_SIZE / 2 - BUFFER, BUFFER + BOX_SIZE / 2, BOX_SIZE, BOX_SIZE}
+	dest := rl.Rectangle{SCREEN_SIZE.x - BOX_SIZE / 2 - BUFFER, BUFFER + BOX_SIZE / 2, BOX_SIZE, BOX_SIZE}
 	rot := math.mod_f32(f32(rl.GetTime()), 360) * 15
 	
 	rl.DrawTexturePro(texture, src, dest, BOX_SIZE / 2, rot, rl.WHITE if cooldown <= 0 else rl.GRAY)
-	if cooldown > 0 do DrawTextCenter(cooldown_text, {screen_size.x - (BUFFER + BOX_SIZE / 2), BUFFER + BOX_SIZE / 2}, 32, .QUICKSAND_MEDIUM)
+	if cooldown > 0 do DrawTextCenter(cooldown_text, {SCREEN_SIZE.x - (BUFFER + BOX_SIZE / 2), BUFFER + BOX_SIZE / 2}, 32, .QUICKSAND_MEDIUM)
 }
 
 DrawActiveSpellPreview :: proc() {
@@ -120,7 +120,7 @@ DrawBoundPowerups :: proc(bound_powerups: [PowerupType]BoundPowerup) {
 		case .DAMAGE, .SPEED: {
 			if powerup.time_remaining <= 0 do continue
 			src := rl.Rectangle{0, 0, f32(powerup_textures[type].width), f32(powerup_textures[type].height)}
-			pos := screen_size - {(SIZE + BUFFER if type == .SPEED else 0) + SIZE / 2 + BUFFER, MAP_SIZE + SIZE / 2 + BUFFER}
+			pos := SCREEN_SIZE - {(SIZE + BUFFER if type == .SPEED else 0) + SIZE / 2 + BUFFER, MAP_SIZE + SIZE / 2 + BUFFER}
 			dest := rl.Rectangle{pos.x, pos.y, SIZE, SIZE}
 
 			opacity := f32(255)

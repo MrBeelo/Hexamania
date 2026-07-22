@@ -55,7 +55,7 @@ UpdatePellets :: proc() { for &pellet, index in pellets do UpdatePellet(&pellet,
 
 UpdatePellet :: proc(pellet: ^Pellet, index: int) {
 	pellet.pos += pellet.vel * pellet.speed * rl.GetFrameTime()
-	if rl.Vector2Distance(pellet.pos, player.pos) > screen_size.x do if len(pellets) > index do unordered_remove(&pellets, index)
+	if rl.Vector2Distance(pellet.pos, player.pos) > SCREEN_SIZE.x do if len(pellets) > index do unordered_remove(&pellets, index)
 
 	for clump in hexagon_clumps do if clump.uuid != pellet.owner && clump.grace_period <= 0 do for hexagon in clump.hexagons {
 		if rl.Vector2Distance(pellet.pos, hexagon.center) > 100 do continue
@@ -70,5 +70,5 @@ DrawPellets :: proc() { for pellet in pellets do DrawPellet(pellet) }
 
 DrawPellet :: proc(pellet: Pellet) {
 	rl.DrawCircleV(pellet.pos, 3, rl.WHITE)
-	if debug_on do DrawDebugText(pellet.pos, "Owner: %s", ShortUUID(pellet.owner))
+	if DEBUG_ON do DrawDebugText(pellet.pos, "Owner: %s", ShortUUID(pellet.owner))
 }

@@ -71,5 +71,5 @@ DrawHexagonHearts :: proc() { for heart in hearts do DrawHexagonHeart(heart) }
 DrawHexagonHeart :: proc(heart: HexagonHeart) {
 	rl.DrawCircleGradient(heart.center, 40, rl.SKYBLUE, rl.BLANK)
 	DrawHexagon(heart.hexagon)
-	if debug_on do DrawDebugText(heart.center, "%.1f, %.1f", heart.vel.x, heart.vel.y)
+	if DEBUG_ON do DrawDebugText(heart.center, "%.1f, %.1f", heart.vel.x, heart.vel.y)
 }

@@ -173,7 +173,7 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 	
 	for hexagon in clump.hexagons do DrawHexagon(hexagon, opacity, overlay)
 	
-	if debug_on do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
+	if DEBUG_ON do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
 
 // This is a broken buggy mess. I don't have time to implement good collisions
@@ -225,7 +225,7 @@ DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) 
 		attacker.kill_happiness_time = 2
 	 	if attacker.uuid == player.uuid {
 			kills += 1
-			points += len(clump.hexagon_types)
+			killed_hexagons += len(clump.hexagon_types)
 		}
 	}
 	

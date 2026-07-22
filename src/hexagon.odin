@@ -101,7 +101,7 @@ DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOver
 	case HexagonStaticOverlay: rl.DrawTexturePro(hexagon_overlays[.FILLED], src, dest, HEXAGON_SIZE / 2, hex.rot, o.color)
 	}
 
-	if debug_on {
+	if DEBUG_ON {
 		rl.DrawRectangleLinesEx(hex.hurtbox, 1, rl.RED)
 		rl.DrawCircleV(hex.center, 3, rl.RED)
 	}

@@ -77,6 +77,6 @@ UpdateToolbar :: proc() {
 }
 
 DrawToolbar :: proc() {
-	DrawTextCenter(toolbar_messages[0], {screen_size.x / 2, 50}, 32, spacing = 2)
-	DrawTextCenter(toolbar_messages[1], {screen_size.x / 2, 80}, 32, spacing = 2)
+	DrawTextCenter(toolbar_messages[0], {SCREEN_SIZE.x / 2, 50}, 32, spacing = 2)
+	DrawTextCenter(toolbar_messages[1], {SCREEN_SIZE.x / 2, 80}, 32, spacing = 2)
 }

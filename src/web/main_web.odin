@@ -20,7 +20,7 @@ main_start :: proc "c" () {
 }
 
 @export
-main_update :: proc "c" () -> bool { context = web_context; game.update(); return !game.should_close }
+main_update :: proc "c" () -> bool { context = web_context; game.update(); return true }
 
 @export
 main_end :: proc "c" () { context = web_context; game.close() }

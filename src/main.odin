@@ -4,10 +4,9 @@ import "core:fmt"
 import rl "vendor:raylib"
 import "core:strings"
 
-screen_size := rl.Vector2{720, 720}
-should_close := false
-debug_on := false
-session_playthroughs := 0
+SCREEN_SIZE := rl.Vector2{720, 720} // It is a variable so it can be indexed (not planning to make the window resizable)
+DEBUG_ON :: false
+VERSION :: "1.1.5"
 
 player: Player
 
@@ -15,7 +14,7 @@ log :: proc(str: string, args: ..any) { fmt.printfln(strings.concatenate({"GAME:
 
 init :: proc() {
 	rl.SetConfigFlags({.VSYNC_HINT, .WINDOW_HIGHDPI, .MSAA_4X_HINT})
-	rl.InitWindow(i32(screen_size.x), i32(screen_size.y), "Hexamania.io")
+	rl.InitWindow(i32(SCREEN_SIZE.x), i32(SCREEN_SIZE.y), "Hexamania.io")
 	rl.SetExitKey(.KEY_NULL)
 	rl.InitAudioDevice()
 	
@@ -23,7 +22,6 @@ init :: proc() {
 	LoadBackground()
 	LoadPowerups()
 	LoadFonts()
-	LoadShaders()
 	LoadFace()
 	LoadSpells()
 	LoadUI()
@@ -78,13 +76,13 @@ update :: proc() {
 		DrawBoundPowerups(player.bound_powerups)
 		DrawToolbar()
 
-		if debug_on {
+		if DEBUG_ON {
 			rl.DrawText(rl.TextFormat("pos: %.2f, %.2f", player.pos.x, player.pos.y), 10, 10, 32, rl.BLACK)
 			rl.DrawText(rl.TextFormat("vel: %.2f, %.2f", player.vel.x, player.vel.y), 10, 50, 32, rl.BLACK)
 			rl.DrawText(rl.TextFormat("speed: %.0f", GetPlayerSpeed(player)), 10, 90, 32, rl.BLACK)
 			rl.DrawText(rl.TextFormat("acc: %d", PLAYER_ACCELERATION), 10, 130, 32, rl.BLACK)
 			rl.DrawText(rl.TextFormat("time survived: %f", GetElapsedStopwatchTime(time_survived)), 10, 170, 32, rl.BLACK)
-			rl.DrawText(rl.TextFormat("points: %d", points), 10, 210, 32, rl.BLACK)
+			rl.DrawText(rl.TextFormat("score: %d", killed_hexagons), 10, 210, 32, rl.BLACK)
 			rl.DrawText(rl.TextFormat("fps: %d", rl.GetFPS()), 10, 250, 32, rl.BLACK)
 			rl.DrawText(rl.TextFormat("enemies: %d", len(enemies)), 10, 290, 32, rl.BLACK)
 			rl.DrawText(rl.TextFormat("powerups: %d", len(world_powerups)), 10, 330, 32, rl.BLACK)
@@ -101,7 +99,6 @@ close :: proc() {
 	UnloadBackground()
 	UnloadPowerups()
 	UnloadFonts()
-	UnloadShaders()
 	UnloadFace()
 	UnloadSpells()
 	UnloadUI()
