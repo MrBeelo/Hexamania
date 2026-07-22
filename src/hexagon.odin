@@ -1,7 +1,6 @@
 package main
 
 import rl "vendor:raylib"
-import "core:strings"
 import "core:math"
 
 // The size of the hexagon destination texture, which also happens to be its diameter
@@ -14,47 +13,38 @@ HEXAGON_SIDE_LENGTH :: HEXAGON_SIZE / 2
 // top/bottom boundaries, so using HEXAGON_SIZE would make the offsets weird.
 HEXAGON_HEIGHT :: HEXAGON_SIDE_LENGTH * 1.73 // sqrt(3) ~= 1.73
 
-hexagon_textures: [HexagonType]rl.Texture2D
-hexagon_overlays: [HexagonOverlayTexture]rl.Texture2D
+hexagon_sheet: rl.Texture2D
+hexagon_frozen_texture: rl.Texture2D
+hexagon_burning_texture_sheet: rl.Texture2D
 
 HexagonType :: enum {
 	RIFLE,
-	RIFLE_UPGRADE_FIRE_RATE,
 	RIFLE_UPGRADE_PELLET_SPEED,
+	RIFLE_UPGRADE_FIRE_RATE,
 	RIFLE_UPGRADE_DAMAGE,
 	HEALTH_PAD,
-	HEALTH_PAD_UPGRADE_HEAL_AMOUNT,
 	HEALTH_PAD_UPGRADE_SIZE,
 	HEALTH_PAD_UPGRADE_TIME,
+	HEALTH_PAD_UPGRADE_HEAL_AMOUNT,
 	ICE_BALL,
-	ICE_BALL_UPGRADE_RANGE,
-	ICE_BALL_UPGRADE_FLOOR_SIZE,
+	ICE_BALL_UPGRADE_SIZE,
 	ICE_BALL_UPGRADE_FREEZE_TIME,
+	ICE_BALL_UPGRADE_RANGE,
 	FIREBALL,
 	FIREBALL_UPGRADE_SIZE,
-	FIREBALL_UPGRADE_TIME,
+	FIREBALL_UPGRADE_BURN_TIME,
 	FIREBALL_UPGRADE_DAMAGE,
 	BLACK_HOLE,
-	BLACK_HOLE_UPGRADE_SUCTION_POWER,
 	BLACK_HOLE_UPGRADE_SIZE,
 	BLACK_HOLE_UPGRADE_TIME,
-}
-
-HexagonOverlayTexture :: enum {
-	FILLED,
-	FREEZE,
-	BURN1,
-	BURN2,
-	BURN3,
+	BLACK_HOLE_UPGRADE_SUCTION_POWER,
 }
 
 HexagonFrozenOverlay :: struct {}
 HexagonBurningOverlay :: struct {}
-HexagonStaticOverlay :: struct { color: rl.Color }
 HexagonOverlay :: union {
 	HexagonFrozenOverlay,
 	HexagonBurningOverlay,
-	HexagonStaticOverlay,	
 }
 
 Hexagon :: struct {
@@ -70,8 +60,7 @@ GetHexagonHurtBox :: proc(center: rl.Vector2) -> rl.Rectangle {
 }
 
 DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOverlay) = nil, ) {
-	texture := hexagon_textures[hex.type]
-	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
+	src := GetHexagonTextureSource(hex.type)
 
 	// Note that hex.center should already be rotated, so we don't need to apply
 	// any modifications.
@@ -80,25 +69,22 @@ DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOver
 	// Since dest takes into account the fact that hex.center is rotated, rotating around
 	// the middle of it works!
 	color := rl.Color{255, 255, 255, opacity}
-	rl.DrawTexturePro(texture, src, dest, HEXAGON_SIZE / 2, hex.rot, color)
+	rl.DrawTexturePro(hexagon_sheet, src, dest, HEXAGON_SIZE / 2, hex.rot, color)
 
 	// Draw overlays
 	if overlay != nil do switch o in overlay.? {
-	case HexagonFrozenOverlay: rl.DrawTexturePro(hexagon_overlays[.FREEZE], src, dest, HEXAGON_SIZE / 2, hex.rot, color)
+	case HexagonFrozenOverlay: {
+		frozen_texture_src := rl.Rectangle{0, 0, f32(hexagon_frozen_texture.width), f32(hexagon_frozen_texture.height)}
+		rl.DrawTexturePro(hexagon_frozen_texture, frozen_texture_src, dest, HEXAGON_SIZE / 2, hex.rot, color)
+	}
 	case HexagonBurningOverlay: {
 		for i in 0..=2 {
-			burn_texture: rl.Texture2D
-			switch i {
-			case 0: burn_texture = hexagon_overlays[.BURN1]
-			case 1: burn_texture = hexagon_overlays[.BURN2]
-			case 2: burn_texture = hexagon_overlays[.BURN3]
-			}
-
+			BURN_TEXTURE_SRC_SIZE :: 256
+			burn_texture_src := rl.Rectangle{f32(i) * BURN_TEXTURE_SRC_SIZE, 0, BURN_TEXTURE_SRC_SIZE, BURN_TEXTURE_SRC_SIZE}
 			burn_color := GetBurningOverlayColor(f32(i) / 3, opacity)
-			rl.DrawTexturePro(burn_texture, src, dest, HEXAGON_SIZE / 2, hex.rot, burn_color)
+			rl.DrawTexturePro(hexagon_burning_texture_sheet, burn_texture_src, dest, HEXAGON_SIZE / 2, hex.rot, burn_color)
 		}
 	}
-	case HexagonStaticOverlay: rl.DrawTexturePro(hexagon_overlays[.FILLED], src, dest, HEXAGON_SIZE / 2, hex.rot, o.color)
 	}
 
 	if DEBUG_ON {
@@ -116,49 +102,24 @@ GetBurningOverlayColor :: proc(time_delay: f32, opacity := u8(255)) -> rl.Color 
 	return color
 }
 
-LoadHexagon :: proc(name: string) -> rl.Texture2D { 
-	return rl.LoadTexture(strings.clone_to_cstring(strings.concatenate({"res/hexagon/", name, ".png"}))) 
-}
-
-LoadOverlay :: proc(name: string) -> rl.Texture2D { 
-	return rl.LoadTexture(strings.clone_to_cstring(strings.concatenate({"res/overlay/", name, ".png"}))) 
-}
-
 LoadHexagons :: proc() {
-	hexagon_textures = {
-		.RIFLE = LoadHexagon("rifle"),
-		.RIFLE_UPGRADE_FIRE_RATE = LoadHexagon("rifle_upgrade_fire_rate"),
-		.RIFLE_UPGRADE_PELLET_SPEED = LoadHexagon("rifle_upgrade_pellet_speed"),
-		.RIFLE_UPGRADE_DAMAGE = LoadHexagon("rifle_upgrade_damage"),
-		.HEALTH_PAD = LoadHexagon("health_pad"),
-		.HEALTH_PAD_UPGRADE_HEAL_AMOUNT = LoadHexagon("health_pad_upgrade_heal_amount"),
-		.HEALTH_PAD_UPGRADE_SIZE = LoadHexagon("health_pad_upgrade_size"),
-		.HEALTH_PAD_UPGRADE_TIME = LoadHexagon("health_pad_upgrade_time"),
-		.ICE_BALL = LoadHexagon("ice_ball"),
-		.ICE_BALL_UPGRADE_RANGE = LoadHexagon("ice_ball_upgrade_range"),
-		.ICE_BALL_UPGRADE_FLOOR_SIZE = LoadHexagon("ice_ball_upgrade_floor_size"),
-		.ICE_BALL_UPGRADE_FREEZE_TIME = LoadHexagon("ice_ball_upgrade_freeze_time"),
-		.FIREBALL = LoadHexagon("fireball"),
-		.FIREBALL_UPGRADE_SIZE = LoadHexagon("fireball_upgrade_size"),
-		.FIREBALL_UPGRADE_TIME = LoadHexagon("fireball_upgrade_time"),
-		.FIREBALL_UPGRADE_DAMAGE = LoadHexagon("fireball_upgrade_damage"),
-		.BLACK_HOLE = LoadHexagon("black_hole"),
-		.BLACK_HOLE_UPGRADE_SUCTION_POWER = LoadHexagon("black_hole_upgrade_suction_power"),
-		.BLACK_HOLE_UPGRADE_SIZE = LoadHexagon("black_hole_upgrade_size"),
-		.BLACK_HOLE_UPGRADE_TIME = LoadHexagon("black_hole_upgrade_time"),
-	}
-
-	hexagon_overlays = {
-		.FILLED = LoadOverlay("filled"),
-		.FREEZE = LoadOverlay("freeze"),
-		.BURN1 = LoadOverlay("burn1"),
-		.BURN2 = LoadOverlay("burn2"),
-		.BURN3 = LoadOverlay("burn3"),
-	}
+	hexagon_sheet = rl.LoadTexture("texture/hexagon_sheet.png")
+	hexagon_frozen_texture = rl.LoadTexture("texture/hexagon_frozen.png")
+	hexagon_burning_texture_sheet = rl.LoadTexture("texture/hexagon_burning_sheet.png")
 }
 
 UnloadHexagons :: proc() {
-	for texture in hexagon_textures do rl.UnloadTexture(texture)
+	rl.UnloadTexture(hexagon_sheet)
+	rl.UnloadTexture(hexagon_frozen_texture)
+	rl.UnloadTexture(hexagon_burning_texture_sheet)
+}
+
+GetHexagonTextureSource :: proc(type: HexagonType) -> rl.Rectangle {
+	HEXAGON_SRC_SIZE :: 256
+	src_x := int(type) % 4
+	src_y := math.floor_div(int(type), 4)
+	src := rl.Rectangle{f32(src_x) * HEXAGON_SRC_SIZE, f32(src_y) * HEXAGON_SRC_SIZE, HEXAGON_SRC_SIZE, HEXAGON_SRC_SIZE}
+	return src
 }
 
 IsUpgrade :: proc(type: HexagonType) -> bool {
@@ -175,10 +136,6 @@ IsSpell :: proc(type: HexagonType) -> bool {
 }
 
 GetHexagonName :: proc(type: HexagonType) -> string {
-	/*str := string(rl.TextFormat("%v", type))
-	str, _ = strings.replace(str, "_", " ", -1)
-	str = strings.to_lower(str)
-	return str*/
 	switch type {
 	case .RIFLE: return "the Rifle"
 	case .RIFLE_UPGRADE_FIRE_RATE: return "Increased fire rate"
@@ -190,11 +147,11 @@ GetHexagonName :: proc(type: HexagonType) -> string {
 	case .HEALTH_PAD_UPGRADE_TIME: return "Increased duration"
 	case .ICE_BALL: return "Ice Ball"
 	case .ICE_BALL_UPGRADE_RANGE: return "Increased range"
-	case .ICE_BALL_UPGRADE_FLOOR_SIZE: return "Increased size"
+	case .ICE_BALL_UPGRADE_SIZE: return "Increased size"
 	case .ICE_BALL_UPGRADE_FREEZE_TIME: return "Increased freeze time"
 	case .FIREBALL: return "Fireball"
 	case .FIREBALL_UPGRADE_SIZE: return "Increased size"
-	case .FIREBALL_UPGRADE_TIME: return "Increased duration"
+	case .FIREBALL_UPGRADE_BURN_TIME: return "Increased duration"
 	case .FIREBALL_UPGRADE_DAMAGE: return "Increased burn damage"
 	case .BLACK_HOLE: return "Black Hole"
 	case .BLACK_HOLE_UPGRADE_SUCTION_POWER: return "Increased suction power"

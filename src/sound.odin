@@ -5,12 +5,12 @@ import rl "vendor:raylib"
 shoot, fire_spell, explosion, ui_confirm, damaged, merge: rl.Sound
 
 LoadSounds :: proc() {
-	shoot = rl.LoadSound("res/sound/shoot.wav")
-	fire_spell = rl.LoadSound("res/sound/fire_spell.wav")
-	explosion = rl.LoadSound("res/sound/explosion.wav")
-	ui_confirm = rl.LoadSound("res/sound/ui_confirm.wav")
-	damaged = rl.LoadSound("res/sound/damaged.wav")
-	merge = rl.LoadSound("res/sound/merge.wav")
+	shoot = rl.LoadSound("audio/shoot.wav")
+	fire_spell = rl.LoadSound("audio/fire_spell.wav")
+	explosion = rl.LoadSound("audio/explosion.wav")
+	ui_confirm = rl.LoadSound("audio/ui_confirm.wav")
+	damaged = rl.LoadSound("audio/damaged.wav")
+	merge = rl.LoadSound("audio/merge.wav")
 	
 	rl.SetSoundVolume(merge, 0.7)
 }

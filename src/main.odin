@@ -6,7 +6,7 @@ import "core:strings"
 
 SCREEN_SIZE := rl.Vector2{720, 720} // It is a variable so it can be indexed (not planning to make the window resizable)
 DEBUG_ON :: false
-VERSION :: "1.1.5"
+VERSION :: "1.2"
 
 player: Player
 
@@ -17,6 +17,7 @@ init :: proc() {
 	rl.InitWindow(i32(SCREEN_SIZE.x), i32(SCREEN_SIZE.y), "Hexamania.io")
 	rl.SetExitKey(.KEY_NULL)
 	rl.InitAudioDevice()
+	SearchAndSetResourceDir("res")
 	
 	LoadHexagons()
 	LoadBackground()

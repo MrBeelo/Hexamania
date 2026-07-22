@@ -2,7 +2,7 @@ package main
 
 import rl "vendor:raylib"
 
-faces: [FaceExpression]rl.Texture2D
+face_sheet: rl.Texture2D
 cores: rl.Texture2D
 
 FaceExpression :: enum {
@@ -12,28 +12,23 @@ FaceExpression :: enum {
 }
 
 LoadFace :: proc() {
-	faces = {
-		.NORMAL = rl.LoadTexture("res/face/normal_face.png"),
-		.CARET = rl.LoadTexture("res/face/caret_face.png"),
-		.DEAD = rl.LoadTexture("res/face/dead_face.png"),
-	}
-	
-	cores = rl.LoadTexture("res/face/cores.png")
+	face_sheet = rl.LoadTexture("texture/face_sheet.png")
+	cores = rl.LoadTexture("texture/face_cores.png")
 }
 
 UnloadFace :: proc() {
-	for face in faces do rl.UnloadTexture(face)
+	rl.UnloadTexture(face_sheet)
 	rl.UnloadTexture(cores)
 }
 
 DrawFace :: proc(pos: rl.Vector2, vel: rl.Vector2, level: int, expression: FaceExpression, opacity: u8) {
 	color := rl.Color{255, 255, 255, opacity}
-	
-	texture := faces[expression]
+
+	FACE_SRC_SIZE :: 256
 	size := GetFaceSize(level)
-	face_src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
+	face_src := rl.Rectangle{f32(int(expression)) * FACE_SRC_SIZE, 0, FACE_SRC_SIZE, FACE_SRC_SIZE}
 	face_dest := rl.Rectangle{pos.x, pos.y, size, size}
-	rl.DrawTexturePro(texture, face_src, face_dest, size / 2, 0, color)
+	rl.DrawTexturePro(face_sheet, face_src, face_dest, size / 2, 0, color)
 
 	if expression == .NORMAL {
 		core_src := rl.Rectangle{0, 0, f32(cores.width), f32(cores.height)}

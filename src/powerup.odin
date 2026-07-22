@@ -7,8 +7,9 @@ import "core:math/rand"
 POWERUP_DECELERATION :: 5 * 60
 POWERUP_SIZE :: f32(32)
 BOUND_POWERUP_TIME :: 10
+POWERUP_SRC_SIZE :: 256
 world_powerups: [dynamic]WorldPowerup
-powerup_textures: [PowerupType]rl.Texture2D
+powerup_sheet: rl.Texture2D
 powerup_spawn_timer: Timer
 
 // Because for some reason union lengths aren't known at compile time, PowerupType
@@ -110,10 +111,9 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 DrawWorldPowerups :: proc() { for powerup in world_powerups do DrawWorldPowerup(powerup) }
 
 DrawWorldPowerup :: proc(powerup: WorldPowerup) {
-	texture := powerup_textures[powerup.type]
-	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
+	src := rl.Rectangle{f32(int(powerup.type)) * POWERUP_SRC_SIZE, 0, POWERUP_SRC_SIZE, POWERUP_SRC_SIZE}
 	dest := powerup.hurtbox // The destination rectangle and the hurtbox happen to be the same :)
-	rl.DrawTexturePro(texture, src, dest, {}, 0, rl.WHITE)
+	rl.DrawTexturePro(powerup_sheet, src, dest, {}, 0, rl.WHITE)
 }
 
 UpdateBoundPowerups :: proc(bound_powerups: ^[PowerupType]BoundPowerup) {
@@ -124,15 +124,10 @@ UpdateBoundPowerups :: proc(bound_powerups: ^[PowerupType]BoundPowerup) {
 }
 
 LoadPowerups :: proc() {
-	powerup_textures = {
-		.HEALTH = rl.LoadTexture("res/powerup/health.png"),
-		.DAMAGE = rl.LoadTexture("res/powerup/damage.png"),
-		.SPEED = rl.LoadTexture("res/powerup/speed.png"),
-	}
-
+	powerup_sheet = rl.LoadTexture("texture/powerup_sheet.png")
 	powerup_spawn_timer = NewTimer(20, true, true)
 }
 
 UnloadPowerups :: proc() {
-	for texture in powerup_textures do rl.UnloadTexture(texture)
+	rl.UnloadTexture(powerup_sheet)
 }

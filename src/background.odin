@@ -10,7 +10,7 @@ BACKGROUND_SPEED :: f32(5)
 background: rl.Texture2D
 
 LoadBackground :: proc() {
-	background = rl.LoadTexture("res/background.png")
+	background = rl.LoadTexture("texture/background.png")
 	rl.SetTextureFilter(background, .BILINEAR)
 }
 

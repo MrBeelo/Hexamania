@@ -6,8 +6,8 @@ main_music, death_music: rl.Music
 MAIN_MENU_LOOP_SECONDS :: 24
 
 LoadMusic :: proc() {
-	main_music = rl.LoadMusicStream("res/music/game.mp3")
-	death_music = rl.LoadMusicStream("res/music/death.mp3")
+	main_music = rl.LoadMusicStream("audio/main_music.mp3")
+	death_music = rl.LoadMusicStream("audio/death_music.mp3")
 	death_music.looping = false
 }
 

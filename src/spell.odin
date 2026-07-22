@@ -6,7 +6,7 @@ import "core:math"
 import "core:math/rand"
 
 SpellType :: enum { HEALTH_PAD, ICE_BALL, FIREBALL, BLACK_HOLE }
-spell_textures: [enum{HEALTH, ICE, FIRE1, FIRE2, FIRE3, HOLE, CIRCLE_OVERLAY}]rl.Texture2D
+spell_textures: [SpellType]rl.Texture2D
 
 spells: [dynamic]Spell
 Spell :: union {
@@ -18,13 +18,10 @@ Spell :: union {
 
 LoadSpells :: proc() {
 	spell_textures = {
-		.HEALTH = rl.LoadTexture("res/spell/health_pad_texture.png"),
-		.ICE = rl.LoadTexture("res/spell/ice_ball_texture.png"),
-		.FIRE1 = rl.LoadTexture("res/spell/fireball_texture1.png"),
-		.FIRE2 = rl.LoadTexture("res/spell/fireball_texture2.png"),
-		.FIRE3 = rl.LoadTexture("res/spell/fireball_texture3.png"),
-		.HOLE = rl.LoadTexture("res/spell/black_hole_texture.png"),
-		.CIRCLE_OVERLAY = rl.LoadTexture("res/spell/circle_overlay.png"),
+		.HEALTH_PAD = rl.LoadTexture("texture/spell/health_pad_texture.png"),
+		.ICE_BALL = rl.LoadTexture("texture/spell/ice_ball_texture.png"),
+		.FIREBALL = rl.LoadTexture("texture/spell/fireball_texture_sheet.png"),
+		.BLACK_HOLE = rl.LoadTexture("texture/spell/black_hole_texture.png"),
 	}
 
 	for texture in spell_textures do rl.SetTextureFilter(texture, .BILINEAR)
@@ -73,8 +70,8 @@ GetSpellFromHexagonType :: proc(type: HexagonType) -> Maybe(SpellType) {
 	switch type {
 	case .RIFLE, .RIFLE_UPGRADE_FIRE_RATE, .RIFLE_UPGRADE_PELLET_SPEED, .RIFLE_UPGRADE_DAMAGE: return nil
 	case .HEALTH_PAD, .HEALTH_PAD_UPGRADE_HEAL_AMOUNT, .HEALTH_PAD_UPGRADE_SIZE, .HEALTH_PAD_UPGRADE_TIME: return .HEALTH_PAD
-	case .ICE_BALL, .ICE_BALL_UPGRADE_RANGE, .ICE_BALL_UPGRADE_FLOOR_SIZE, .ICE_BALL_UPGRADE_FREEZE_TIME: return .ICE_BALL
-	case .FIREBALL, .FIREBALL_UPGRADE_SIZE, .FIREBALL_UPGRADE_TIME, .FIREBALL_UPGRADE_DAMAGE: return .FIREBALL
+	case .ICE_BALL, .ICE_BALL_UPGRADE_RANGE, .ICE_BALL_UPGRADE_SIZE, .ICE_BALL_UPGRADE_FREEZE_TIME: return .ICE_BALL
+	case .FIREBALL, .FIREBALL_UPGRADE_SIZE, .FIREBALL_UPGRADE_BURN_TIME, .FIREBALL_UPGRADE_DAMAGE: return .FIREBALL
 	case .BLACK_HOLE, .BLACK_HOLE_UPGRADE_SUCTION_POWER, .BLACK_HOLE_UPGRADE_SIZE, .BLACK_HOLE_UPGRADE_TIME: return .BLACK_HOLE
 	}
 
@@ -114,10 +111,10 @@ UpdateHealthPad :: proc(pad: ^HealthPad, index: int) {
 }
 
 DrawHealthPad :: proc(pad: HealthPad) {
-	src := rl.Rectangle{0, 0, f32(spell_textures[.HEALTH].width), f32(spell_textures[.HEALTH].height)}
+	src := rl.Rectangle{0, 0, f32(spell_textures[.HEALTH_PAD].width), f32(spell_textures[.HEALTH_PAD].height)}
 	color := rl.Color{255, 255, 255, 100} if pad.owner != player.uuid else rl.WHITE
 	rect := rl.Rectangle{pad.pos.x, pad.pos.y, pad.size, pad.size}
-	rl.DrawTexturePro(spell_textures[.HEALTH], src, rect, pad.size / 2, pad.rot, color)
+	rl.DrawTexturePro(spell_textures[.HEALTH_PAD], src, rect, pad.size / 2, pad.rot, color)
 }
 
 GetHealthPadStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (time_left: f32, size: f32, heal_amount: f32) {
@@ -168,7 +165,7 @@ UpdateIceBall :: proc(ball: ^IceBall, index: int) {
 }
 
 DrawIceBall :: proc(ball: IceBall) {
-	texture := spell_textures[.ICE]
+	texture := spell_textures[.ICE_BALL]
 	src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
 	dest := rl.Rectangle{ball.pos.x, ball.pos.y, ICE_BALL_SIZE, ICE_BALL_SIZE}
 	color := rl.WHITE
@@ -241,23 +238,17 @@ UpdateFireball :: proc(ball: ^Fireball, index: int) {
 
 DrawFireball :: proc(ball: Fireball) {
 	for i in 0..=2 {
-		texture: rl.Texture2D
-		switch i {
-		case 0: texture = spell_textures[.FIRE1]
-		case 1: texture = spell_textures[.FIRE2]
-		case 2: texture = spell_textures[.FIRE3]
-		}
-
-		src := rl.Rectangle{0, 0, f32(texture.width), f32(texture.height)}
+		FIREBALL_TEXTURE_SRC_SIZE :: 256
+		src := rl.Rectangle{f32(i) * FIREBALL_TEXTURE_SRC_SIZE, 0, FIREBALL_TEXTURE_SRC_SIZE, FIREBALL_TEXTURE_SRC_SIZE}
 		dest := rl.Rectangle{ball.pos.x, ball.pos.y, ball.size, ball.size}
 		color := GetBurningOverlayColor(f32(i) / 3)
 		rot := math.mod_f32(f32(rl.GetTime() * 100), 360)
-		rl.DrawTexturePro(texture, src, dest, ball.size / 2, rot, color)
+		rl.DrawTexturePro(spell_textures[.FIREBALL], src, dest, ball.size / 2, rot, color)
 	}	
 }
 
 GetFireballStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (burn_time: f32, size: f32, damage: f32) {
-	burn_time = 7 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_TIME])
+	burn_time = 7 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_BURN_TIME])
 	size = 30 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_SIZE]) * 10
 	damage = 3 + f32(hexagon_type_amounts[.FIREBALL_UPGRADE_DAMAGE]) / 2
 	return burn_time, size, damage
@@ -314,7 +305,7 @@ UpdateBlackHole :: proc(hole: ^BlackHole, index: int) {
 }
 
 DrawBlackHole :: proc(hole: BlackHole) {
-	src := rl.Rectangle{0, 0, f32(spell_textures[.HOLE].width), f32(spell_textures[.HOLE].height)}
+	src := rl.Rectangle{0, 0, f32(spell_textures[.BLACK_HOLE].width), f32(spell_textures[.BLACK_HOLE].height)}
 	
 	DELAY :: 2
 	time := f32(rl.GetTime())
@@ -325,7 +316,7 @@ DrawBlackHole :: proc(hole: BlackHole) {
 	
 	dest := rl.Rectangle{hole.pos.x, hole.pos.y, hole.size, hole.size}
 
-	rl.DrawTexturePro(spell_textures[.HOLE], src, dest, hole.size / 2, 0, color)
+	rl.DrawTexturePro(spell_textures[.BLACK_HOLE], src, dest, hole.size / 2, 0, color)
 }
 
 GetBlackHoleStats :: proc(hexagon_type_amounts: [HexagonType]int) -> (time_left: f32, suction_power: f32, size: f32) {

@@ -3,6 +3,9 @@ package web
 import "core:mem"
 import "core:c"
 import "base:intrinsics"
+import "core:fmt"
+
+PRINT_ALLOCS :: false
 
 @(default_calling_convention = "c")
 foreign {
@@ -67,16 +70,20 @@ emscripten_allocator_proc :: proc(
 
 	switch mode {
 	case .Alloc:
+		if PRINT_ALLOCS do fmt.printfln("DEBUG: Allocated %d bytes from %v", size, location)
 		return aligned_alloc(size, alignment, true)
 
 	case .Alloc_Non_Zeroed:
+		if PRINT_ALLOCS do fmt.printfln("DEBUG: Allocated %d non-zeroed bytes from %v", size, location)
 		return aligned_alloc(size, alignment, false)
 
 	case .Free:
+		if PRINT_ALLOCS do fmt.printfln("DEBUG: Freed %d bytes from %v", size, location)
 		aligned_free(old_memory)
 		return nil, nil
 
 	case .Resize:
+		if PRINT_ALLOCS do fmt.printfln("DEBUG: Resized %d to %d bytes from %v", old_size, size, location)
 		if old_memory == nil {
 			return aligned_alloc(size, alignment, true)
 		}
@@ -91,6 +98,7 @@ emscripten_allocator_proc :: proc(
 		return bytes, nil
 
 	case .Resize_Non_Zeroed:
+		if PRINT_ALLOCS do fmt.printfln("DEBUG: Resized %d to %d non-zeroed bytes from %v", old_size, size, location)
 		if old_memory == nil {
 			return aligned_alloc(size, alignment, false)
 		}

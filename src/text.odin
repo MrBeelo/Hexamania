@@ -22,9 +22,9 @@ UnloadFonts :: proc() {
 
 GetFontPath :: proc(type: FontType) -> cstring {
 	switch type {
-	case .QUICKSAND_LIGHT: return "res/font/Quicksand-Regular.ttf"
-	case .QUICKSAND_MEDIUM: return "res/font/Quicksand-Medium.ttf"
-	case .QUICKSAND_HEAVY: return "res/font/Quicksand-SemiBold.ttf"
+	case .QUICKSAND_LIGHT: return "font/Quicksand-Regular.ttf"
+	case .QUICKSAND_MEDIUM: return "font/Quicksand-Medium.ttf"
+	case .QUICKSAND_HEAVY: return "font/Quicksand-SemiBold.ttf"
 	}
 
 	return ""
