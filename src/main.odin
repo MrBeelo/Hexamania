@@ -6,7 +6,7 @@ import "core:strings"
 
 SCREEN_SIZE := rl.Vector2{720, 720} // It is a variable so it can be indexed (not planning to make the window resizable)
 DEBUG_ON :: false
-VERSION :: "1.2"
+VERSION :: "1.2.1"
 
 player: Player
 
@@ -18,6 +18,7 @@ init :: proc() {
 	rl.SetExitKey(.KEY_NULL)
 	rl.InitAudioDevice()
 	SearchAndSetResourceDir("res")
+	GuiLoadStyleHexamania()
 	
 	LoadHexagons()
 	LoadBackground()
