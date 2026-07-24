@@ -56,9 +56,9 @@ GetFaceExpression :: proc(clump: HexagonClump) -> FaceExpression {
 }
 
 DrawPlayerFace :: proc() {
-	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+	vel := VelocityFrom2Points(WorldToCamera(player.pos), rl.GetMousePosition())
 	opacity := u8(255 * (1 - player.dead_time * 2)) if player.dead_time > 0 else 255
-	DrawFace(player.pos, vel, GetPlayerLevel(player), GetFaceExpression(player.clump), opacity)
+	DrawFace(player.pos, vel, GetLevel(player.hexagon_types), GetFaceExpression(player.clump), opacity)
 }
 
 DrawEnemyFace :: proc(enemy: Enemy) {

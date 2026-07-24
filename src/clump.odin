@@ -22,7 +22,9 @@ HexagonClump :: struct {
 	rot: f32,
 	health: f32,
 	uuid: uuid.Identifier,
-	spr: SprintPackage,
+	sprinting: bool,
+	sprint_secs: f32,
+	time_since_last_sprint: f32,
 	health_regen: Timer,
 	grace_period: f32,
 	attacker: ^HexagonClump,
@@ -34,13 +36,6 @@ HexagonClump :: struct {
 	dead_time: f32,
 	can_shoot: bool,
 	collision_grace_period: f32,
-}
-
-// Everything that has to do with sprinting.
-SprintPackage :: struct {
-	sprinting: bool,
-	sprint_secs: f32,
-	time_since_last_sprint: f32,
 }
 
 GetMaxHealth :: proc(hexagons: int) -> f32 {
@@ -64,7 +59,7 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	health_regen := NewTimer(5, true, true)
 	health := GetMaxHealth(len(hexagon_types))
 
-	clump := HexagonClump{new_hexagon_types, hexagons, center, 0, 0, health, id, {false, 5, 5}, health_regen, 
+	clump := HexagonClump{new_hexagon_types, hexagons, center, 0, 0, health, id, false, 5, 5, health_regen, 
 		0, nil, 0, 0, {}, {}, 0, 0, true, 0}
 	
 	UpdateClumpHexagons(&clump)
@@ -122,16 +117,16 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	if clump.collision_grace_period > 0 do clump.collision_grace_period -= rl.GetFrameTime()
 
 	// Sprinting logic
-	if clump.spr.sprinting {
-		clump.spr.sprint_secs -= rl.GetFrameTime()
-		clump.spr.time_since_last_sprint = 0
+	if clump.sprinting {
+		clump.sprint_secs -= rl.GetFrameTime()
+		clump.time_since_last_sprint = 0
 	} else {
-		clump.spr.time_since_last_sprint += rl.GetFrameTime()
+		clump.time_since_last_sprint += rl.GetFrameTime()
 	}
 
-	if clump.spr.sprint_secs <= 0 do clump.spr.sprinting = false
-	if clump.spr.time_since_last_sprint > REGEN_SPRINT_TIME do clump.spr.sprint_secs += rl.GetFrameTime()
-	clump.spr.sprint_secs = math.clamp(clump.spr.sprint_secs, 0, MAX_SPRINT_SECS)
+	if clump.sprint_secs <= 0 do clump.sprinting = false
+	if clump.time_since_last_sprint > REGEN_SPRINT_TIME do clump.sprint_secs += rl.GetFrameTime()
+	clump.sprint_secs = math.clamp(clump.sprint_secs, 0, MAX_SPRINT_SECS)
 
 	// Handle spells
 	if clump.frozen_time_left > 0 do clump.frozen_time_left -= rl.GetFrameTime()
@@ -160,7 +155,7 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	HandleClumpCollisions(clump)
 
 	// Final velocity addition (should probably be last)
-	if clump.frozen_time_left <= 0 && clump.dead_time <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (1.5 if clump.spr.sprinting else 1)
+	if clump.frozen_time_left <= 0 && clump.dead_time <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (1.5 if clump.sprinting else 1)
 }
 
 DrawHexagonClump :: proc(clump: HexagonClump) {
@@ -176,9 +171,8 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 	if DEBUG_ON do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
 
-// This is a broken buggy mess. I don't have time to implement good collisions
-// I don't care anymore.
-
+// Originally, this was actual collisions, but since it was really buggy
+// I had to remove them and resort to just dealing damage to both clumps...
 HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 	if clump.collision_grace_period > 0 do return
 	if clump.dead_time > 0 do return
@@ -253,7 +247,7 @@ UpdateClumpHexagons :: proc(clump: ^HexagonClump) {
 		offset := GetHexagonOffset(index)
 
 		// We get the average offset, so we can center the clump properly (around clump.pos)
-		average_offset := GetAverageOffset(len(clump.hexagon_types))
+		average_offset := GetAverageHexagonOffset(len(clump.hexagon_types))
 
 		// Local center here is the non rotated center of the hexagon
 		local_center := clump.pos + (offset - average_offset) * math.max(1 + clump.dead_time * 2, 0)
@@ -265,6 +259,18 @@ UpdateClumpHexagons :: proc(clump: ^HexagonClump) {
 		hexagon := Hexagon{hexagon_type, rotated_center, clump.rot, hurtbox}
 		if len(clump.hexagons) > index do clump.hexagons[index] = hexagon
 	}
+}
+
+GetLevel :: proc(hexagon_types: []HexagonType) -> int {
+	hexagons := len(hexagon_types)
+	switch {
+	case hexagons < 1 + 6: return 1
+	case hexagons < 1 + 6 + 12: return 2
+	case hexagons < 1 + 6 + 12 + 18: return 3
+	case hexagons == 1 + 6 + 12 + 18: return 4
+	}
+
+	return 1
 }
 
 Accelerate :: proc(value: ^f32, target: f32, acceleration: f32) {
@@ -280,7 +286,7 @@ ShortUUID :: proc(id: uuid.Identifier) -> string {
 // From every hexagon in the clump, all the positions are averaged
 // to get the average offset. If we didn't calculate this, the center of the
 // clump would be the middle hex's center, which we don't always want.
-GetAverageOffset :: proc(hexagon_count: int) -> rl.Vector2 {
+GetAverageHexagonOffset :: proc(hexagon_count: int) -> rl.Vector2 {
 	if hexagon_count == 0 do return {}
 	offset: rl.Vector2
 	for i in 0..<hexagon_count do offset += GetHexagonOffset(i)

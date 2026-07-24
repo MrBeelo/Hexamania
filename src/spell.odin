@@ -66,7 +66,7 @@ HasSpell :: proc(clump: HexagonClump, spell: SpellType) -> bool {
 	return false
 }
 
-GetSpellFromHexagonType :: proc(type: HexagonType) -> Maybe(SpellType) {
+HexagonToSpell :: proc(type: HexagonType) -> Maybe(SpellType) {
 	switch type {
 	case .RIFLE, .RIFLE_UPGRADE_FIRE_RATE, .RIFLE_UPGRADE_PELLET_SPEED, .RIFLE_UPGRADE_DAMAGE: return nil
 	case .HEALTH_PAD, .HEALTH_PAD_UPGRADE_HEAL_AMOUNT, .HEALTH_PAD_UPGRADE_SIZE, .HEALTH_PAD_UPGRADE_TIME: return .HEALTH_PAD
@@ -76,6 +76,30 @@ GetSpellFromHexagonType :: proc(type: HexagonType) -> Maybe(SpellType) {
 	}
 
 	return nil
+}
+
+SpellToHexagon :: proc(spell: Maybe(SpellType)) -> HexagonType {
+	switch spell {
+	case nil: return .RIFLE
+	case .HEALTH_PAD: return .HEALTH_PAD
+	case .ICE_BALL: return .ICE_BALL
+	case .FIREBALL: return .FIREBALL
+	case .BLACK_HOLE: return .BLACK_HOLE
+	}
+	return .RIFLE
+}
+
+// nil corresponds to RIFLE
+SpellToHexagonUpgrades :: proc(spell: Maybe(SpellType)) -> [3]HexagonType {
+	if spell == nil do return {.RIFLE_UPGRADE_FIRE_RATE, .RIFLE_UPGRADE_PELLET_SPEED, .RIFLE_UPGRADE_DAMAGE}
+	switch spell.? {
+	case .HEALTH_PAD: return {.HEALTH_PAD_UPGRADE_HEAL_AMOUNT, .HEALTH_PAD_UPGRADE_SIZE, .HEALTH_PAD_UPGRADE_TIME}
+	case .ICE_BALL: return {.ICE_BALL_UPGRADE_RANGE, .ICE_BALL_UPGRADE_SIZE, .ICE_BALL_UPGRADE_FREEZE_TIME}
+	case .FIREBALL: return {.FIREBALL_UPGRADE_SIZE, .FIREBALL_UPGRADE_BURN_TIME, .FIREBALL_UPGRADE_DAMAGE}
+	case .BLACK_HOLE: return {.BLACK_HOLE_UPGRADE_SUCTION_POWER, .BLACK_HOLE_UPGRADE_SIZE, .BLACK_HOLE_UPGRADE_TIME}
+	}
+
+	return {.RIFLE, .RIFLE, .RIFLE}
 }
 
 SPELL_COOLDOWN :: f32(25)
@@ -133,7 +157,7 @@ IceBall :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, ti
 	size: f32, freeze_time: f32 }
 
 PlayerThrowIceBall :: proc() {
-	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+	vel := VelocityFrom2Points(WorldToCamera(player.pos), rl.GetMousePosition())
 	ThrowIceBall(&player.clump, vel)
 }
 
@@ -187,7 +211,7 @@ FIREBALL_SPEED :: 400
 Fireball :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, time_left: f32, burn_time: f32, size: f32, damage: f32 }
 
 PlayerThrowFireball :: proc() {
-	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+	vel := VelocityFrom2Points(WorldToCamera(player.pos), rl.GetMousePosition())
 	ThrowFireball(&player.clump, vel)
 }
 
@@ -262,7 +286,7 @@ BLACK_HOLE_DECELERATION :: 5 * 60
 BlackHole :: struct { owner: uuid.Identifier, pos: rl.Vector2, vel: rl.Vector2, time_left: f32, suction_power: f32, size: f32, max_size: f32 }
 
 PlayerThrowBlackHole :: proc() {
-	vel := VelocityFrom2Points(CameraPos(player), rl.GetMousePosition())
+	vel := VelocityFrom2Points(WorldToCamera(player.pos), rl.GetMousePosition())
 	ThrowBlackHole(&player.clump, vel)
 }
 

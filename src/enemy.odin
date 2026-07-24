@@ -5,7 +5,7 @@ import "core:math"
 import "core:math/rand"
 import "core:slice"
 
-ENEMY_ACCELERATION :: 3 * 60
+ENEMY_ACCELERATION :: 8 * 60
 
 enemy_spawn_timer: Timer
 enemies: [dynamic]Enemy
@@ -78,7 +78,7 @@ UpdateEnemies :: proc() {
 
 GetMaxEnemyVelocity :: proc(enemy: Enemy) -> f32 {
 	max_speed := f32(70)
-	if player.spr.sprinting do max_speed *= 1.5
+	if player.sprinting do max_speed *= 1.5
 	return max_speed
 }
 
@@ -107,11 +107,11 @@ GenEnemyHexagonTypes :: proc(hexagon_types: ^[]HexagonType) {
 		
 		if add_main_type {
 			// Add the main type
-			hexagon_types[i] = GetHexagonTypeFromSpellType(main_type)
+			hexagon_types[i] = SpellToHexagon(main_type)
 			main_type_added = true
 		} else if add_secondary_type {
 			// Add the secondary type
-			hexagon_types[i] = GetHexagonTypeFromSpellType(secondary_type)
+			hexagon_types[i] = SpellToHexagon(secondary_type)
 			secondary_type_added = true
 		} else {
 			// Add a random upgrade, based on the spell types the entity has
@@ -123,9 +123,9 @@ GenEnemyHexagonTypes :: proc(hexagon_types: ^[]HexagonType) {
 
 			upgrades: [3]HexagonType
 			switch upgrade_type_to_add {
-			case 0: upgrades = GetHexagonUpgradesFromSpellType(nil)
-			case 1: upgrades = GetHexagonUpgradesFromSpellType(main_type)
-			case 2: upgrades = GetHexagonUpgradesFromSpellType(secondary_type)
+			case 0: upgrades = SpellToHexagonUpgrades(nil)
+			case 1: upgrades = SpellToHexagonUpgrades(main_type)
+			case 2: upgrades = SpellToHexagonUpgrades(secondary_type)
 			}
 
 			hexagon_types[i] = upgrades[upgrade_to_add]
@@ -133,33 +133,9 @@ GenEnemyHexagonTypes :: proc(hexagon_types: ^[]HexagonType) {
 	}
 }
 
-GetHexagonTypeFromSpellType :: proc(spell: Maybe(SpellType)) -> HexagonType {
-	switch spell {
-	case nil: return .RIFLE
-	case .HEALTH_PAD: return .HEALTH_PAD
-	case .ICE_BALL: return .ICE_BALL
-	case .FIREBALL: return .FIREBALL
-	case .BLACK_HOLE: return .BLACK_HOLE
-	}
-	return .RIFLE
-}
-
-// nil corresponds to RIFLE
-GetHexagonUpgradesFromSpellType :: proc(spell: Maybe(SpellType)) -> [3]HexagonType {
-	if spell == nil do return {.RIFLE_UPGRADE_FIRE_RATE, .RIFLE_UPGRADE_PELLET_SPEED, .RIFLE_UPGRADE_DAMAGE}
-	switch spell.? {
-	case .HEALTH_PAD: return {.HEALTH_PAD_UPGRADE_HEAL_AMOUNT, .HEALTH_PAD_UPGRADE_SIZE, .HEALTH_PAD_UPGRADE_TIME}
-	case .ICE_BALL: return {.ICE_BALL_UPGRADE_RANGE, .ICE_BALL_UPGRADE_SIZE, .ICE_BALL_UPGRADE_FREEZE_TIME}
-	case .FIREBALL: return {.FIREBALL_UPGRADE_SIZE, .FIREBALL_UPGRADE_BURN_TIME, .FIREBALL_UPGRADE_DAMAGE}
-	case .BLACK_HOLE: return {.BLACK_HOLE_UPGRADE_SUCTION_POWER, .BLACK_HOLE_UPGRADE_SIZE, .BLACK_HOLE_UPGRADE_TIME}
-	}
-
-	return {.RIFLE, .RIFLE, .RIFLE}
-}
-
 UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	RANGE :: 350
-	is_clump_close, closest_clump := GetClosestClump(enemy, RANGE)
+	is_clump_close, closest_clump := EnemyGetClosestClump(enemy, RANGE)
 	ManageAIState(enemy, is_clump_close, closest_clump)
 	
 	if enemy.dead_time <= 0 do switch enemy.ai_state {
@@ -179,14 +155,15 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 
 	// For safety :)
 	max_velocity := GetMaxEnemyVelocity(enemy^)
-	enemy.vel = clamp(enemy.vel.x, -max_velocity, max_velocity)
+	enemy.vel.x = clamp(enemy.vel.x, -max_velocity, max_velocity)
+	enemy.vel.y = clamp(enemy.vel.y, -max_velocity, max_velocity)
 
 	Accelerate(&enemy.vel.x, enemy.target_vel.x, ENEMY_ACCELERATION)
 	Accelerate(&enemy.vel.y, enemy.target_vel.y, ENEMY_ACCELERATION)
 
 	// Despawn if away from player
 	player_dist := rl.Vector2Distance(enemy.pos, player.pos)
-	player_dist -= f32(GetPlayerLevel(player) - 1) * HEXAGON_SIZE
+	player_dist -= f32(GetLevel(player.hexagon_types) - 1) * HEXAGON_SIZE
 	player_dist -= f32(GetLevel(enemy.hexagon_types) - 1) * HEXAGON_SIZE
 	if player_dist > 500 do enemy.time_away_from_player += rl.GetFrameTime(); else do enemy.time_away_from_player = 0
 	if enemy.time_away_from_player > 20 && len(enemies) > index do unordered_remove(&enemies, index)
@@ -195,10 +172,10 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 }
 
 GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
-	if GetPlayerLevel(player) == MAX_LEVEL do return nil
+	if GetLevel(player.hexagon_types) == MAX_LEVEL do return nil
 
 	for spell in SpellType {
-		hexagon_type := GetHexagonTypeFromSpellType(spell)
+		hexagon_type := SpellToHexagon(spell)
 		if slice.contains(enemy.hexagon_types, hexagon_type) && !HasSpell(player.clump, spell) do return hexagon_type
 	}
 	
@@ -212,7 +189,7 @@ GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
 		if hexagon_type == .BLACK_HOLE do if HasSpell(player.clump, .BLACK_HOLE) do continue; else do return hexagon_type
 
 		// From now on, it's guaranteed that the hexagon is an upgrade
-		spell := GetSpellFromHexagonType(hexagon_type)
+		spell := HexagonToSpell(hexagon_type)
 		if spell == nil || (spell != nil && HasSpell(player.clump, spell.?)) {
 			hexagon_amounts := GetHexagonTypeAmounts(player.clump)
 			if hexagon_amounts[hexagon_type] > 2 do continue // Max of 3 upgrades
@@ -246,7 +223,7 @@ GetEnemyInaccuracy :: proc(state: AIState) -> f32 {
 	return 0
 }
 
-GetClosestClump :: proc(enemy: ^Enemy, range: f32) -> (found: bool, clump: ^HexagonClump) {
+EnemyGetClosestClump :: proc(enemy: ^Enemy, range: f32) -> (found: bool, clump: ^HexagonClump) {
 	closest_dist := range
 	closest_clump: ^HexagonClump = nil
 	
@@ -270,7 +247,7 @@ DrawEnemies :: proc() { for enemy in enemies do DrawEnemy(enemy) }
 DrawEnemy :: proc(enemy: Enemy) {
 	DrawHexagonClump(enemy.clump)
 	DrawEnemyFace(enemy)
-	if DEBUG_ON do DrawDebugText(enemy.pos, "%.0f hp, %v, %s", enemy.health, enemy.ai_state, ShortUUID(enemy.uuid))
+	if DEBUG_ON do DrawDebugText(enemy.pos, "%.0f hp, %v, %v, %s", enemy.health, enemy.ai_state, enemy.vel, ShortUUID(enemy.uuid))
 }
 
 GetDetectionRange :: proc(hexagon_types: []HexagonType) -> f32 {
@@ -382,8 +359,8 @@ HandleAggroState :: proc(enemy: ^Enemy, target: ^HexagonClump) {
 	}
 
 	// Sprint to catch up to target
-	if rl.Vector2Distance(enemy.pos, target.pos) > 300 && enemy.spr.sprint_secs > 0 {
-		enemy.spr.sprinting = true
+	if rl.Vector2Distance(enemy.pos, target.pos) > 300 && enemy.sprint_secs > 0 {
+		enemy.sprinting = true
 	}
 
 	// Fire as fast as possible
@@ -407,8 +384,8 @@ HandlePanicState :: proc(enemy: ^Enemy, attacker: ^HexagonClump) {
 	}
 
 	// Sprint if it can
-	if enemy.spr.sprint_secs > 0 {
-		enemy.spr.sprinting = true
+	if enemy.sprint_secs > 0 {
+		enemy.sprinting = true
 	}
 
 	// Fire as much as it can, while running away

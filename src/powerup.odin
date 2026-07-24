@@ -21,6 +21,10 @@ PowerupType :: enum {
 	SPEED, // Value: Speed multiplier (1 doesn't change anything)
 }
 
+// It's important to distinguish the two different kinds of "powerups".
+// World powerups are like hearts, they appear in world space.
+// Bound powerups are the active powerups the player has consumed.
+
 WorldPowerup :: struct {
 	type: PowerupType,
 	value: f32,
@@ -104,7 +108,7 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 
 	// Despawn if away from player
 	player_dist := rl.Vector2Distance(powerup.pos, player.pos)
-	player_dist -= f32(GetPlayerLevel(player) - 1) * HEXAGON_SIZE
+	player_dist -= f32(GetLevel(player.hexagon_types) - 1) * HEXAGON_SIZE
 	if player_dist > 1000 && len(world_powerups) > index do unordered_remove(&world_powerups, index)
 }
 

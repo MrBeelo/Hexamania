@@ -160,7 +160,3 @@ GetHexagonName :: proc(type: HexagonType) -> string {
 	}
 	return "ERROR"
 }
-
-GetCorrespondingSpellAsHexagon :: proc(type: HexagonType) -> HexagonType {
-	return GetHexagonTypeFromSpellType(GetSpellFromHexagonType(type))
-}

@@ -2,7 +2,6 @@ package main
 
 import rl "vendor:raylib"
 import "core:math"
-import "core:math/rand"
 
 BASE_PLAYER_SPEED :: 3 * 60
 PLAYER_ACCELERATION :: 8 * 60
@@ -20,12 +19,6 @@ NewPlayer :: proc() -> Player {
 	return Player{ NewHexagonClump({.RIFLE, .RIFLE}, 0), camera, {}, false, nil }
 }
 
-GetMaxPlayerVelocity :: proc(plr: Player) -> f32 {
-	max_speed := GetPlayerSpeed(plr)
-	if player.spr.sprinting do max_speed *= 1.5
-	return max_speed
-}
-
 UpdatePlayer :: proc(plr: ^Player) {
 	// Manage death
 	if plr.dead_time > 0.5 do StartDeathSequence()
@@ -33,23 +26,14 @@ UpdatePlayer :: proc(plr: ^Player) {
 	// Manage speed
 	speed := GetPlayerSpeed(plr^)
 	if Holding(.HORIZ) && Holding(.VERT) do speed *= (1 / 1.41)
-	
-	// Movement
-	if Holding(.UP) {
-	 	Accelerate(&plr.vel.y, -speed, PLAYER_ACCELERATION)
-		has_moved = true
-	} else if Holding(.DOWN) {
-		Accelerate(&plr.vel.y, speed, PLAYER_ACCELERATION)
-		has_moved = true
-	} else do Accelerate(&plr.vel.y, 0, PLAYER_ACCELERATION)
-	
-	if Holding(.LEFT) {
-	 	Accelerate(&plr.vel.x, -speed, PLAYER_ACCELERATION)
-		has_moved = true
-	} else if Holding(.RIGHT) {
-	 	Accelerate(&plr.vel.x, speed, PLAYER_ACCELERATION)
-		has_moved = true
-	} else do Accelerate(&plr.vel.x, 0, PLAYER_ACCELERATION)
+
+	target_speed_modifier_x := int(Holding(.RIGHT)) - int(Holding(.LEFT))
+	target_speed_modifier_y := int(Holding(.DOWN)) - int(Holding(.UP))
+
+	Accelerate(&plr.vel.x, speed * f32(target_speed_modifier_x), PLAYER_ACCELERATION)
+	Accelerate(&plr.vel.y, speed * f32(target_speed_modifier_y), PLAYER_ACCELERATION)
+
+	if !has_moved && (Holding(.HORIZ) || Holding(.VERT)) do has_moved = true
 
 	// Clamp velocities down to 0 if they are low and player isn't moving
 	if !Holding(.HORIZ) && !Holding(.VERT) {
@@ -58,7 +42,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 		if math.abs(plr.vel.y) < DEADZONE do plr.vel.y = 0
 	}
 
-	plr.spr.sprinting = Holding(.SPRINT) && plr.spr.sprint_secs > 0
+	plr.sprinting = Holding(.SPRINT) && plr.sprint_secs > 0
 	if Holding(.SPRINT) do has_sprinted = true
 
 	// Clamp player velocity for safety
@@ -109,6 +93,12 @@ UpdatePlayer :: proc(plr: ^Player) {
 	UpdateHexagonClump(&plr.clump)
 }
 
+DrawPlayer :: proc(plr: ^Player) {
+	DrawHexagonClump(plr.clump)
+	DrawPlayerFace()
+	if DEBUG_ON do DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
+}
+
 ChangePlayerActiveSpell :: proc(up: bool, start_spell: SpellType, test_spell: SpellType) {
 	index := int(test_spell)
 	index += 1 if up else -1
@@ -121,83 +111,14 @@ ChangePlayerActiveSpell :: proc(up: bool, start_spell: SpellType, test_spell: Sp
 	ChangePlayerActiveSpell(up, start_spell, new_spell)
 }
 
-DrawPlayer :: proc(plr: ^Player) {
-	DrawHexagonClump(plr.clump)
-	DrawPlayerFace()
-	if DEBUG_ON do DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
-}
-
 GetPlayerSpeed :: proc(plr: Player) -> f32 {
 	speed := f32(BASE_PLAYER_SPEED)
 	if plr.bound_powerups[.SPEED].time_remaining > 0 do speed *= plr.bound_powerups[.SPEED].value
 	return speed
 }
 
-HandlePlayerCamera :: proc(plr: ^Player) {	
-	for i in 0..=1 {
-		diff := plr.pos[i] - plr.camera.target[i]
-		threshold := SCREEN_SIZE[i] / 10 / plr.camera.zoom
-
-		if diff > threshold do plr.camera.target[i] = plr.pos[i] - threshold
-		if diff < -threshold do plr.camera.target[i] = plr.pos[i] + threshold
-	}
-
-	target_zoom := GetCameraZoom(GetPlayerLevel(plr^))
-	if plr.camera.zoom < target_zoom do plr.camera.zoom += rl.GetFrameTime()
-	if plr.camera.zoom > target_zoom do plr.camera.zoom -= rl.GetFrameTime()
-}
-
-CameraPos :: proc(plr: Player) -> rl.Vector2 {
-	return (plr.pos - plr.camera.target) * plr.camera.zoom + plr.camera.offset
-}
-
-GetCameraZoom :: proc(level: int) -> f32 {
-	switch level {
-	case 1: return 1.1
-	case 2: return 0.9
-	case 3: return 0.8
-	case 4: return 0.7
-	}
-
-	return 1
-}
-
-GetPlayerLevel :: proc(plr: Player) -> int { return GetLevel(plr.hexagon_types) }
-
-GetLevel :: proc(hexagon_types: []HexagonType) -> int {
-	hexagons := len(hexagon_types)
-	switch {
-	case hexagons < 1 + 6: return 1
-	case hexagons < 1 + 6 + 12: return 2
-	case hexagons < 1 + 6 + 12 + 18: return 3
-	case hexagons == 1 + 6 + 12 + 18: return 4
-	}
-
-	return 1
-}
-
-// For spawning enemies and powerups
-GetRandomSpawnPos :: proc(range: f32 = 120) -> rl.Vector2 {
-	visible_screen_size := SCREEN_SIZE / player.camera.zoom
-	min_dist := visible_screen_size / 2
-	max_dist := min_dist + range
-
-	pos_x, pos_y: f32
-	x_free := bool(rand.int_range(0, 2))
-	if x_free {
-		pos_x = rand.float32_range(-max_dist.x, max_dist.x)
-		pos_y = RangeRand({min_dist.y, max_dist.y})
-	} else {
-		pos_x = RangeRand({min_dist.x, max_dist.x})
-		pos_y = rand.float32_range(-max_dist.y, max_dist.y)
-	}
-	
-	pos := player.camera.target + {pos_x, pos_y}
-	return pos
-}
-
-GetWorldCameraRect :: proc(cam := player.camera) -> rl.Rectangle {
-	size := SCREEN_SIZE * cam.zoom
-	pos := cam.target - size / 2
-	return {pos.x, pos.y, size.x, size.y}
+GetMaxPlayerVelocity :: proc(plr: Player) -> f32 {
+	max_speed := GetPlayerSpeed(plr)
+	if player.sprinting do max_speed *= 1.5
+	return max_speed
 }

@@ -9,10 +9,8 @@ SearchAndSetResourceDir :: proc(folder_name: cstring) -> bool {
 	}
 	
 	app_dir := rl.GetApplicationDirectory()
-	if ChangeAndCheckDir(rl.TextFormat("%s%s", app_dir, folder_name)) do return true
-	if ChangeAndCheckDir(rl.TextFormat("%s../%s", app_dir, folder_name)) do return true
-	if ChangeAndCheckDir(rl.TextFormat("%s../../%s", app_dir, folder_name)) do return true
-	if ChangeAndCheckDir(rl.TextFormat("%s../../../%s", app_dir, folder_name)) do return true
+	dirs := [?]cstring{"%s%s", "%s../%s", "%s../../%s", "%s../../../%s"}
+	for dir in dirs do if ChangeAndCheckDir(rl.TextFormat(dir, app_dir, folder_name)) do return true
 	
 	return false
 }

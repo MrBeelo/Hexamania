@@ -28,7 +28,7 @@ DrawPlayerHealthBar :: proc() {
 	rl.DrawRectangleRounded(health_bar_rect, 0.3, 10, rl.RED)
 	
 	sprint_bar_size := bar_size + 5
-	sprint_bar_size.x = sprint_bar_size.x * player.spr.sprint_secs / MAX_SPRINT_SECS
+	sprint_bar_size.x = sprint_bar_size.x * player.sprint_secs / MAX_SPRINT_SECS
 	sprint_bar_rect := rl.Rectangle{shell_pos.x, shell_pos.y + 45, sprint_bar_size.x, sprint_bar_size.y}
 	rl.DrawRectangleRec(sprint_bar_rect, rl.SKYBLUE)
 }
@@ -64,7 +64,7 @@ DrawActiveSpellPreview :: proc() {
 	case .HEALTH_PAD: {
 		_, size, _ := GetHealthPadStats(hexagon_type_amounts)
 		size *= player.camera.zoom
-		pos := CameraPos(player)
+		pos := WorldToCamera(player.pos)
 		rect := rl.Rectangle{pos.x - size / 2, pos.y - size / 2, size, size}
 		rl.DrawRectangleRoundedLinesEx(rect, 0.2, 10, 7, rl.GREEN)
 	}

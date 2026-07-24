@@ -5,8 +5,8 @@ import rl "vendor:raylib"
 import "core:strings"
 
 SCREEN_SIZE := rl.Vector2{720, 720} // It is a variable so it can be indexed (not planning to make the window resizable)
-DEBUG_ON :: false
-VERSION :: "1.2.1"
+DEBUG_ON :: true
+VERSION :: "1.2.2"
 
 player: Player
 
