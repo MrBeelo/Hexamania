@@ -87,7 +87,7 @@ DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOver
 	}
 	}
 
-	if DEBUG_ON {
+	if debug_on {
 		rl.DrawRectangleLinesEx(hex.hurtbox, 1, rl.RED)
 		rl.DrawCircleV(hex.center, 3, rl.RED)
 	}

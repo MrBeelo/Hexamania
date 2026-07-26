@@ -36,6 +36,7 @@ HexagonClump :: struct {
 	dead_time: f32,
 	can_shoot: bool,
 	collision_grace_period: f32,
+	invincible: bool,
 }
 
 GetMaxHealth :: proc(hexagons: int) -> f32 {
@@ -59,8 +60,30 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	health_regen := NewTimer(5, true, true)
 	health := GetMaxHealth(len(hexagon_types))
 
-	clump := HexagonClump{new_hexagon_types, hexagons, center, 0, 0, health, id, false, 5, 5, health_regen, 
-		0, nil, 0, 0, {}, {}, 0, 0, true, 0}
+	clump := HexagonClump{
+		hexagon_types = new_hexagon_types,
+		hexagons = hexagons,
+		pos = center,
+		vel = 0,
+		rot = 0,
+		health = health,
+		uuid = id,
+		sprinting = false,
+		sprint_secs = 5,
+		time_since_last_sprint = 5,
+		health_regen = health_regen,
+		grace_period = 0,
+		attacker = nil,
+		rifle_delay = 0,
+		frozen_time_left = 0,
+		burning = {},
+		spell_cooldowns = {},
+		kill_happiness_time = 0,
+		dead_time = 0,
+		can_shoot = true,
+		collision_grace_period = 0,
+		invincible = false,
+	}
 	
 	UpdateClumpHexagons(&clump)
 	return clump
@@ -168,7 +191,7 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 	
 	for hexagon in clump.hexagons do DrawHexagon(hexagon, opacity, overlay)
 	
-	if DEBUG_ON do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
+	if debug_on do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
 
 // Originally, this was actual collisions, but since it was really buggy
@@ -204,7 +227,7 @@ GetClumpFromUUID :: proc(id: uuid.Identifier) -> ^HexagonClump {
 }
 
 DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) {
-	if clump.grace_period > 0 do return
+	if clump.grace_period > 0 || clump.invincible do return
 
 	multiplier := f32(1)
 	if attacker.uuid == player.uuid && clump.uuid != player.uuid {
@@ -227,7 +250,7 @@ DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) 
 }
 
 DamageClumpNoAttacker :: proc(clump: ^HexagonClump, amount: f32) {
-	if clump.grace_period > 0 do return
+	if clump.grace_period > 0 || clump.invincible do return
 	clump.health -= amount
 	clump.grace_period = 0.15
 	if clump.uuid == player.uuid do rl.PlaySound(damaged)

@@ -96,7 +96,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 DrawPlayer :: proc(plr: ^Player) {
 	DrawHexagonClump(plr.clump)
 	DrawPlayerFace()
-	if DEBUG_ON do DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
+	if debug_on do DrawDebugText(plr.pos, "%.0f hp, %s", plr.health, ShortUUID(plr.uuid))
 }
 
 ChangePlayerActiveSpell :: proc(up: bool, start_spell: SpellType, test_spell: SpellType) {

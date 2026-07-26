@@ -247,7 +247,7 @@ DrawEnemies :: proc() { for enemy in enemies do DrawEnemy(enemy) }
 DrawEnemy :: proc(enemy: Enemy) {
 	DrawHexagonClump(enemy.clump)
 	DrawEnemyFace(enemy)
-	if DEBUG_ON do DrawDebugText(enemy.pos, "%.0f hp, %v, %v, %s", enemy.health, enemy.ai_state, enemy.vel, ShortUUID(enemy.uuid))
+	if debug_on do DrawDebugText(enemy.pos, "%.0f hp, %v, %v, %s", enemy.health, enemy.ai_state, enemy.vel, ShortUUID(enemy.uuid))
 }
 
 GetDetectionRange :: proc(hexagon_types: []HexagonType) -> f32 {

@@ -1,6 +1,7 @@
 package main
 
 import rl "vendor:raylib"
+import "core:fmt"
 
 toolbar_messages: [2]cstring
 has_moved: bool
@@ -57,14 +58,14 @@ UpdateToolbar :: proc() {
 	
 	if IsUpgrade(last_hexagon_found) && can_show_upgrade_text && hexagon_found_time > 0 {
 		hexagon_found_time -= rl.GetFrameTime()
-		msg1 := rl.TextFormat("Found new upgrade for %s:", GetHexagonName(SpellToHexagon(HexagonToSpell(last_hexagon_found))))
-		msg2 := rl.TextFormat("%s", GetHexagonName(last_hexagon_found))
+		msg1 := fmt.ctprintf("Found new upgrade for %s:", GetHexagonName(SpellToHexagon(HexagonToSpell(last_hexagon_found))))
+		msg2 := fmt.ctprintf("%s", GetHexagonName(last_hexagon_found))
 		toolbar_messages = {msg1, msg2}
 	}
 	
 	if IsSpell(last_hexagon_found) && can_show_spell_text && hexagon_found_time > 0 {
 		hexagon_found_time -= rl.GetFrameTime()
-		msg1 := rl.TextFormat("Found new spell: %s", GetHexagonName(last_hexagon_found))
+		msg1 := fmt.ctprintf("Found new spell: %s", GetHexagonName(last_hexagon_found))
 		msg2: cstring
 		#partial switch last_hexagon_found {
 		case .HEALTH_PAD: msg2 = "Throw a health pad down to heal yourself!"

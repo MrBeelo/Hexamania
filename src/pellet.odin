@@ -70,5 +70,5 @@ DrawPellets :: proc() { for pellet in pellets do DrawPellet(pellet) }
 
 DrawPellet :: proc(pellet: Pellet) {
 	rl.DrawCircleV(pellet.pos, 3, rl.WHITE)
-	if DEBUG_ON do DrawDebugText(pellet.pos, "Owner: %s", ShortUUID(pellet.owner))
+	if debug_on do DrawDebugText(pellet.pos, "Owner: %s", ShortUUID(pellet.owner))
 }

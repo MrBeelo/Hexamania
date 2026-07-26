@@ -5,8 +5,8 @@ import rl "vendor:raylib"
 import "core:strings"
 
 SCREEN_SIZE := rl.Vector2{720, 720} // It is a variable so it can be indexed (not planning to make the window resizable)
-DEBUG_ON :: true
-VERSION :: "1.2.2"
+VERSION :: "1.2.3"
+debug_on := false
 
 player: Player
 
@@ -35,6 +35,7 @@ init :: proc() {
 }
 
 update :: proc() {
+	if Holding(.SPRINT) && rl.IsKeyPressed(.F3) do debug_on = !debug_on
 	ResetHexagonClumps()
 	UpdateMenus()
 	if game_state == .PLAYING {
@@ -78,17 +79,7 @@ update :: proc() {
 		DrawBoundPowerups(player.bound_powerups)
 		DrawToolbar()
 
-		if DEBUG_ON {
-			rl.DrawText(rl.TextFormat("pos: %.2f, %.2f", player.pos.x, player.pos.y), 10, 10, 32, rl.BLACK)
-			rl.DrawText(rl.TextFormat("vel: %.2f, %.2f", player.vel.x, player.vel.y), 10, 50, 32, rl.BLACK)
-			rl.DrawText(rl.TextFormat("speed: %.0f", GetPlayerSpeed(player)), 10, 90, 32, rl.BLACK)
-			rl.DrawText(rl.TextFormat("acc: %d", PLAYER_ACCELERATION), 10, 130, 32, rl.BLACK)
-			rl.DrawText(rl.TextFormat("time survived: %f", GetElapsedStopwatchTime(time_survived)), 10, 170, 32, rl.BLACK)
-			rl.DrawText(rl.TextFormat("score: %d", killed_hexagons), 10, 210, 32, rl.BLACK)
-			rl.DrawText(rl.TextFormat("fps: %d", rl.GetFPS()), 10, 250, 32, rl.BLACK)
-			rl.DrawText(rl.TextFormat("enemies: %d", len(enemies)), 10, 290, 32, rl.BLACK)
-			rl.DrawText(rl.TextFormat("powerups: %d", len(world_powerups)), 10, 330, 32, rl.BLACK)
-		}
+		if debug_on do DrawDebug()
 	}
 
 	DrawMenus()
