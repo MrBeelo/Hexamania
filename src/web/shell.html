@@ -5,8 +5,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 	<title>Odin + Raylib Template</title>
-	<meta name="title" content="Hexamania.io">
-	<meta name="description" content="">
+	<meta name="title" content="Odin + Raylib Web Template">
+	<meta name="description" content="Simple template, made by Karl Zylinski, changed to fit my needs!">
 	<meta name="viewport" content="width=device-width">
 
 	<style>
@@ -14,20 +14,19 @@
 			margin: 0px; 
 			overflow: hidden; 
 			background-color: black;
+			display: grid;
+			place-items: center;
+			height: 100vh;
 		}
 		canvas.game_canvas { 
 			border: 0px none; 
 			background-color: black;
-			padding-left: 0;
-			padding-right: 0;
-			margin-left: auto;
-			margin-right: auto;
 			display: block;
 		}
 	</style>
 </head>
 <body>
-	<canvas class="game_canvas" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1" onmousedown="event.target.focus()" onkeydown="event.preventDefault()"></canvas>
+	<canvas class="game_canvas" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
 	<script type="text/javascript" src="odin.js"></script>
 	<script>
 		var odinMemoryInterface = new odin.WasmMemoryInterface();
@@ -41,7 +40,8 @@
 					...imports
 				}
 
-				return WebAssembly.instantiateStreaming(fetch("index.wasm"), newImports).then(function(output) {
+				const wasmFile = document.currentScript.src.replace(/\.js$/, ".wasm");
+				return WebAssembly.instantiateStreaming(fetch(wasmFile), newImports).then(function(output) {
 					var e = output.instance.exports;
 					odinMemoryInterface.setExports(e);
 					odinMemoryInterface.setMemory(e.memory);

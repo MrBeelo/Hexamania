@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 
 SearchAndSetResourceDir :: proc(folder_name: cstring) -> bool {
 	if rl.DirectoryExists(folder_name) {

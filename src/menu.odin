@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 
 GameState :: enum { PLAYING, MAIN, PAUSED, FINISH, ANALYSIS }
 game_state := GameState.MAIN

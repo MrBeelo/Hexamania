@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 import "core:math"
 
 // The size of the hexagon destination texture, which also happens to be its diameter

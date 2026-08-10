@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 
 MAP_SIZE :: f32(128)
 

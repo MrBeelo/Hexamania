@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 
 main_music, death_music: rl.Music
 MAIN_MENU_LOOP_SECONDS :: 24

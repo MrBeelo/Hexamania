@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 
 GameButton :: enum { UP, DOWN, LEFT, RIGHT, HORIZ, VERT, SPRINT }
 

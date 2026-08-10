@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 import "core:math"
 import "core:crypto"
 import "core:encoding/uuid"

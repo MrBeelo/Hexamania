@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 
 shoot, fire_spell, explosion, ui_confirm, damaged, merge: rl.Sound
 

@@ -1,16 +1,15 @@
-#--SETTINGS--
+#------------------#
+#     SETTINGS     #
+#------------------#
 
-# Directory in which there are source files.
-BASE_SOURCE_DIRECTORY := src
+# What should be the target? Options: desktop, web
+MODE := desktop
 
-# Directory in which there are resources (like images, sounds, etc.).
-RESOURCES_DIRECTORY := res
-
-# Directory in which the program along with the resources will be outputted in.
-BASE_OUTPUT_DIRECTORY := bin
-
-# The executable's name (add .exe if on windows)
+# The executable's name (without any extensions).
 EXECUTABLE_NAME := Hexamania
+
+# Adds the .exe extension to the executable. Definitely use if on windows.
+ADD_EXE := false
 
 # Run the project immediately after export?
 RUN := true
@@ -21,45 +20,99 @@ OPTIMIZATION := none
 # Enforce string odin writing conventions?
 STRICT := true
 
-# What should be the target? Options: desktop, web
-MODE := desktop
+# Enable debug symbols?
+DEBUG := true
 
-# Odin's path. (needed for web building only)
-ODIN_PATH := $(shell odin root)
+# Copy resources over to the output directory? (desktop only)
+COPY_RESOURCES := true
 
-# Path to emscripten compiler. (needed for web building only)
-EMCC := /usr/lib/emscripten/emcc
+# Directory in which there are source files.
+BASE_SOURCE_DIRECTORY := src
 
-#--SCRIPT--
+# Directory in which there are resources (like images, sounds, etc.).
+RESOURCES_DIRECTORY := res
 
+# Directory in which the program along with the resources will be outputted in.
+BASE_OUTPUT_DIRECTORY := bin
+
+#----------------#
+#     SCRIPT     #
+#----------------#
+
+# This reroutes the source directory to a subfolder, as there are two 'main' procs.
 SOURCE_DIRECTORY := $(BASE_SOURCE_DIRECTORY)/$(MODE)
+
+# This is used for convenience if building on multiple platforms
 OUTPUT_DIRECTORY := $(BASE_OUTPUT_DIRECTORY)/$(MODE)
+
+# Add the strict flag if STRICT is true
 STRICT_FLAG := $(if $(filter true,$(STRICT)),-vet -strict-style)
+
+# Ditto with DEBUG
+DEBUG_FLAG := $(if $(filter true,$(DEBUG)),-debug)
+
+# Add .exe extension.
+ifeq ($(ADD_EXE), true)
+	EXECUTABLE_NAME := $(EXECUTABLE_NAME).exe
+endif
+
+# Change the build target depending on the platform
 build: build-$(MODE)
 
+# Desktop Build
 build-desktop:
+	# Make the output directory if it doesn't already exist.
 	mkdir -p $(OUTPUT_DIRECTORY)
-	odin build $(SOURCE_DIRECTORY) -out:$(OUTPUT_DIRECTORY)/$(EXECUTABLE_NAME) -o:$(OPTIMIZATION) $(STRICT_FLAG)
-	cp -r $(RESOURCES_DIRECTORY) $(OUTPUT_DIRECTORY)
 
+	# Build command.
+	odin build $(SOURCE_DIRECTORY) -out:$(OUTPUT_DIRECTORY)/$(EXECUTABLE_NAME) -o:$(OPTIMIZATION) $(STRICT_FLAG) $(DEBUG_FLAG)
+
+# Copy the resources to the output directory. If this wasn't done, the user
+# would have to manually copy over the resource folder to the final build.
+ifeq ($(COPY_RESOURCES), true)
+	cp -r $(RESOURCES_DIRECTORY) $(OUTPUT_DIRECTORY)
+endif
+
+# If RUN is set to true, run the program.
 ifeq ($(RUN), true)
 	./$(OUTPUT_DIRECTORY)/$(EXECUTABLE_NAME)
 endif
 
-ODIN_WEB_BUILD_FLAGS = -target:js_wasm32 -build-mode:obj -define:RAYLIB_WASM_LIB=env.o -define:RAYGUI_WASM_LIB=env.o $(STRICT_FLAG) -out:$(OUTPUT_DIRECTORY)/game.wasm.obj
-WEB_FILES := $(OUTPUT_DIRECTORY)/game.wasm.obj $(ODIN_PATH)/vendor/raylib/wasm/libraylib.web.a $(ODIN_PATH)/vendor/raylib/wasm/libraygui.a
+# Additional build flags needed for web building. Generates an obj file that emscripten will take.
+ODIN_WEB_BUILD_FLAGS := -target:js_wasm32 -build-mode:obj -define:RAYLIB_WASM_LIB=env.o -define:RAYGUI_WASM_LIB=env.o $(STRICT_FLAG) $(DEBUG_FLAG) -out:$(OUTPUT_DIRECTORY)/game.wasm.obj
+
+# Outputted obj file and raylib library.
+WEB_FILES := $(OUTPUT_DIRECTORY)/game.wasm.obj $(BASE_SOURCE_DIRECTORY)/raylib/lib/webassembly/libraylib.web.a $(BASE_SOURCE_DIRECTORY)/raylib/lib/webassembly/libraygui.web.a
+
+# Some additional flags for emscripten.
 WEB_FLAGS := -sEXPORTED_RUNTIME_METHODS=['HEAPF32'] -sALLOW_MEMORY_GROWTH=1 -sUSE_GLFW=3 -sWASM_BIGINT -sWARN_ON_UNDEFINED_SYMBOLS=0 -sASSERTIONS --shell-file $(SOURCE_DIRECTORY)/shell.html --preload-file $(RESOURCES_DIRECTORY)
 
+# Web build
 build-web:
+	# Make the output directory if it doesn't already exist.
 	mkdir -p $(OUTPUT_DIRECTORY)
+
+	# First pass: odin build command.
 	odin build $(SOURCE_DIRECTORY) $(ODIN_WEB_BUILD_FLAGS)
-	cp $(ODIN_PATH)/core/sys/wasm/js/odin.js $(OUTPUT_DIRECTORY)
-	$(EMCC) -o $(OUTPUT_DIRECTORY)/index.html $(WEB_FILES) $(WEB_FLAGS)
+
+	# Copy over odin.js to the output directory.
+	cp $(SOURCE_DIRECTORY)/odin.js $(OUTPUT_DIRECTORY)
+
+	# Second pass: emcc build command.
+	emcc -o $(OUTPUT_DIRECTORY)/$(EXECUTABLE_NAME).html $(WEB_FILES) $(WEB_FLAGS)
+
+	# Since the project has been built, we can get rid of the obj file.
 	rm $(OUTPUT_DIRECTORY)/game.wasm.obj
 
+	# Rename name.html to index.html for itch.io
+	mv $(OUTPUT_DIRECTORY)/$(EXECUTABLE_NAME).html $(OUTPUT_DIRECTORY)/index.html
+
+# If RUN is set to true, start a python server on the output directory.
 ifeq ($(RUN), true)
-	cd $(OUTPUT_DIRECTORY) && python -m http.server 8080
+	cd $(OUTPUT_DIRECTORY) && emrun .
 endif
 
+# Clean the output directory.
+# Can be called with 'make clean'.
 clean:
 	rm -rf $(BASE_OUTPUT_DIRECTORY)

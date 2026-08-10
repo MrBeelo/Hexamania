@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 import "core:math"
 
 circle_overlay_texture: rl.Texture2D

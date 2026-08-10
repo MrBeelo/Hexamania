@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 
 face_sheet: rl.Texture2D
 cores: rl.Texture2D

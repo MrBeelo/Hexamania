@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 
 FontInfo :: struct { type: FontType, size: f32 }
 font_cache: map[FontInfo]rl.Font

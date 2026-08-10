@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 import "core:fmt"
 
 toolbar_messages: [2]cstring

@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 import "core:math"
 
 BACKGROUND_SIZE :: rl.Vector2{1024, 1024}

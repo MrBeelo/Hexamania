@@ -4,7 +4,7 @@ import "base:runtime"
 import "core:mem"
 import "core:c"
 import game ".."
-import rl "vendor:raylib"
+import rl "../raylib"
 
 @(private="file")
 web_context: runtime.Context

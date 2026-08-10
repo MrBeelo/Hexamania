@@ -1,11 +1,11 @@
 package main
 
 import "core:fmt"
-import rl "vendor:raylib"
+import rl "raylib"
 import "core:strings"
 
 SCREEN_SIZE := rl.Vector2{720, 720} // It is a variable so it can be indexed (not planning to make the window resizable)
-VERSION :: "1.2.3"
+VERSION :: "1.2.4"
 debug_on := false
 
 player: Player
@@ -15,7 +15,7 @@ log :: proc(str: string, args: ..any) { fmt.printfln(strings.concatenate({"GAME:
 init :: proc() {
 	rl.SetConfigFlags({.VSYNC_HINT, .WINDOW_HIGHDPI, .MSAA_4X_HINT})
 	rl.InitWindow(i32(SCREEN_SIZE.x), i32(SCREEN_SIZE.y), "Hexamania.io")
-	rl.SetExitKey(.KEY_NULL)
+	rl.SetExitKey(.NULL)
 	rl.InitAudioDevice()
 	SearchAndSetResourceDir("res")
 	GuiLoadStyleHexamania()

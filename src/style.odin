@@ -1,33 +1,30 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 import "core:mem"
-
-GuiStyleProp :: struct {
-    controlId: rl.GuiControl,
-    propertyId: int,
-    propertyValue: int,
-}
 
 HEXAMANIA_STYLE_PROPS_COUNT :: 16
 
-hexamaniaStyleProps := [HEXAMANIA_STYLE_PROPS_COUNT]GuiStyleProp {
-    { .DEFAULT, 0, 0x8449deff },    // DEFAULT_BORDER_COLOR_NORMAL 
-    { .DEFAULT, 1, 0x1a0034ff },    // DEFAULT_BASE_COLOR_NORMAL 
-    { .DEFAULT, 2, 0xffffffff },    // DEFAULT_TEXT_COLOR_NORMAL 
-    { .DEFAULT, 3, 0x8449deff },    // DEFAULT_BORDER_COLOR_FOCUSED 
-    { .DEFAULT, 4, 0x3b1576ff },    // DEFAULT_BASE_COLOR_FOCUSED 
-    { .DEFAULT, 5, 0xffffffff },    // DEFAULT_TEXT_COLOR_FOCUSED 
-    { .DEFAULT, 6, 0x8220caff },    // DEFAULT_BORDER_COLOR_PRESSED 
-    { .DEFAULT, 7, 0x4b0f7eff },    // DEFAULT_BASE_COLOR_PRESSED 
-    { .DEFAULT, 8, 0xffffffff },    // DEFAULT_TEXT_COLOR_PRESSED 
-    { .DEFAULT, 9, 0x3c0e55ff },    // DEFAULT_BORDER_COLOR_DISABLED 
-    { .DEFAULT, 10, 0x2a0a44ff },    // DEFAULT_BASE_COLOR_DISABLED 
-    { .DEFAULT, 11, 0x8f8f8fff },    // DEFAULT_TEXT_COLOR_DISABLED 
-    { .DEFAULT, 16, 0x00000010 },    // DEFAULT_TEXT_SIZE 
-    { .DEFAULT, 18, 0x8449deff },    // DEFAULT_LINE_COLOR 
-    { .DEFAULT, 19, 0x180038ff },    // DEFAULT_BACKGROUND_COLOR 
-    { .DEFAULT, 20, 0x00000018 },    // DEFAULT_TEXT_LINE_SPACING 
+// Conversion from i64 -> i32 as Odin doesn't allow casts like this to untyped integers.
+@(private = "file") col :: proc "contextless" (val: i64) -> i32 { return i32(val) }
+
+hexamaniaStyleProps := [HEXAMANIA_STYLE_PROPS_COUNT]rl.GuiStyleProp {
+	{ .DEFAULT, 0, col(0x8449deff) },    // DEFAULT_BORDER_COLOR_NORMAL 
+    { .DEFAULT, 1, col(0x1a0034ff) },    // DEFAULT_BASE_COLOR_NORMAL 
+    { .DEFAULT, 2, col(0xffffffff) },    // DEFAULT_TEXT_COLOR_NORMAL 
+    { .DEFAULT, 3, col(0x8449deff) },    // DEFAULT_BORDER_COLOR_FOCUSED 
+    { .DEFAULT, 4, col(0x3b1576ff) },    // DEFAULT_BASE_COLOR_FOCUSED 
+    { .DEFAULT, 5, col(0xffffffff) },    // DEFAULT_TEXT_COLOR_FOCUSED 
+    { .DEFAULT, 6, col(0x8220caff) },    // DEFAULT_BORDER_COLOR_PRESSED 
+    { .DEFAULT, 7, col(0x4b0f7eff) },    // DEFAULT_BASE_COLOR_PRESSED 
+    { .DEFAULT, 8, col(0xffffffff) },    // DEFAULT_TEXT_COLOR_PRESSED 
+    { .DEFAULT, 9, col(0x3c0e55ff) },    // DEFAULT_BORDER_COLOR_DISABLED 
+    { .DEFAULT, 10, col(0x2a0a44ff) },    // DEFAULT_BASE_COLOR_DISABLED 
+    { .DEFAULT, 11, col(0x8f8f8fff) },    // DEFAULT_TEXT_COLOR_DISABLED 
+    { .DEFAULT, 16, col(0x00000010) },    // DEFAULT_TEXT_SIZE 
+    { .DEFAULT, 18, col(0x8449deff) },    // DEFAULT_LINE_COLOR 
+    { .DEFAULT, 19, col(0x180038ff) },    // DEFAULT_BACKGROUND_COLOR 
+    { .DEFAULT, 20, col(0x00000018) },    // DEFAULT_TEXT_LINE_SPACING 
 }
 
 HEXAMANIA_STYLE_FONT_ATLAS_COMP_SIZE :: 6155

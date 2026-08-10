@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 import "core:math"
 
 BASE_PLAYER_SPEED :: 3 * 60

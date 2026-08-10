@@ -1,6 +1,6 @@
 package main
 
-import rl "vendor:raylib"
+import rl "raylib"
 import "core:fmt"
 
 DrawDebug :: proc() {
@@ -49,7 +49,8 @@ DrawDebug :: proc() {
 		bounds := rl.Rectangle{
 			GROUP_BOX_POS.x + LABEL_PADDING.x, 
 			GROUP_BOX_POS.y + LABEL_PADDING.y + f32(index) * (font_size + LABEL_CHILD_GAP), 
-			longest_text_size_x, font_size,
+			longest_text_size_x + GROUP_BOX_X_BUFFER, // Note: with new raygui (5.0), text bounds width must be a tiny bit bigger, or else '...' will appear.
+			font_size,
 		}
 		
 		rl.GuiLabel(bounds, str)
