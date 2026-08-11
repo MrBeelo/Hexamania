@@ -355,7 +355,7 @@ ModelSkeleton :: struct {
 }
 
 // Model, meshes, materials and animation data
-Model :: struct {
+Model :: struct #align(4) {
 	transform:     Matrix,      // Local transform matrix
 	meshCount:     c.int,       // Number of meshes
 	materialCount: c.int,       // Number of materials
@@ -446,7 +446,7 @@ VrDeviceInfo :: struct {
 }
 
 // VrStereoConfig, VR stereo rendering configuration for simulator
-VrStereoConfig :: struct {
+VrStereoConfig :: struct #align(4) {
 	projection:        [2]Matrix, // VR projection matrices (per eye)
 	viewOffset:        [2]Matrix, // VR view offset matrices (per eye)
 	leftLensCenter:    [2]f32,    // VR left lens center
@@ -1042,7 +1042,7 @@ foreign lib {
 	LoadFileData     :: proc(fileName: cstring, dataSize: ^c.int) -> [^]u8 ---             // Load file data as byte array (read)
 	UnloadFileData   :: proc(data: [^]u8) ---                                              // Unload file data allocated by LoadFileData()
 	SaveFileData     :: proc(fileName: cstring, data: rawptr, dataSize: c.int) -> bool --- // Save data to file from byte array (write), returns true on success
-	ExportDataAsCode :: proc(data: ^u8, dataSize: c.int, fileName: cstring) -> bool ---    // Export data to code (.h), returns true on success
+	ExportDataAsCode :: proc(data: rawptr, dataSize: c.int, fileName: cstring) -> bool --- // Export data to code (.h), returns true on success
 	LoadFileText     :: proc(fileName: cstring) -> [^]u8 ---                               // Load text data from file (read), returns a '\0' terminated string
 	UnloadFileText   :: proc(text: [^]u8) ---                                              // Unload file text data allocated by LoadFileText()
 	SaveFileText     :: proc(fileName: cstring, text: [^]u8) -> bool ---                   // Save text data to file (write), string must be '\0' terminated, returns true on success
@@ -1251,7 +1251,7 @@ foreign lib {
 	CheckCollisionPointCircle   :: proc(point: Vector2, center: Vector2, radius: f32) -> bool --- // Check if point is inside circle
 	CheckCollisionPointTriangle :: proc(point: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> bool --- // Check if point is inside a triangle
 	CheckCollisionPointLine     :: proc(point: Vector2, p1: Vector2, p2: Vector2, threshold: c.int) -> bool --- // Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
-	CheckCollisionPointPoly     :: proc(point: Vector2, points: ^Vector2, pointCount: c.int) -> bool --- // Check if point is within a polygon described by array of vertices
+	CheckCollisionPointPoly     :: proc(point: Vector2, points: [^]Vector2, pointCount: c.int) -> bool --- // Check if point is within a polygon described by array of vertices
 	CheckCollisionLines         :: proc(startPos1: Vector2, endPos1: Vector2, startPos2: Vector2, endPos2: Vector2, collisionPoint: [^]Vector2) -> bool --- // Check the collision between two lines defined by two points each, returns collision point by reference
 	GetCollisionRec             :: proc(rec1: Rectangle, rec2: Rectangle) -> Rectangle --- // Get collision rectangle for two rectangles collision
 
@@ -1457,7 +1457,7 @@ foreign lib {
 	TextInsert              :: proc(text: cstring, insert: cstring, position: c.int) -> [^]u8 --- // Insert text in a defined byte position
 	TextInsertAlloc         :: proc(text: cstring, insert: cstring, position: c.int) -> [^]u8 --- // Insert text in a defined byte position, memory must be MemFree()
 	TextJoin                :: proc(textList: [^]cstring, count: c.int, delimiter: cstring) -> cstring --- // Join text strings with delimiter
-	TextSplit               :: proc(text: cstring, delimiter: i8, count: ^c.int) -> [^]cstring --- // Split text into multiple strings, using MAX_TEXTSPLIT_COUNT static strings
+	TextSplit               :: proc(text: cstring, delimiter: u8, count: ^c.int) -> [^]cstring --- // Split text into multiple strings, using MAX_TEXTSPLIT_COUNT static strings
 	TextAppend              :: proc(text: [^]u8, append: cstring, position: ^c.int) ---       // Append text at specific position and move cursor
 	TextFindIndex           :: proc(text: cstring, search: cstring) -> c.int ---              // Find first text occurrence within a string, -1 if not found
 	TextToUpper             :: proc(text: cstring) -> cstring ---                             // Get upper case version of provided string
@@ -1651,6 +1651,7 @@ import "core:math/bits"
 
 //  Check if a gesture have been detected
 IsGestureDetected :: proc "c" (gesture: Gesture) -> bool {
+	@(default_calling_convention="c")
 	foreign lib {
 		IsGestureDetected :: proc "c" (gesture: Gestures) -> bool ---
 	}
@@ -1659,6 +1660,7 @@ IsGestureDetected :: proc "c" (gesture: Gesture) -> bool {
 
 // Get latest detected gesture
 GetGestureDetected :: proc "c" () -> Gesture {
+	@(default_calling_convention="c")
 	foreign lib {
 		GetGestureDetected :: proc "c" () -> Gestures ---
 	}
@@ -1667,9 +1669,9 @@ GetGestureDetected :: proc "c" () -> Gesture {
 }
 
 // Check if one specific window flag is enabled
-IsWindowState :: proc "c" (flag: ConfigFlag) -> bool {
+IsWindowState :: proc(flag: ConfigFlag) -> bool {
 	foreign lib {
-		IsWindowState :: proc "c" (flag: ConfigFlags) -> bool ---
+		IsWindowState :: proc(flag: ConfigFlags) -> bool ---
 	}
 
 	return IsWindowState({flag})

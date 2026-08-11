@@ -131,5 +131,4 @@ versions, but they ended up being too buggy or didn't fit in, so I had to scrap 
 
 #### Things I want to add before a 'final release'  
 - Better sound effects
-- A more organised "toolbar" system
-- Maybe rewrite HexagonType and Entities entirely (I want to avoid using all_clumps)
+- Maybe rewrite HexagonType and Entities entirely (I want to avoid using all_clumps) + full performace & allocations check

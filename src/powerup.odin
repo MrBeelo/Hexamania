@@ -95,7 +95,7 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 	if rl.CheckCollisionRecs(closest_box, powerup.hurtbox) {
 		if len(world_powerups) > index do unordered_remove(&world_powerups, index)
 		rl.PlaySound(merge)
-		has_found_powerup = true
+		player_action_list.found_powerup = true
 
 		value := powerup.value
 		if player.bound_powerups[powerup.type].time_remaining > 0 do value = math.max(player.bound_powerups[powerup.type].value, powerup.value)

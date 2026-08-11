@@ -33,7 +33,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 	Accelerate(&plr.vel.x, speed * f32(target_speed_modifier_x), PLAYER_ACCELERATION)
 	Accelerate(&plr.vel.y, speed * f32(target_speed_modifier_y), PLAYER_ACCELERATION)
 
-	if !has_moved && (Holding(.HORIZ) || Holding(.VERT)) do has_moved = true
+	if !player_action_list.moved && (Holding(.HORIZ) || Holding(.VERT)) do player_action_list.moved = true
 
 	// Clamp velocities down to 0 if they are low and player isn't moving
 	if !Holding(.HORIZ) && !Holding(.VERT) {
@@ -43,7 +43,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 	}
 
 	plr.sprinting = Holding(.SPRINT) && plr.sprint_secs > 0
-	if Holding(.SPRINT) do has_sprinted = true
+	if Holding(.SPRINT) do player_action_list.sprinted = true
 
 	// Clamp player velocity for safety
 	max_vel := GetMaxPlayerVelocity(plr^)
@@ -57,7 +57,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 	UpdateBoundPowerups(&plr.bound_powerups)
 
 	if rl.IsMouseButtonPressed(.RIGHT) {
-		has_opened_spell_menu = true
+		player_action_list.opened_spell_menu = true
 		if plr.active_spell == nil {
 			for spell in SpellType do if HasSpell(plr.clump, spell) { plr.active_spell = spell; plr.spell_mode = true }
 		} else {
@@ -67,7 +67,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 
 	if !plr.spell_mode {
 		if rl.IsMouseButtonPressed(.LEFT) && plr.rifle_delay <= 0 && player.can_shoot {
-			has_shot = true
+			player_action_list.shot = true
 			PlayerFirePellet()
 		}
 	} else {
@@ -76,7 +76,7 @@ UpdatePlayer :: proc(plr: ^Player) {
 		if move < 0 do ChangePlayerActiveSpell(false, plr.active_spell.?, plr.active_spell.?)
 
 		if rl.IsMouseButtonPressed(.LEFT) && player.spell_cooldowns[player.active_spell.?] <= 0 {
-			has_used_spell = true
+			player_action_list.used_spell = true
 			switch plr.active_spell {
 			case .HEALTH_PAD: SummonHealthPad(&plr.clump)
 			case .ICE_BALL: PlayerThrowIceBall()

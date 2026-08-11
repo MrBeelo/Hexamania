@@ -150,7 +150,7 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 		if hexagon_type == nil do ThrowRandomWorldPowerup(enemy.pos); else do ThrowHeart(enemy.pos, hexagon_type.?)
 		
 		if len(enemies) > index do unordered_remove(&enemies, index)
-		has_killed_enemy = true
+		player_action_list.killed_enemy = true
 	}
 
 	// For safety :)
