@@ -54,26 +54,29 @@ UpdateEnemies :: proc() {
 
 	// Spawning Enemies
 	UpdateTimer(&enemy_spawn_timer)
-	if enemy_spawn_timer.ding {
-		if player.camera.zoom == 0 do return // Will cause a division by zero error, but this shouldn't happen anyway.
-		HEXAGON_DEVELOPEMENT_FACTOR :: 25 // The bigger this is, the less hexagons enemies will have (based on time)
-		
-		hexagons := math.floor_div(int(GetElapsedStopwatchTime(time_survived)), HEXAGON_DEVELOPEMENT_FACTOR) + 2
-		hexagons = rand.int_range(hexagons, hexagons + 3)
-		if hexagons <= 0 do return
-		hexagons = math.min(hexagons, MAX_HEXAGONS)
-		
-		hexagon_types := make([]HexagonType, hexagons)
-		GenEnemyHexagonTypes(&hexagon_types)
-		
-		pos := GetRandomSpawnPos()
-		rot := RotationFrom2Points(pos, player.camera.target)
-		rot += rand.float32_range(-10, 10)
-		vel := VelocityFromRotation(rot)
-		
-		append(&enemies, NewEnemy(hexagon_types, pos, vel))
-		enemy_spawn_timer.duration = rand.float32_range(7, 12)
-	}
+	if enemy_spawn_timer.ding do SpawnEnemy()
+}
+
+SpawnEnemy :: proc() {
+	if player.camera.zoom == 0 do return // Will cause a division by zero error, but this shouldn't happen anyway.
+	HEXAGON_DEVELOPEMENT_FACTOR :: 25 // The bigger this is, the less hexagons enemies will have (based on time)
+	
+	hexagons := math.floor_div(int(GetElapsedStopwatchTime(time_survived)), HEXAGON_DEVELOPEMENT_FACTOR) + 2
+	hexagons = rand.int_range(hexagons, hexagons + 3)
+	if hexagons <= 0 do return
+	hexagons = math.min(hexagons, MAX_HEXAGONS)
+	
+	hexagon_types := make([]HexagonType, hexagons)
+	GenEnemyHexagonTypes(&hexagon_types)
+	
+	pos := GetRandomSpawnPos()
+	rot := RotationFrom2Points(pos, player.camera.target)
+	rot += rand.float32_range(-10, 10)
+	vel := VelocityFromRotation(rot)
+	
+	append(&enemies, NewEnemy(hexagon_types, pos, vel))
+	enemy_spawn_timer.duration = rand.float32_range(7, 12)
+	delete(hexagon_types)
 }
 
 GetMaxEnemyVelocity :: proc(enemy: Enemy) -> f32 {
@@ -148,7 +151,8 @@ UpdateEnemy :: proc(enemy: ^Enemy, index: int) {
 	if enemy.dead_time > 0.5 {
 		hexagon_type := GetHexagonTypeToThrow(enemy^)
 		if hexagon_type == nil do ThrowRandomWorldPowerup(enemy.pos); else do ThrowHeart(enemy.pos, hexagon_type.?)
-		
+
+		DestructClump(enemy.clump)
 		if len(enemies) > index do unordered_remove(&enemies, index)
 		player_action_list.killed_enemy = true
 	}
@@ -197,6 +201,8 @@ GetHexagonTypeToThrow :: proc(enemy: Enemy) -> Maybe(HexagonType) {
 		}
 	}
 
+	delete(shuffled)
+
 	return nil
 }
 
@@ -228,7 +234,7 @@ EnemyGetClosestClump :: proc(enemy: ^Enemy, range: f32) -> (found: bool, clump: 
 	closest_clump: ^HexagonClump = nil
 	
 	level := f32(GetLevel(enemy.hexagon_types))
-	for other_clump in hexagon_clumps {
+	for other_clump in hexagon_clumps[:clump_cap] {
 		if enemy.uuid == other_clump.uuid do continue
 		other_level := f32(GetLevel(other_clump.hexagon_types))
 		dist := rl.Vector2Distance(enemy.pos, other_clump.pos) - HEXAGON_SIZE * (level + other_level - 2)

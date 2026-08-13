@@ -57,13 +57,27 @@ DrawDebug :: proc() {
 	}
 
 	// Invincibility toggle
+	{
+		toggle_text := cstring("Invincibility")
+		toggle_bounds := rl.Rectangle{
+			group_box_bounds.x, group_box_bounds.y + group_box_bounds.height + LABEL_PADDING.y,
+			rl.MeasureTextEx(font, toggle_text, font_size, font_spacing).x + LABEL_PADDING.x * 2,
+			font_size + LABEL_PADDING.y * 2,
+		}
 
-	toggle_text := cstring("Invincibility")
-	toggle_bounds := rl.Rectangle{
-		group_box_bounds.x, group_box_bounds.y + group_box_bounds.height + LABEL_PADDING.y,
-		rl.MeasureTextEx(font, toggle_text, font_size, font_spacing).x + LABEL_PADDING.x * 2,
-		font_size + LABEL_PADDING.y * 2,
+		rl.GuiToggle(toggle_bounds, toggle_text, &player.invincible)
 	}
-	
-	rl.GuiToggle(toggle_bounds, toggle_text, &player.invincible)
+
+	// Add Hexagon Button
+	{
+		button_text := cstring("Add Hexagon")
+		button_bounds := rl.Rectangle{
+			group_box_bounds.x, group_box_bounds.y + group_box_bounds.height + LABEL_PADDING.y * 4 + font_size,
+			rl.MeasureTextEx(font, button_text, font_size, font_spacing).x + LABEL_PADDING.x * 2,
+			font_size + LABEL_PADDING.y * 2,
+		}
+
+		result := rl.GuiButton(button_bounds, button_text)
+		if result == 1 do AddHexagonToClump(&player.clump, .RIFLE)
+	}
 }

@@ -12,11 +12,13 @@ MAX_SPRINT_SECS :: f32(5)
 REGEN_SPRINT_TIME :: f32(2.5)
 
 hexagon_clumps: []^HexagonClump
+clump_cap: int
 
 // Clumps function as entities, hence their "health" and "uuid" fields.
 HexagonClump :: struct {
 	hexagon_types: []HexagonType,
 	hexagons: []Hexagon,
+	hexagon_amount: int, // Functions as the cap for above 2 slices.
 	pos: rl.Vector2,
 	vel: rl.Vector2,
 	rot: f32,
@@ -89,16 +91,27 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	return clump
 }
 
+DestructClump :: proc(clump: HexagonClump) {
+	delete(clump.hexagon_types)
+	delete(clump.hexagons)
+}
+
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
 	len := len(clump.hexagon_types)
 	if len >= MAX_HEXAGONS do return
 
-	// The slice the clump currently has is 1 type short, so we make a new
-	// one and copy it.
-	new_hexagon_types := make([]HexagonType, len + 1)
-	copy(new_hexagon_types, clump.hexagon_types)
-	new_hexagon_types[len] = type
-	clump.hexagon_types = new_hexagon_types
+	// Temporarily hold the old hexagon types
+	old_hexagon_types := make([]HexagonType, len)
+	copy(old_hexagon_types, clump.hexagon_types)
+
+	// Reset clump.hexagon_types, now adding the new type
+	delete(clump.hexagon_types)
+	clump.hexagon_types = make([]HexagonType, len + 1)
+	copy(clump.hexagon_types, old_hexagon_types)
+	clump.hexagon_types[len] = type
+
+	// Delete our temporary slice
+	delete(old_hexagon_types)
 }
 
 // Returns how many of each type the clump contains
@@ -199,7 +212,7 @@ DrawHexagonClump :: proc(clump: HexagonClump) {
 HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 	if clump.collision_grace_period > 0 do return
 	if clump.dead_time > 0 do return
-	for enemy_clump in hexagon_clumps {
+	for enemy_clump in hexagon_clumps[:clump_cap] {
 		if enemy_clump.collision_grace_period > 0 do continue
 		if enemy_clump.dead_time > 0 do continue
 		if clump.uuid == enemy_clump.uuid do continue
@@ -216,13 +229,14 @@ HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 }
 
 ResetHexagonClumps :: proc() {
-	if len(hexagon_clumps) != len(enemies) + 1 do hexagon_clumps = make([]^HexagonClump, len(enemies) + 1)
+	clump_cap = len(enemies) + 1
+	if len(hexagon_clumps) < clump_cap do hexagon_clumps = make([]^HexagonClump, clump_cap)
 	for &enemy, index in enemies do hexagon_clumps[index] = &enemy.clump
 	hexagon_clumps[len(enemies)] = &player.clump
 }
 
 GetClumpFromUUID :: proc(id: uuid.Identifier) -> ^HexagonClump {
-	for clump in hexagon_clumps do if clump.uuid == id do return clump
+	for clump in hexagon_clumps[:clump_cap] do if clump.uuid == id do return clump
 	return nil
 }
 
@@ -263,8 +277,12 @@ HealClump :: proc(clump: ^HexagonClump, amount: f32) {
 }
 
 UpdateClumpHexagons :: proc(clump: ^HexagonClump) {
-	if len(clump.hexagons) != len(clump.hexagon_types) do clump.hexagons = make([]Hexagon, len(clump.hexagon_types)) 
-	//hexagons := make([]Hexagon, len(clump.hexagon_types))
+	// Resizing only ever happens on the player, so it's safe to do it like this
+	if len(clump.hexagons) != len(clump.hexagon_types) { 
+		delete(clump.hexagons)
+		clump.hexagons = make([]Hexagon, len(clump.hexagon_types))
+	}
+	
 	for hexagon_type, index in clump.hexagon_types {
 		// First we get the local offset from the middle hexagon
 		offset := GetHexagonOffset(index)
