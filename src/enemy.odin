@@ -300,13 +300,8 @@ EnemyDoRandomSpell :: proc(enemy: ^Enemy, target: rl.Vector2, spell_weights: [Sp
 		if spell_weights[spell] == 0 do continue
 		if enemy.spell_cooldowns[spell] > 0 do continue
 		if !HasSpell(enemy.clump, spell) do continue
-		
-		switch spell {
-		case .HEALTH_PAD: SummonHealthPad(&enemy.clump)
-		case .ICE_BALL: EnemyThrowIceBall(enemy, target)
-		case .FIREBALL: EnemyThrowFireball(enemy, target)
-		case .BLACK_HOLE: EnemyThrowBlackHole(enemy, target)
-		}
+
+		EnemyDoSpell(enemy, spell, target)
 		return true
 	}
 	

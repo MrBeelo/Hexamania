@@ -104,6 +104,29 @@ SpellToHexagonUpgrades :: proc(spell: Maybe(SpellType)) -> [3]HexagonType {
 
 SPELL_COOLDOWN :: f32(25)
 
+PlayerDoSpell :: proc(type: SpellType) {
+	switch type {
+	case .HEALTH_PAD: SummonHealthPad(&player.clump)
+	case .ICE_BALL: PlayerThrowIceBall()
+	case .FIREBALL: PlayerThrowFireball()
+	case .BLACK_HOLE: PlayerThrowBlackHole()
+	}
+
+	rl.SetSoundVolume(fire_spell, 1)
+	PlaySound(fire_spell)
+}
+
+EnemyDoSpell :: proc(enemy: ^Enemy, type: SpellType, target: rl.Vector2) {
+	switch type {
+	case .HEALTH_PAD: SummonHealthPad(&enemy.clump)
+	case .ICE_BALL: EnemyThrowIceBall(enemy, target)
+	case .FIREBALL: EnemyThrowFireball(enemy, target)
+	case .BLACK_HOLE: EnemyThrowBlackHole(enemy, target)
+	}
+
+	// NOTE: TODO
+}
+
 // HEALTH PAD
 
 HealthPad :: struct { owner: uuid.Identifier, pos: rl.Vector2, size: f32, max_size: f32, heal_amount: f32, heal_timer: Timer, time_left: f32, rot: f32 }
@@ -243,7 +266,7 @@ UpdateFireball :: proc(ball: ^Fireball, index: int) {
 			clump.burning = { damage_timer, ball.burn_time, ball.damage }
 			exploded = true
 			exploded_clump_uuid = clump.uuid
-			rl.PlaySound(explosion)
+			PlaySound(explosion)
 		}
 	}
 

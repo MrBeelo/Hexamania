@@ -77,16 +77,8 @@ UpdatePlayer :: proc(plr: ^Player) {
 
 		if rl.IsMouseButtonPressed(.LEFT) && player.spell_cooldowns[player.active_spell.?] <= 0 {
 			player_action_list.used_spell = true
-			switch plr.active_spell {
-			case .HEALTH_PAD: SummonHealthPad(&plr.clump)
-			case .ICE_BALL: PlayerThrowIceBall()
-			case .FIREBALL: PlayerThrowFireball()
-			case .BLACK_HOLE: PlayerThrowBlackHole()
-			}
+			PlayerDoSpell(plr.active_spell.?)
 			plr.spell_mode = false
-
-			rl.SetSoundVolume(fire_spell, 1)
-			rl.PlaySound(fire_spell)
 		}
 	}	
 

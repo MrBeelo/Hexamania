@@ -58,7 +58,7 @@ UpdateHexagonHeart :: proc(heart: ^HexagonHeart, index: int) {
 		AddHexagonToClump(&player.clump, heart.type)
 		player_action_list.last_hexagon_found = heart.type
 		hexagon_found_time = 5
-		rl.PlaySound(merge)
+		PlaySound(merge, 0.7)
 		
 		if heart.type == .HEALTH_PAD || heart.type == .ICE_BALL || heart.type == .FIREBALL || heart.type == .BLACK_HOLE {
 			player_action_list.found_spell = true

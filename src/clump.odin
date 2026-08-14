@@ -92,8 +92,8 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 }
 
 DestructClump :: proc(clump: HexagonClump) {
-	delete(clump.hexagon_types)
-	delete(clump.hexagons)
+	if clump.hexagon_types != nil do delete(clump.hexagon_types)
+	if clump.hexagons != nil do delete(clump.hexagons)
 }
 
 AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
@@ -260,14 +260,14 @@ DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) 
 		}
 	}
 	
-	if clump.uuid == player.uuid do rl.PlaySound(damaged)
+	if clump.uuid == player.uuid do PlaySound(damaged)
 }
 
 DamageClumpNoAttacker :: proc(clump: ^HexagonClump, amount: f32) {
 	if clump.grace_period > 0 || clump.invincible do return
 	clump.health -= amount
 	clump.grace_period = 0.15
-	if clump.uuid == player.uuid do rl.PlaySound(damaged)
+	if clump.uuid == player.uuid do PlaySound(damaged)
 }
 
 HealClump :: proc(clump: ^HexagonClump, amount: f32) {
