@@ -63,24 +63,49 @@ DrawText :: proc(text: cstring, pos: rl.Vector2, size: f32, type := FontType.QUI
 	rl.DrawTextPro(font, text, pos, 0, 0, size, spacing, color)
 }
 
-DrawTextCenter :: proc(text: cstring, center: rl.Vector2, size: f32, type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
+DrawTextCenter :: proc(text: cstring, center: rl.Vector2, size: f32, 
+type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
 	if text == "" do return
-	font := GetFont({type, size})
-	text_size := MeasureTextProStyled(text, size, type, spacing)
-
-	if border_info.bordered do for i in -1..=1 do for j in -1..=1 do if i != 0 || j != 0 {
-		DrawTextProStyled(font, string(text), center + {f32(i) * border_info.border_thickness, f32(j) * border_info.border_thickness}, 
-			text_size / 2, 0, size, spacing, border_info.border_color)
-	}
-	
-	DrawTextProStyled(font, string(text), center, text_size / 2, 0, size, spacing, color)
+	text_size := MeasureTextStyled(text, size, type, spacing)
+	DrawTextStyledPro(text, center, text_size / 2, 0, size, type, color, border_info, spacing)
 }
 
 MeasureText :: proc(text: cstring, size: f32, type := FontType.QUICKSAND_MEDIUM, spacing: f32 = 5) -> rl.Vector2 {
 	return rl.MeasureTextEx(GetFont({type, size}), text, size, spacing)
 }
 
-DrawTextStyled :: proc(font: rl.Font, text: string, position: rl.Vector2, font_size: f32, spacing: f32, color: rl.Color) {
+DrawTextStyled :: proc(text: cstring, pos: rl.Vector2, size: f32, 
+type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
+	if text == "" do return
+	font := GetFont({type, size})
+
+	if border_info.bordered do for i in -1..=1 do for j in -1..=1 do if i != 0 || j != 0 {
+		_DrawTextStyled(font, string(text), pos + {f32(i) * border_info.border_thickness, 
+			f32(j) * border_info.border_thickness}, 
+			size, spacing, border_info.border_color)
+	}
+	
+	_DrawTextStyled(font, string(text), pos, size, spacing, color)
+}
+
+DrawTextStyledPro :: proc(text: cstring, pos: rl.Vector2, origin: rl.Vector2, rot: f32, size: f32, 
+type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
+	rlgl.PushMatrix()
+	
+    rlgl.Translatef(pos.x, pos.y, 0)
+    rlgl.Rotatef(rot, 0, 0, 1)
+    rlgl.Translatef(-origin.x, -origin.y, 0)
+    DrawTextStyled(text, {}, size, type, color, border_info, spacing)
+
+    rlgl.PopMatrix()
+}
+
+MeasureTextStyled :: proc(text: cstring, size: f32, type := FontType.QUICKSAND_MEDIUM, spacing: f32 = 5) -> rl.Vector2 {
+	return _MeasureTextStyled(GetFont({type, size}), string(text), size, spacing)
+}
+
+@(private = "file")
+_DrawTextStyled :: proc(font: rl.Font, text: string, position: rl.Vector2, font_size: f32, spacing: f32, color: rl.Color) {
 	text_len := len(text)
 
 	col_front := color
@@ -152,7 +177,8 @@ DrawTextStyled :: proc(font: rl.Font, text: string, position: rl.Vector2, font_s
 	}
 }
 
-MeasureTextStyled :: proc(font: rl.Font, text: string, font_size: f32, spacing: f32) -> rl.Vector2 {
+@(private = "file")
+_MeasureTextStyled :: proc(font: rl.Font, text: string, font_size: f32, spacing: f32) -> rl.Vector2 {
 	text_size: rl.Vector2
 
 	if len(text) <= 0 || text[0] == 0 do return text_size
@@ -204,22 +230,6 @@ MeasureTextStyled :: proc(font: rl.Font, text: string, font_size: f32, spacing: 
     text_size.y = text_height
 
     return text_size
-}
-
-DrawTextProStyled :: proc(font: rl.Font, text: string, position: rl.Vector2, 
-origin: rl.Vector2, rotation: f32, fontSize: f32, spacing: f32, tint: rl.Color) {
-	rlgl.PushMatrix()
-	
-    rlgl.Translatef(position.x, position.y, 0)
-    rlgl.Rotatef(rotation, 0, 0, 1)
-    rlgl.Translatef(-origin.x, -origin.y, 0)
-    DrawTextStyled(font, text, {}, fontSize, spacing, tint)
-
-    rlgl.PopMatrix()
-}
-
-MeasureTextProStyled :: proc(text: cstring, size: f32, type := FontType.QUICKSAND_MEDIUM, spacing: f32 = 5) -> rl.Vector2 {
-	return MeasureTextStyled(GetFont({type, size}), string(text), size, spacing)
 }
 
 @(private = "file")
