@@ -5,7 +5,7 @@
 # What should be the target? Options: desktop, web
 MODE ?= desktop
 
-# The executable's name (without any extensions).
+# The executable's name. (without any extensions)
 EXECUTABLE_NAME ?= Hexamania
 
 # Adds the .exe extension to the executable. Definitely use if on windows.
@@ -17,10 +17,10 @@ RUN ?= true
 # Type of optimization to use. Options: none, minimal, size, speed, aggressive
 OPTIMIZATION ?= none
 
-# Enforce string odin writing conventions?
+# Enforce strict odin writing conventions?
 STRICT ?= true
 
-# Enable debug symbols?
+# Enable debug? (adds debug symbols and runs with gdb, if it exists)
 DEBUG ?= true
 
 # Copy resources over to the output directory? (desktop only)
@@ -29,7 +29,7 @@ COPY_RESOURCES ?= true
 # Directory in which there are source files.
 SOURCE_DIRECTORY ?= src
 
-# Directory in which there are resources (like images, sounds, etc.).
+# Directory in which there are resources. (like images, sounds, etc.)
 RESOURCES_DIRECTORY ?= res
 
 # Directory in which the program along with the resources will be outputted in.
@@ -42,13 +42,13 @@ OUTPUT_DIRECTORY ?= bin
 # This reroutes the source directory to a subfolder, as there are two 'main' procs.
 NAMED_SOURCE_DIRECTORY := $(SOURCE_DIRECTORY)/$(MODE)
 
-# This is used for convenience if building on multiple platforms
+# This is used for convenience if building on multiple platforms.
 NAMED_OUTPUT_DIRECTORY := $(OUTPUT_DIRECTORY)/$(MODE)
 
-# Add the strict flag if STRICT is true
+# Add the strict flag if STRICT is true.
 STRICT_FLAG := $(if $(filter true,$(STRICT)),-vet -strict-style)
 
-# Ditto with DEBUG
+# Ditto with DEBUG.
 DEBUG_FLAG := $(if $(filter true,$(DEBUG)),-debug)
 
 # Add .exe extension.
@@ -56,7 +56,16 @@ ifeq ($(ADD_EXE), true)
 	EXECUTABLE_NAME := $(EXECUTABLE_NAME).exe
 endif
 
-# Change the build target depending on the platform
+# Decide whether the program should be run with gdb.
+CAN_RUN_DEBUG := true
+ifneq ($(DEBUG), true)
+	CAN_RUN_DEBUG = false
+endif
+ifeq (, $(shell which gdb))
+	CAN_RUN_DEBUG = false
+endif
+
+# Change the build target depending on the platform.
 build: build-$(MODE)
 
 # Desktop Build
@@ -75,7 +84,14 @@ endif
 
 # If RUN is set to true, run the program.
 ifeq ($(RUN), true)
+
+# Attempt to debug with gdb if it exists.
+ifeq ($(CAN_RUN_DEBUG), true)
+	gdb -q -ex 'set pagination off' ./$(NAMED_OUTPUT_DIRECTORY)/$(EXECUTABLE_NAME) -ex 'set debuginfod enabled on' -ex run
+else
 	./$(NAMED_OUTPUT_DIRECTORY)/$(EXECUTABLE_NAME)
+endif
+
 endif
 
 # Additional build flags needed for web building. Generates an obj file that emscripten will take.
@@ -107,7 +123,7 @@ build-web:
 	# Rename name.html to index.html for itch.io
 	mv $(NAMED_OUTPUT_DIRECTORY)/$(EXECUTABLE_NAME).html $(NAMED_OUTPUT_DIRECTORY)/index.html
 
-# If RUN is set to true, start a python server on the output directory.
+# If RUN is set to true, start a web server on the output directory.
 ifeq ($(RUN), true)
 	cd $(NAMED_OUTPUT_DIRECTORY) && emrun .
 endif

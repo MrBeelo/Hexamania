@@ -112,7 +112,6 @@ PlayerDoSpell :: proc(type: SpellType) {
 	case .BLACK_HOLE: PlayerThrowBlackHole()
 	}
 
-	rl.SetSoundVolume(fire_spell, 1)
 	PlaySound(fire_spell)
 }
 
@@ -124,7 +123,7 @@ EnemyDoSpell :: proc(enemy: ^Enemy, type: SpellType, target: rl.Vector2) {
 	case .BLACK_HOLE: EnemyThrowBlackHole(enemy, target)
 	}
 
-	// NOTE: TODO
+	PlaySound(fire_spell, enemy.clump, player.clump)
 }
 
 // HEALTH PAD

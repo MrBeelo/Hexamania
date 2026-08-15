@@ -103,7 +103,7 @@ UpdateWorldPowerup :: proc(powerup: ^WorldPowerup, index: int) {
 		player.bound_powerups[powerup.type] = BoundPowerup{value, time_remaining}
 
 		// Add health as soon as bound powerup is acquired
-		if powerup.type == .HEALTH do player.health += powerup.value
+		if powerup.type == .HEALTH do HealClump(&player.clump, powerup.value)
 	}
 
 	// Despawn if away from player

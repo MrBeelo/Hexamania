@@ -4,10 +4,25 @@ import rl "raylib"
 
 shoot, fire_spell, explosion, ui_confirm, damaged, merge: rl.Sound
 
-PlaySound :: proc(sound: rl.Sound, volume := f32(1), pitch := f32(1)) {
+PlaySoundNormal :: proc(sound: rl.Sound, volume := f32(1)) {
 	rl.SetSoundVolume(sound, volume)
-	rl.SetSoundPitch(sound, pitch)
 	rl.PlaySound(sound)
+}
+
+PlaySoundEnemy :: proc(sound: rl.Sound, clumpa, clumpb: HexagonClump, volume := f32(1)) {
+	mult := GetVolumeMult(clumpa, clumpb)
+	rl.SetSoundVolume(sound, volume * mult)
+	rl.PlaySound(sound)
+}
+
+PlaySound :: proc{
+	PlaySoundNormal,
+	PlaySoundEnemy,
+}
+
+GetVolumeMult :: proc(a, b: HexagonClump) -> f32 {
+	distance := ClumpDistance(a, b)
+	return max(0.4 - distance / 1000, 0)
 }
 
 LoadSounds :: proc() {

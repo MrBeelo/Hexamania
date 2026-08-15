@@ -130,4 +130,4 @@ Ultimately, some of these (like shaders and collisions) weren't added. I had som
 versions, but they ended up being too buggy or didn't fit in, so I had to scrap them.  
 
 #### Things I want to add before a 'final release'  
-- Better sound effects
+- More && higher quality sound effects

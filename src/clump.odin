@@ -18,7 +18,6 @@ clump_cap: int
 HexagonClump :: struct {
 	hexagon_types: []HexagonType,
 	hexagons: []Hexagon,
-	hexagon_amount: int, // Functions as the cap for above 2 slices.
 	pos: rl.Vector2,
 	vel: rl.Vector2,
 	rot: f32,
@@ -235,6 +234,13 @@ ResetHexagonClumps :: proc() {
 	hexagon_clumps[len(enemies)] = &player.clump
 }
 
+ClumpDistance :: proc(a, b: HexagonClump) -> f32 {
+	distance := rl.Vector2Distance(a.pos, b.pos)
+	distance -= (f32(GetLevel(a.hexagon_types)) - 1) * HEXAGON_SIZE
+	distance -= (f32(GetLevel(b.hexagon_types)) - 1) * HEXAGON_SIZE
+	return max(distance, 0)
+}
+
 GetClumpFromUUID :: proc(id: uuid.Identifier) -> ^HexagonClump {
 	for clump in hexagon_clumps[:clump_cap] do if clump.uuid == id do return clump
 	return nil
@@ -260,20 +266,21 @@ DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) 
 		}
 	}
 	
-	if clump.uuid == player.uuid do PlaySound(damaged)
+	if clump.uuid == player.uuid do PlaySound(damaged); else do PlaySound(damaged, clump^, player.clump)
 }
 
 DamageClumpNoAttacker :: proc(clump: ^HexagonClump, amount: f32) {
 	if clump.grace_period > 0 || clump.invincible do return
 	clump.health -= amount
 	clump.grace_period = 0.15
-	if clump.uuid == player.uuid do PlaySound(damaged)
+	if clump.uuid == player.uuid do PlaySound(damaged); else do PlaySound(damaged, clump^, player.clump)
 }
 
 HealClump :: proc(clump: ^HexagonClump, amount: f32) {
 	if clump.health <= 0 do return
 	clump.health += amount
-	if clump.health > GetMaxHealth(len(clump.hexagon_types)) do clump.health = GetMaxHealth(len(clump.hexagon_types))
+	max_health := GetMaxHealth(len(clump.hexagon_types))
+	clump.health = min(clump.health, max_health)
 }
 
 UpdateClumpHexagons :: proc(clump: ^HexagonClump) {
