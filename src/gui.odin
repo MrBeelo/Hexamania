@@ -5,15 +5,15 @@ import "core:math"
 
 circle_overlay_texture: rl.Texture2D
 
-LoadUI :: proc() {
+load_gui :: proc() {
 	circle_overlay_texture = rl.LoadTexture("texture/circle_overlay.png")
 }
 
-UnloadUI :: proc() {
+unload_gui :: proc() {
 	rl.UnloadTexture(circle_overlay_texture)
 }
 
-DrawPlayerHealthBar :: proc() {
+draw_health_bar :: proc() {
 	BUFFER :: f32(5)
 	SHELL_BUFFER :: f32(3)
 	bar_size := rl.Vector2{256, 48}
@@ -23,7 +23,7 @@ DrawPlayerHealthBar :: proc() {
 	rl.DrawRectangleRounded(shell_rect, 0.3, 10, rl.BLACK)
 	
 	health_bar_size := bar_size + 5
-	health_bar_size.x = health_bar_size.x * player.health / GetMaxHealth(len(player.hexagon_types))
+	health_bar_size.x = health_bar_size.x * player.health / get_max_health(len(player.hexagon_types))
 	health_bar_rect := rl.Rectangle{shell_pos.x, shell_pos.y + 5, health_bar_size.x, health_bar_size.y}
 	rl.DrawRectangleRounded(health_bar_rect, 0.3, 10, rl.RED)
 	
@@ -33,15 +33,15 @@ DrawPlayerHealthBar :: proc() {
 	rl.DrawRectangleRec(sprint_bar_rect, rl.SKYBLUE)
 }
 
-DrawSpellMenu :: proc() {
+draw_spell_menu :: proc() {
 	if !player.spell_mode do return
 
 	src: rl.Rectangle
 	switch player.active_spell.? {
-	case .HEALTH_PAD: src = GetHexagonTextureSource(.HEALTH_PAD)
-	case .ICE_BALL: src = GetHexagonTextureSource(.ICE_BALL)
-	case .FIREBALL: src = GetHexagonTextureSource(.FIREBALL)
-	case .BLACK_HOLE: src = GetHexagonTextureSource(.BLACK_HOLE)
+	case .HEALTH_PAD: src = get_hexagon_texture_src(.HEALTH_PAD)
+	case .ICE_BALL: src = get_hexagon_texture_src(.ICE_BALL)
+	case .FIREBALL: src = get_hexagon_texture_src(.FIREBALL)
+	case .BLACK_HOLE: src = get_hexagon_texture_src(.BLACK_HOLE)
 	}
 
 	cooldown := int(math.ceil(player.spell_cooldowns[player.active_spell.?]))
@@ -53,18 +53,18 @@ DrawSpellMenu :: proc() {
 	rot := math.mod_f32(f32(rl.GetTime()), 360) * 15
 	
 	rl.DrawTexturePro(hexagon_sheet, src, dest, BOX_SIZE / 2, rot, rl.WHITE if cooldown <= 0 else rl.GRAY)
-	if cooldown > 0 do DrawTextCenter(cooldown_text, {SCREEN_SIZE.x - (BUFFER + BOX_SIZE / 2), BUFFER + BOX_SIZE / 2}, 32, .QUICKSAND_MEDIUM)
+	if cooldown > 0 do draw_text_center(cooldown_text, {SCREEN_SIZE.x - (BUFFER + BOX_SIZE / 2), BUFFER + BOX_SIZE / 2}, 32, .QUICKSAND_MEDIUM)
 }
 
-DrawActiveSpellPreview :: proc() {
+draw_active_spell_preview :: proc() {
 	if !player.spell_mode do return
-	hexagon_type_amounts := GetHexagonTypeAmounts(player.clump)
+	hexagon_type_amounts := get_hexagon_type_amounts(player.clump)
 	if player.spell_cooldowns[player.active_spell.?] > 0 do return // If the active spell is on cooldown, don't draw the preview
 	switch player.active_spell.? {
 	case .HEALTH_PAD: {
-		_, size, _ := GetHealthPadStats(hexagon_type_amounts)
+		_, size, _ := get_health_pad_stats(hexagon_type_amounts)
 		size *= player.camera.zoom
-		pos := WorldToCamera(player.pos)
+		pos := world_to_camera(player.pos)
 		rect := rl.Rectangle{pos.x - size / 2, pos.y - size / 2, size, size}
 		rl.DrawRectangleRoundedLinesEx(rect, 0.2, 10, 7, rl.GREEN)
 	}
@@ -77,7 +77,7 @@ DrawActiveSpellPreview :: proc() {
 	}
 	case .FIREBALL: {
 		src := rl.Rectangle{0, 0, f32(circle_overlay_texture.width), f32(circle_overlay_texture.height)}
-		_, size, _ := GetFireballStats(hexagon_type_amounts)
+		_, size, _ := get_fireball_stats(hexagon_type_amounts)
 		size *= player.camera.zoom
 		dest := rl.Rectangle{rl.GetMousePosition().x, rl.GetMousePosition().y, size, size}
 		rot := math.mod_f32(f32(rl.GetTime()), 360) * 50
@@ -85,7 +85,7 @@ DrawActiveSpellPreview :: proc() {
 	}
 	case .BLACK_HOLE: {
 		src := rl.Rectangle{0, 0, f32(circle_overlay_texture.width), f32(circle_overlay_texture.height)}
-		_, _, size := GetBlackHoleStats(hexagon_type_amounts)
+		_, _, size := get_black_hole_stats(hexagon_type_amounts)
 		size *= player.camera.zoom
 		dest := rl.Rectangle{rl.GetMousePosition().x, rl.GetMousePosition().y, size, size}
 		rot := math.mod_f32(f32(rl.GetTime()), 360) * 50
@@ -94,7 +94,7 @@ DrawActiveSpellPreview :: proc() {
 	}
 }
 
-DrawBoundPowerups :: proc(bound_powerups: [PowerupType]BoundPowerup) {
+draw_bound_powerups :: proc(bound_powerups: [Powerup_Type]Bound_Powerup) {
 	SIZE :: 64
 	BUFFER :: 20
 	for powerup, type in bound_powerups {

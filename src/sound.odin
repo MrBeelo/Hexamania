@@ -4,28 +4,31 @@ import rl "raylib"
 
 shoot, fire_spell, explosion, ui_confirm, damaged, merge: rl.Sound
 
-PlaySoundNormal :: proc(sound: rl.Sound, volume := f32(1)) {
+@(private = "file")
+play_sound_normal :: proc(sound: rl.Sound, volume := f32(1)) {
 	rl.SetSoundVolume(sound, volume)
 	rl.PlaySound(sound)
 }
 
-PlaySoundEnemy :: proc(sound: rl.Sound, clumpa, clumpb: HexagonClump, volume := f32(1)) {
-	mult := GetVolumeMult(clumpa, clumpb)
+@(private = "file")
+play_sound_enemy :: proc(sound: rl.Sound, clumpa, clumpb: Hexagon_Clump, volume := f32(1)) {
+	mult := get_volume_mult(clumpa, clumpb)
 	rl.SetSoundVolume(sound, volume * mult)
 	rl.PlaySound(sound)
 }
 
-PlaySound :: proc{
-	PlaySoundNormal,
-	PlaySoundEnemy,
+play_sound :: proc{
+	play_sound_normal,
+	play_sound_enemy,
 }
 
-GetVolumeMult :: proc(a, b: HexagonClump) -> f32 {
-	distance := ClumpDistance(a, b)
+@(private = "file")
+get_volume_mult :: proc(a, b: Hexagon_Clump) -> f32 {
+	distance := clump_distance(a, b)
 	return max(0.4 - distance / 1000, 0)
 }
 
-LoadSounds :: proc() {
+load_sounds :: proc() {
 	shoot = rl.LoadSound("audio/shoot.wav")
 	fire_spell = rl.LoadSound("audio/fire_spell.wav")
 	explosion = rl.LoadSound("audio/explosion.wav")
@@ -34,7 +37,7 @@ LoadSounds :: proc() {
 	merge = rl.LoadSound("audio/merge.wav")
 }
 
-UnloadSounds :: proc() {
+unload_sounds :: proc() {
 	rl.UnloadSound(shoot)
 	rl.UnloadSound(fire_spell)
 	rl.UnloadSound(explosion)

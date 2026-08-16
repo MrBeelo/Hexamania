@@ -5,7 +5,7 @@ import rl "raylib"
 import "core:strings"
 
 @(rodata) SCREEN_SIZE := rl.Vector2{720, 720} // It is a variable so it can be indexed (not planning to make the window resizable)
-VERSION :: "1.2.7"
+VERSION :: "1.2.71"
 debug_on := false
 
 player: Player
@@ -17,41 +17,41 @@ init :: proc() {
 	rl.InitWindow(i32(SCREEN_SIZE.x), i32(SCREEN_SIZE.y), "Hexamania.io")
 	rl.SetExitKey(.NULL)
 	rl.InitAudioDevice()
-	SearchAndSetResourceDir("res")
-	GuiLoadStyleHexamania()
+	search_and_set_resource_dir("res")
+	load_style()
 	
-	LoadHexagons()
-	LoadBackground()
-	LoadPowerups()
-	LoadFonts()
-	LoadFace()
-	LoadSpells()
-	LoadUI()
-	LoadSounds()
-	LoadMusic()
+	load_hexagons()
+	load_background()
+	load_powerups()
+	load_fonts()
+	load_face()
+	load_spells()
+	load_gui()
+	load_sounds()
+	load_music()
 	
-	InitMenus()
-	InitEnemies()
+	init_menus()
+	init_enemies()
 }
 
 update :: proc() {
-	if Holding(.SPRINT) && rl.IsKeyPressed(.F3) do debug_on = !debug_on
-	ResetHexagonClumps()
-	UpdateMenus()
+	if holding(.SPRINT) && rl.IsKeyPressed(.F3) do debug_on = !debug_on
+	reset_clumps()
+	update_menus()
 	if game_state == .PLAYING {
-		UpdatePlayer(&player)
-		UpdatePellets()
-		UpdateHexagonHearts()
-		UpdateEnemies()
-		UpdateWorldPowerups()
-		UpdateSpells()
-		UpdateToolbar()
+		update_player(&player)
+		update_pellets()
+		update_hearts()
+		update_enemies()
+		update_world_powerups()
+		update_spells()
+		update_toolbar()
 		
 		if rl.IsKeyPressed(.ESCAPE) do game_state = .PAUSED
 		if rl.IsKeyPressed(.LEFT_CONTROL) do game_state = .ANALYSIS
 	}
 
-	UpdateMusic()
+	update_music()
 	
 	rl.BeginDrawing()
 	defer rl.EndDrawing()
@@ -60,43 +60,43 @@ update :: proc() {
 	if game_state == .PLAYING {
 		rl.BeginMode2D(player.camera)
 
-		DrawGameBackground()
-		DrawSpellsBelow()
-		DrawHexagonHearts()
-		DrawWorldPowerups()
-		DrawEnemies()
-		DrawPlayer(&player)
-		DrawPellets()
-		DrawSpellsAbove()
+		draw_game_background()
+		draw_spells_bottom_layer()
+		draw_hearts()
+		draw_world_powerups()
+		draw_enemies()
+		draw_player(&player)
+		draw_pellets()
+		draw_spells_top_layer()
 		
 		rl.EndMode2D()
 
 		// HUD
-		DrawPlayerHealthBar()
-		DrawMap()
-		DrawActiveSpellPreview()
-		DrawSpellMenu()
-		DrawBoundPowerups(player.bound_powerups)
-		DrawToolbar()
+		draw_health_bar()
+		draw_map()
+		draw_active_spell_preview()
+		draw_spell_menu()
+		draw_bound_powerups(player.bound_powerups)
+		draw_toolbar()
 
-		if debug_on do DrawDebug()
+		if debug_on do draw_debug()
 	}
 
-	DrawMenus()
+	draw_menus()
 
     free_all(context.temp_allocator)
 }
 
 close :: proc() { 
-	UnloadHexagons()
-	UnloadBackground()
-	UnloadPowerups()
-	UnloadFonts()
-	UnloadFace()
-	UnloadSpells()
-	UnloadUI()
-	UnloadSounds()
-	UnloadMusic()
+	unload_hexagons()
+	unload_background()
+	unload_powerups()
+	unload_fonts()
+	unload_face()
+	unload_spells()
+	unload_gui()
+	unload_sounds()
+	unload_music()
 
 	rl.CloseAudioDevice()
 	rl.CloseWindow() 

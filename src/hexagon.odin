@@ -17,7 +17,7 @@ hexagon_sheet: rl.Texture2D
 hexagon_frozen_texture: rl.Texture2D
 hexagon_burning_texture_sheet: rl.Texture2D
 
-HexagonType :: enum {
+Hexagon_Type :: enum {
 	RIFLE,
 	RIFLE_UPGRADE_PELLET_SPEED,
 	RIFLE_UPGRADE_FIRE_RATE,
@@ -40,27 +40,27 @@ HexagonType :: enum {
 	BLACK_HOLE_UPGRADE_SUCTION_POWER,
 }
 
-HexagonFrozenOverlay :: struct {}
-HexagonBurningOverlay :: struct {}
-HexagonOverlay :: union {
-	HexagonFrozenOverlay,
-	HexagonBurningOverlay,
+Hexagon_Frozen_Overlay :: struct {}
+Hexagon_Burning_Overlay :: struct {}
+Hexagon_Overlay :: union {
+	Hexagon_Frozen_Overlay,
+	Hexagon_Burning_Overlay,
 }
 
 Hexagon :: struct {
-	type: HexagonType,
+	type: Hexagon_Type,
 	center: rl.Vector2, // Hexagon center, should be rotated beforehand
 	rot: f32,
 	hurtbox: rl.Rectangle,
 }
 
-GetHexagonHurtBox :: proc(center: rl.Vector2) -> rl.Rectangle {
+get_hexagon_hurtbox :: proc(center: rl.Vector2) -> rl.Rectangle {
 	SIZE :: HEXAGON_SIZE * 7 / 8
 	return rl.Rectangle{center.x - SIZE / 2, center.y - SIZE / 2, SIZE, SIZE}
 }
 
-DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOverlay) = nil, ) {
-	src := GetHexagonTextureSource(hex.type)
+draw_hexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(Hexagon_Overlay) = nil, ) {
+	src := get_hexagon_texture_src(hex.type)
 
 	// Note that hex.center should already be rotated, so we don't need to apply
 	// any modifications.
@@ -73,15 +73,15 @@ DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOver
 
 	// Draw overlays
 	if overlay != nil do switch o in overlay.? {
-	case HexagonFrozenOverlay: {
+	case Hexagon_Frozen_Overlay: {
 		frozen_texture_src := rl.Rectangle{0, 0, f32(hexagon_frozen_texture.width), f32(hexagon_frozen_texture.height)}
 		rl.DrawTexturePro(hexagon_frozen_texture, frozen_texture_src, dest, HEXAGON_SIZE / 2, hex.rot, color)
 	}
-	case HexagonBurningOverlay: {
+	case Hexagon_Burning_Overlay: {
 		for i in 0..=2 {
 			BURN_TEXTURE_SRC_SIZE :: 256
 			burn_texture_src := rl.Rectangle{f32(i) * BURN_TEXTURE_SRC_SIZE, 0, BURN_TEXTURE_SRC_SIZE, BURN_TEXTURE_SRC_SIZE}
-			burn_color := GetBurningOverlayColor(f32(i) / 3, opacity)
+			burn_color := get_burning_overlay_color(f32(i) / 3, opacity)
 			rl.DrawTexturePro(hexagon_burning_texture_sheet, burn_texture_src, dest, HEXAGON_SIZE / 2, hex.rot, burn_color)
 		}
 	}
@@ -93,7 +93,7 @@ DrawHexagon :: proc(hex: Hexagon, opacity := u8(255), overlay: Maybe(HexagonOver
 	}
 }
 
-GetBurningOverlayColor :: proc(time_delay: f32, opacity := u8(255)) -> rl.Color {
+get_burning_overlay_color :: proc(time_delay: f32, opacity := u8(255)) -> rl.Color {
 	time := f32(rl.GetTime()) + time_delay
 	time = math.mod_f32(time, 1)
 	factor := math.sin(rl.PI * time)
@@ -102,19 +102,19 @@ GetBurningOverlayColor :: proc(time_delay: f32, opacity := u8(255)) -> rl.Color 
 	return color
 }
 
-LoadHexagons :: proc() {
+load_hexagons :: proc() {
 	hexagon_sheet = rl.LoadTexture("texture/hexagon_sheet.png")
 	hexagon_frozen_texture = rl.LoadTexture("texture/hexagon_frozen.png")
 	hexagon_burning_texture_sheet = rl.LoadTexture("texture/hexagon_burning_sheet.png")
 }
 
-UnloadHexagons :: proc() {
+unload_hexagons :: proc() {
 	rl.UnloadTexture(hexagon_sheet)
 	rl.UnloadTexture(hexagon_frozen_texture)
 	rl.UnloadTexture(hexagon_burning_texture_sheet)
 }
 
-GetHexagonTextureSource :: proc(type: HexagonType) -> rl.Rectangle {
+get_hexagon_texture_src :: proc(type: Hexagon_Type) -> rl.Rectangle {
 	HEXAGON_SRC_SIZE :: 256
 	src_x := int(type) % 4
 	src_y := math.floor_div(int(type), 4)
@@ -122,7 +122,7 @@ GetHexagonTextureSource :: proc(type: HexagonType) -> rl.Rectangle {
 	return src
 }
 
-IsUpgrade :: proc(type: HexagonType) -> bool {
+is_upgrade :: proc(type: Hexagon_Type) -> bool {
 	if type == .RIFLE do return false
 	if type == .HEALTH_PAD do return false
 	if type == .ICE_BALL do return false
@@ -131,11 +131,11 @@ IsUpgrade :: proc(type: HexagonType) -> bool {
 	return true
 }
 
-IsSpell :: proc(type: HexagonType) -> bool {
-	return !IsUpgrade(type)
+is_spell :: proc(type: Hexagon_Type) -> bool {
+	return !is_upgrade(type)
 }
 
-GetHexagonName :: proc(type: HexagonType) -> string {
+get_hexagon_name :: proc(type: Hexagon_Type) -> string {
 	switch type {
 	case .RIFLE: return "the Rifle"
 	case .RIFLE_UPGRADE_FIRE_RATE: return "Increased fire rate"

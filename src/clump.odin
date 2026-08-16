@@ -11,12 +11,12 @@ BASE_MAX_HEALTH :: f32(100)
 MAX_SPRINT_SECS :: f32(5)
 REGEN_SPRINT_TIME :: f32(2.5)
 
-hexagon_clumps: []^HexagonClump
+hexagon_clumps: []^Hexagon_Clump
 clump_cap: int
 
 // Clumps function as entities, hence their "health" and "uuid" fields.
-HexagonClump :: struct {
-	hexagon_types: []HexagonType,
+Hexagon_Clump :: struct {
+	hexagon_types: []Hexagon_Type,
 	hexagons: []Hexagon,
 	pos: rl.Vector2,
 	vel: rl.Vector2,
@@ -28,11 +28,11 @@ HexagonClump :: struct {
 	time_since_last_sprint: f32,
 	health_regen: Timer,
 	grace_period: f32,
-	attacker: ^HexagonClump,
+	attacker: ^Hexagon_Clump,
 	rifle_delay: f32,
 	frozen_time_left: f32,
 	burning: struct{ damage_timer: Timer, time_left: f32, damage: f32 },
-	spell_cooldowns: [SpellType]f32,
+	spell_cooldowns: [Spell_Type]f32,
 	kill_happiness_time: f32,
 	dead_time: f32,
 	can_shoot: bool,
@@ -40,15 +40,15 @@ HexagonClump :: struct {
 	invincible: bool,
 }
 
-GetMaxHealth :: proc(hexagons: int) -> f32 {
+get_max_health :: proc(hexagons: int) -> f32 {
 	return BASE_MAX_HEALTH + (f32(hexagons) - 2) * 5
 }
 
-NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel := rl.Vector2{}, rot := f32(0)) -> HexagonClump {
-	if len(hexagon_types) > MAX_HEXAGONS do return HexagonClump{}
+new_clump :: proc(hexagon_types: []Hexagon_Type, center: rl.Vector2, vel := rl.Vector2{}, rot := f32(0)) -> Hexagon_Clump {
+	if len(hexagon_types) > MAX_HEXAGONS do return Hexagon_Clump{}
 
 	// Copy the hexagon_types parameter to clump
-	new_hexagon_types := make([]HexagonType, len(hexagon_types))
+	new_hexagon_types := make([]Hexagon_Type, len(hexagon_types))
 	copy(new_hexagon_types, hexagon_types)
 
 	hexagons := make([]Hexagon, len(hexagon_types))
@@ -58,10 +58,10 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 	id := uuid.generate_v7()
 
 	// Health Regen Timer
-	health_regen := NewTimer(5, true, true)
-	health := GetMaxHealth(len(hexagon_types))
+	health_regen := new_timer(5, true, true)
+	health := get_max_health(len(hexagon_types))
 
-	clump := HexagonClump{
+	clump := Hexagon_Clump{
 		hexagon_types = new_hexagon_types,
 		hexagons = hexagons,
 		pos = center,
@@ -86,26 +86,26 @@ NewHexagonClump :: proc(hexagon_types: []HexagonType, center: rl.Vector2, vel :=
 		invincible = false,
 	}
 	
-	UpdateClumpHexagons(&clump)
+	update_clump_hexagons(&clump)
 	return clump
 }
 
-DestructClump :: proc(clump: HexagonClump) {
+destroy_clump :: proc(clump: Hexagon_Clump) {
 	if clump.hexagon_types != nil do delete(clump.hexagon_types)
 	if clump.hexagons != nil do delete(clump.hexagons)
 }
 
-AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
+add_hexagon_to_clump :: proc(clump: ^Hexagon_Clump, type: Hexagon_Type) {
 	len := len(clump.hexagon_types)
 	if len >= MAX_HEXAGONS do return
 
 	// Temporarily hold the old hexagon types
-	old_hexagon_types := make([]HexagonType, len)
+	old_hexagon_types := make([]Hexagon_Type, len)
 	copy(old_hexagon_types, clump.hexagon_types)
 
 	// Reset clump.hexagon_types, now adding the new type
 	delete(clump.hexagon_types)
-	clump.hexagon_types = make([]HexagonType, len + 1)
+	clump.hexagon_types = make([]Hexagon_Type, len + 1)
 	copy(clump.hexagon_types, old_hexagon_types)
 	clump.hexagon_types[len] = type
 
@@ -114,14 +114,14 @@ AddHexagonToClump :: proc(clump: ^HexagonClump, type: HexagonType) {
 }
 
 // Returns how many of each type the clump contains
-GetHexagonTypeAmounts :: proc(clump: HexagonClump) -> [HexagonType]int {
-	result: [HexagonType]int
+get_hexagon_type_amounts :: proc(clump: Hexagon_Clump) -> [Hexagon_Type]int {
+	result: [Hexagon_Type]int
 	for type in clump.hexagon_types do result[type] += 1
 	return result
 }
 
 // Checks if any of the clump's hexagons intersect with the rectangle
-ClumpIntersectsRect :: proc(clump: HexagonClump, rect: rl.Rectangle) -> bool {
+clump_intersects_rect :: proc(clump: Hexagon_Clump, rect: rl.Rectangle) -> bool {
 	for hexagon in clump.hexagons {
 	 	if rl.CheckCollisionRecs(rect, hexagon.hurtbox) do return true
 	}
@@ -129,15 +129,15 @@ ClumpIntersectsRect :: proc(clump: HexagonClump, rect: rl.Rectangle) -> bool {
 }
 
 // Ditto, but circle :O
-ClumpIntersectsCircle :: proc(clump: HexagonClump, center: rl.Vector2, radius: f32) -> bool {
+clump_intersects_circle :: proc(clump: Hexagon_Clump, center: rl.Vector2, radius: f32) -> bool {
 	for hexagon in clump.hexagons {
 	 	if rl.CheckCollisionCircleRec(center, radius, hexagon.hurtbox) do return true
 	}
 	return false
 }
 
-UpdateHexagonClump :: proc(clump: ^HexagonClump) {
-	UpdateClumpHexagons(clump)
+update_clump :: proc(clump: ^Hexagon_Clump) {
+	update_clump_hexagons(clump)
 	
 	clump.can_shoot = true
 	if clump.frozen_time_left > 0 do clump.can_shoot = false
@@ -145,9 +145,9 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	clump.rot += rl.GetFrameTime() * (math.abs(clump.vel.x) + math.abs(clump.vel.y)) / 2
 
 	// Health Regen Stuff
-	UpdateTimer(&clump.health_regen)
-	if clump.health_regen.ding do HealClump(clump, 2)
-	clump.health = math.clamp(clump.health, 0, GetMaxHealth(len(clump.hexagon_types)))
+	update_timer(&clump.health_regen)
+	if clump.health_regen.ding do heal_clump(clump, 2)
+	clump.health = math.clamp(clump.health, 0, get_max_health(len(clump.hexagon_types)))
 	if clump.grace_period > 0 do clump.grace_period -= rl.GetFrameTime()
 	if clump.collision_grace_period > 0 do clump.collision_grace_period -= rl.GetFrameTime()
 
@@ -167,17 +167,17 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	if clump.frozen_time_left > 0 do clump.frozen_time_left -= rl.GetFrameTime()
 	clump.frozen_time_left = math.max(clump.frozen_time_left, 0)
 
-	UpdateTimer(&clump.burning.damage_timer)
+	update_timer(&clump.burning.damage_timer)
 	if clump.burning.time_left > 0 {
 		clump.burning.time_left -= rl.GetFrameTime()
-		if clump.burning.damage_timer.ding do DamageClumpNoAttacker(clump, clump.burning.damage)
+		if clump.burning.damage_timer.ding do damage_clump(clump, clump.burning.damage)
 	}
 
 	if clump.rifle_delay > 0 do clump.rifle_delay -= rl.GetFrameTime()
 	clump.rifle_delay = math.max(clump.rifle_delay, 0)
 
-	for spell in SpellType do if clump.spell_cooldowns[spell] > 0 do clump.spell_cooldowns[spell] -= rl.GetFrameTime()
-	for spell in SpellType do clump.spell_cooldowns[spell] = math.max(clump.spell_cooldowns[spell], 0)
+	for spell in Spell_Type do if clump.spell_cooldowns[spell] > 0 do clump.spell_cooldowns[spell] -= rl.GetFrameTime()
+	for spell in Spell_Type do clump.spell_cooldowns[spell] = math.max(clump.spell_cooldowns[spell], 0)
 
 	// Expressions
 	if clump.kill_happiness_time > 0 do clump.kill_happiness_time -= rl.GetFrameTime()
@@ -187,28 +187,28 @@ UpdateHexagonClump :: proc(clump: ^HexagonClump) {
 	if clump.health <= 0 do clump.dead_time += rl.GetFrameTime()
 
 	// Collision logic
-	HandleClumpCollisions(clump)
+	handle_clump_collisions(clump)
 
 	// Final velocity addition (should probably be last)
 	if clump.frozen_time_left <= 0 && clump.dead_time <= 0 do clump.pos += clump.vel * rl.GetFrameTime() * (1.5 if clump.sprinting else 1)
 }
 
-DrawHexagonClump :: proc(clump: HexagonClump) {
-	overlay: Maybe(HexagonOverlay) = nil
-	if clump.frozen_time_left > 0 do overlay = HexagonFrozenOverlay{}
-	if clump.burning.time_left > 0 do overlay = HexagonBurningOverlay{}
+draw_clump :: proc(clump: Hexagon_Clump) {
+	overlay: Maybe(Hexagon_Overlay) = nil
+	if clump.frozen_time_left > 0 do overlay = Hexagon_Frozen_Overlay{}
+	if clump.burning.time_left > 0 do overlay = Hexagon_Burning_Overlay{}
 
 	opacity: u8 = 100 if clump.grace_period > 0 else 255
 	if clump.dead_time > 0 do opacity = u8(255 * (1 - clump.dead_time * 2))
 	
-	for hexagon in clump.hexagons do DrawHexagon(hexagon, opacity, overlay)
+	for hexagon in clump.hexagons do draw_hexagon(hexagon, opacity, overlay)
 	
 	if debug_on do rl.DrawCircleV(clump.pos, 2, rl.BLUE)
 }
 
 // Originally, this was actual collisions, but since it was really buggy
 // I had to remove them and resort to just dealing damage to both clumps...
-HandleClumpCollisions :: proc(clump: ^HexagonClump) {
+handle_clump_collisions :: proc(clump: ^Hexagon_Clump) {
 	if clump.collision_grace_period > 0 do return
 	if clump.dead_time > 0 do return
 	for enemy_clump in hexagon_clumps[:clump_cap] {
@@ -219,34 +219,39 @@ HandleClumpCollisions :: proc(clump: ^HexagonClump) {
 		for hexagon in clump.hexagons do for enemy_hexagon in enemy_clump.hexagons {
 			if rl.Vector2Distance(hexagon.center, enemy_hexagon.center) > 100 do continue
 			if !rl.CheckCollisionRecs(hexagon.hurtbox, enemy_hexagon.hurtbox) do continue
-			DamageClump(clump, 2, enemy_clump)
-			DamageClump(enemy_clump, 2, clump)
+			damage_clump(clump, 2, enemy_clump)
+			damage_clump(enemy_clump, 2, clump)
 			clump.collision_grace_period = 0.5
 			enemy_clump.collision_grace_period = 0.5
 		}
 	}
 }
 
-ResetHexagonClumps :: proc() {
+reset_clumps :: proc() {
 	clump_cap = len(enemies) + 1
-	if len(hexagon_clumps) < clump_cap do hexagon_clumps = make([]^HexagonClump, clump_cap)
+	if len(hexagon_clumps) < clump_cap do hexagon_clumps = make([]^Hexagon_Clump, clump_cap)
 	for &enemy, index in enemies do hexagon_clumps[index] = &enemy.clump
 	hexagon_clumps[len(enemies)] = &player.clump
 }
 
-ClumpDistance :: proc(a, b: HexagonClump) -> f32 {
+clump_distance :: proc(a, b: Hexagon_Clump) -> f32 {
 	distance := rl.Vector2Distance(a.pos, b.pos)
-	distance -= (f32(GetLevel(a.hexagon_types)) - 1) * HEXAGON_SIZE
-	distance -= (f32(GetLevel(b.hexagon_types)) - 1) * HEXAGON_SIZE
+	distance -= (f32(get_level(a.hexagon_types)) - 1) * HEXAGON_SIZE
+	distance -= (f32(get_level(b.hexagon_types)) - 1) * HEXAGON_SIZE
 	return max(distance, 0)
 }
 
-GetClumpFromUUID :: proc(id: uuid.Identifier) -> ^HexagonClump {
+get_clump_from_uuid :: proc(id: uuid.Identifier) -> ^Hexagon_Clump {
 	for clump in hexagon_clumps[:clump_cap] do if clump.uuid == id do return clump
 	return nil
 }
 
-DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) {
+damage_clump :: proc{
+	damage_clump_attacker,
+	damage_clump_no_attacker,
+}
+
+damage_clump_attacker :: proc(clump: ^Hexagon_Clump, amount: f32, attacker: ^Hexagon_Clump) {
 	if clump.grace_period > 0 || clump.invincible do return
 
 	multiplier := f32(1)
@@ -266,24 +271,24 @@ DamageClump :: proc(clump: ^HexagonClump, amount: f32, attacker: ^HexagonClump) 
 		}
 	}
 	
-	if clump.uuid == player.uuid do PlaySound(damaged); else do PlaySound(damaged, clump^, player.clump)
+	if clump.uuid == player.uuid do play_sound(damaged); else do play_sound(damaged, clump^, player.clump)
 }
 
-DamageClumpNoAttacker :: proc(clump: ^HexagonClump, amount: f32) {
+damage_clump_no_attacker :: proc(clump: ^Hexagon_Clump, amount: f32) {
 	if clump.grace_period > 0 || clump.invincible do return
 	clump.health -= amount
 	clump.grace_period = 0.15
-	if clump.uuid == player.uuid do PlaySound(damaged); else do PlaySound(damaged, clump^, player.clump)
+	if clump.uuid == player.uuid do play_sound(damaged); else do play_sound(damaged, clump^, player.clump)
 }
 
-HealClump :: proc(clump: ^HexagonClump, amount: f32) {
+heal_clump :: proc(clump: ^Hexagon_Clump, amount: f32) {
 	if clump.health <= 0 do return
 	clump.health += amount
-	max_health := GetMaxHealth(len(clump.hexagon_types))
+	max_health := get_max_health(len(clump.hexagon_types))
 	clump.health = min(clump.health, max_health)
 }
 
-UpdateClumpHexagons :: proc(clump: ^HexagonClump) {
+update_clump_hexagons :: proc(clump: ^Hexagon_Clump) {
 	// Resizing only ever happens on the player, so it's safe to do it like this
 	if len(clump.hexagons) != len(clump.hexagon_types) { 
 		delete(clump.hexagons)
@@ -292,24 +297,24 @@ UpdateClumpHexagons :: proc(clump: ^HexagonClump) {
 	
 	for hexagon_type, index in clump.hexagon_types {
 		// First we get the local offset from the middle hexagon
-		offset := GetHexagonOffset(index)
+		offset := get_hexagon_offset(index)
 
 		// We get the average offset, so we can center the clump properly (around clump.pos)
-		average_offset := GetAverageHexagonOffset(len(clump.hexagon_types))
+		average_offset := get_average_hexagon_offset(len(clump.hexagon_types))
 
 		// Local center here is the non rotated center of the hexagon
 		local_center := clump.pos + (offset - average_offset) * math.max(1 + clump.dead_time * 2, 0)
 
 		// Rotated center is the actual center of the hexagon
-		rotated_center := RotatePoint(local_center, clump.pos, clump.rot)
+		rotated_center := rotate_point_around_pivot(local_center, clump.pos, clump.rot)
 		
-		hurtbox := GetHexagonHurtBox(rotated_center)
+		hurtbox := get_hexagon_hurtbox(rotated_center)
 		hexagon := Hexagon{hexagon_type, rotated_center, clump.rot, hurtbox}
 		if len(clump.hexagons) > index do clump.hexagons[index] = hexagon
 	}
 }
 
-GetLevel :: proc(hexagon_types: []HexagonType) -> int {
+get_level :: proc(hexagon_types: []Hexagon_Type) -> int {
 	hexagons := len(hexagon_types)
 	switch {
 	case hexagons < 1 + 6: return 1
@@ -321,23 +326,24 @@ GetLevel :: proc(hexagon_types: []HexagonType) -> int {
 	return 1
 }
 
-Accelerate :: proc(value: ^f32, target: f32, acceleration: f32) {
+accelerate :: proc(value: ^f32, target: f32, acceleration: f32) {
 	if value^ > target do value^ -= f32(acceleration) * rl.GetFrameTime()
 	if value^ < target do value^ += f32(acceleration) * rl.GetFrameTime()
 }
 
 // Get a short part of the clump's UUID, as a string
-ShortUUID :: proc(id: uuid.Identifier) -> string {
+clump_uuid_str :: proc(id: uuid.Identifier) -> string {
 	return string(rl.TextFormat("%d%d%d%d", id[8], id[9], id[10], id[11]))
 }
 
 // From every hexagon in the clump, all the positions are averaged
 // to get the average offset. If we didn't calculate this, the center of the
 // clump would be the middle hex's center, which we don't always want.
-GetAverageHexagonOffset :: proc(hexagon_count: int) -> rl.Vector2 {
+@(private = "file")
+get_average_hexagon_offset :: proc(hexagon_count: int) -> rl.Vector2 {
 	if hexagon_count == 0 do return {}
 	offset: rl.Vector2
-	for i in 0..<hexagon_count do offset += GetHexagonOffset(i)
+	for i in 0..<hexagon_count do offset += get_hexagon_offset(i)
 	offset /= f32(hexagon_count)
 	return offset
 }
@@ -351,7 +357,8 @@ GetAverageHexagonOffset :: proc(hexagon_count: int) -> rl.Vector2 {
 // VERY IMPORTANT: coord_offset.y is flipped, as coordinate system in windowing is
 // usually "Y increases the downer you go", while I prefer the normal math system, which
 // is the opposite.
-GetHexagonOffset :: proc(index: int) -> rl.Vector2 {
+@(private = "file")
+get_hexagon_offset :: proc(index: int) -> rl.Vector2 {
 	coord_offset := hexagon_coord_offsets[index]
 	return rl.Vector2{HEXAGON_HEIGHT * coord_offset.x, HEXAGON_SIZE * -coord_offset.y}
 }
@@ -360,7 +367,7 @@ GetHexagonOffset :: proc(index: int) -> rl.Vector2 {
 // As stated above, Y values are flipped!
 // I could have made a better system of calculating the offsets rather than hardcoding,
 // but I think I'd spend too much time on that XD
-hexagon_coord_offsets := [MAX_HEXAGONS]rl.Vector2 {
+@(rodata) hexagon_coord_offsets := [MAX_HEXAGONS]rl.Vector2 {
 	// Middle Hexagon, should ALWAYS be {0, 0}
 	0 = {0, 0},
 		

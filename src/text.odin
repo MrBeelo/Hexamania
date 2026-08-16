@@ -5,25 +5,25 @@ import "raylib/rlgl"
 import "core:unicode/utf8"
 import "core:strconv"
 
-FontInfo :: struct { type: FontType, size: f32 }
-font_cache: map[FontInfo]rl.Font
-FontType :: enum {
+Font_Info :: struct { type: Font_Type, size: f32 }
+font_cache: map[Font_Info]rl.Font
+Font_Type :: enum {
 	QUICKSAND_LIGHT,
 	QUICKSAND_MEDIUM,
 	QUICKSAND_HEAVY,
 }
 
-BorderInfo :: struct { bordered: bool, border_thickness: f32, border_color: rl.Color, }
+Border_Info :: struct { bordered: bool, border_thickness: f32, border_color: rl.Color, }
 
-LoadFonts :: proc() {
-	font_cache = make(map[FontInfo]rl.Font)
+load_fonts :: proc() {
+	font_cache = make(map[Font_Info]rl.Font)
 }
 
-UnloadFonts :: proc() {
+unload_fonts :: proc() {
 	for _, font in font_cache do rl.UnloadFont(font)
 }
 
-GetFontPath :: proc(type: FontType) -> cstring {
+get_font_path :: proc(type: Font_Type) -> cstring {
 	switch type {
 	case .QUICKSAND_LIGHT: return "font/Quicksand-Regular.ttf"
 	case .QUICKSAND_MEDIUM: return "font/Quicksand-Medium.ttf"
@@ -33,9 +33,9 @@ GetFontPath :: proc(type: FontType) -> cstring {
 	return ""
 }
 
-GetFont :: proc(info: FontInfo) -> rl.Font {
+get_font :: proc(info: Font_Info) -> rl.Font {
 	if font, ok := font_cache[info]; ok do return font; else {
-		new_font := rl.LoadFontEx(GetFontPath(info.type), i32(info.size), nil, 0)
+		new_font := rl.LoadFontEx(get_font_path(info.type), i32(info.size), nil, 0)
 		rl.SetTextureFilter(new_font.texture, .BILINEAR)
 		font_cache[info] = new_font
 		return new_font
@@ -44,16 +44,16 @@ GetFont :: proc(info: FontInfo) -> rl.Font {
 	return rl.GetFontDefault()
 }
 
-DrawDebugText :: proc(pos: rl.Vector2, txt: cstring, args: ..any) {
+draw_debug_text :: proc(pos: rl.Vector2, txt: cstring, args: ..any) {
 	text := rl.TextFormat(txt, ..args)
 	text_size := f32(rl.MeasureText(text, 16))
 	text_pos := pos - {text_size / 2, 50}
 	rl.DrawTextEx(rl.GetFontDefault(), text, text_pos, 16, 2, rl.RED)
 }
 
-DrawText :: proc(text: cstring, pos: rl.Vector2, size: f32, type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
+draw_text :: proc(text: cstring, pos: rl.Vector2, size: f32, type := Font_Type.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := Border_Info{}, spacing: f32 = 5) {
 	if text == "" do return
-	font := GetFont({type, size})
+	font := get_font({type, size})
 
 	if border_info.bordered do for i in -1..=1 do for j in -1..=1 do if i != 0 || j != 0 {
 		rl.DrawTextPro(font, text, pos + {f32(i) * border_info.border_thickness, f32(j) * border_info.border_thickness}, 
@@ -63,49 +63,49 @@ DrawText :: proc(text: cstring, pos: rl.Vector2, size: f32, type := FontType.QUI
 	rl.DrawTextPro(font, text, pos, 0, 0, size, spacing, color)
 }
 
-DrawTextCenter :: proc(text: cstring, center: rl.Vector2, size: f32, 
-type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
+draw_text_center :: proc(text: cstring, center: rl.Vector2, size: f32, 
+type := Font_Type.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := Border_Info{}, spacing: f32 = 5) {
 	if text == "" do return
-	text_size := MeasureTextStyled(text, size, type, spacing)
-	DrawTextStyledPro(text, center, text_size / 2, 0, size, type, color, border_info, spacing)
+	text_size := measure_text_styled(text, size, type, spacing)
+	draw_text_styled_pro(text, center, text_size / 2, 0, size, type, color, border_info, spacing)
 }
 
-MeasureText :: proc(text: cstring, size: f32, type := FontType.QUICKSAND_MEDIUM, spacing: f32 = 5) -> rl.Vector2 {
-	return rl.MeasureTextEx(GetFont({type, size}), text, size, spacing)
+measure_text :: proc(text: cstring, size: f32, type := Font_Type.QUICKSAND_MEDIUM, spacing: f32 = 5) -> rl.Vector2 {
+	return rl.MeasureTextEx(get_font({type, size}), text, size, spacing)
 }
 
-DrawTextStyled :: proc(text: cstring, pos: rl.Vector2, size: f32, 
-type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
+draw_text_styled :: proc(text: cstring, pos: rl.Vector2, size: f32, 
+type := Font_Type.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := Border_Info{}, spacing: f32 = 5) {
 	if text == "" do return
-	font := GetFont({type, size})
+	font := get_font({type, size})
 
 	if border_info.bordered do for i in -1..=1 do for j in -1..=1 do if i != 0 || j != 0 {
-		_DrawTextStyled(font, string(text), pos + {f32(i) * border_info.border_thickness, 
+		_draw_text_styled(font, string(text), pos + {f32(i) * border_info.border_thickness, 
 			f32(j) * border_info.border_thickness}, 
 			size, spacing, border_info.border_color)
 	}
 	
-	_DrawTextStyled(font, string(text), pos, size, spacing, color)
+	_draw_text_styled(font, string(text), pos, size, spacing, color)
 }
 
-DrawTextStyledPro :: proc(text: cstring, pos: rl.Vector2, origin: rl.Vector2, rot: f32, size: f32, 
-type := FontType.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := BorderInfo{}, spacing: f32 = 5) {
+draw_text_styled_pro :: proc(text: cstring, pos: rl.Vector2, origin: rl.Vector2, rot: f32, size: f32, 
+type := Font_Type.QUICKSAND_MEDIUM, color := rl.WHITE, border_info := Border_Info{}, spacing: f32 = 5) {
 	rlgl.PushMatrix()
 	
     rlgl.Translatef(pos.x, pos.y, 0)
     rlgl.Rotatef(rot, 0, 0, 1)
     rlgl.Translatef(-origin.x, -origin.y, 0)
-    DrawTextStyled(text, {}, size, type, color, border_info, spacing)
+    draw_text_styled(text, {}, size, type, color, border_info, spacing)
 
     rlgl.PopMatrix()
 }
 
-MeasureTextStyled :: proc(text: cstring, size: f32, type := FontType.QUICKSAND_MEDIUM, spacing: f32 = 5) -> rl.Vector2 {
-	return _MeasureTextStyled(GetFont({type, size}), string(text), size, spacing)
+measure_text_styled :: proc(text: cstring, size: f32, type := Font_Type.QUICKSAND_MEDIUM, spacing: f32 = 5) -> rl.Vector2 {
+	return _measure_text_styled(get_font({type, size}), string(text), size, spacing)
 }
 
 @(private = "file")
-_DrawTextStyled :: proc(font: rl.Font, text: string, position: rl.Vector2, font_size: f32, spacing: f32, color: rl.Color) {
+_draw_text_styled :: proc(font: rl.Font, text: string, position: rl.Vector2, font_size: f32, spacing: f32, color: rl.Color) {
 	text_len := len(text)
 
 	col_front := color
@@ -136,7 +136,7 @@ _DrawTextStyled :: proc(font: rl.Font, text: string, position: rl.Vector2, font_
 
                    	col_hex_count := 0
                     for text_ptr[col_hex_count] != 0 && text_ptr[col_hex_count] != ']' {
-                    	if IsValidStyleChar(text_ptr[col_hex_count]) {
+                    	if is_valid_style_char(text_ptr[col_hex_count]) {
                      		col_hex_text[col_hex_count] = rune(text_ptr[col_hex_count])
                        		col_hex_count += 1
                      	} else do break
@@ -178,7 +178,7 @@ _DrawTextStyled :: proc(font: rl.Font, text: string, position: rl.Vector2, font_
 }
 
 @(private = "file")
-_MeasureTextStyled :: proc(font: rl.Font, text: string, font_size: f32, spacing: f32) -> rl.Vector2 {
+_measure_text_styled :: proc(font: rl.Font, text: string, font_size: f32, spacing: f32) -> rl.Vector2 {
 	text_size: rl.Vector2
 
 	if len(text) <= 0 || text[0] == 0 do return text_size
@@ -206,7 +206,7 @@ _MeasureTextStyled :: proc(font: rl.Font, text: string, font_size: f32, spacing:
 
                 col_hex_count := 0
                 for text_ptr[col_hex_count] != 0 && text_ptr[col_hex_count] != ']' {
-                	if IsValidStyleChar(text_ptr[col_hex_count]) do col_hex_count += 1; else do break
+                	if is_valid_style_char(text_ptr[col_hex_count]) do col_hex_count += 1; else do break
                 }
 
                 i += (col_hex_count + 1)
@@ -233,7 +233,7 @@ _MeasureTextStyled :: proc(font: rl.Font, text: string, font_size: f32, spacing:
 }
 
 @(private = "file")
-IsValidStyleChar :: proc(char: u8) -> bool {
+is_valid_style_char :: proc(char: u8) -> bool {
 	return (char >= '0' && char <= '9') || 
 		(char >= 'A' && char <= 'F') ||
         (char >= 'a' && char <= 'f')

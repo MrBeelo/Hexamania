@@ -4,7 +4,7 @@ import rl "raylib"
 import "core:fmt"
 
 tutorial_active: bool
-TutorialIndex :: enum {
+Tutorial_Index :: enum {
 	MOVE,
 	SPRINT,
 	SHOOT,
@@ -18,8 +18,8 @@ TutorialIndex :: enum {
 	FOUND_SPELL_2, // Scroll and left click ...
 }
 
-player_action_list: ActionList
-ActionList :: struct {
+player_action_list: Action_List
+Action_List :: struct {
 	moved: bool,
 	sprinted: bool,
 	shot: bool,
@@ -29,18 +29,18 @@ ActionList :: struct {
 	found_spell: bool,
 	opened_spell_menu: bool,
 	used_spell: bool,
-	last_hexagon_found: HexagonType,
+	last_hexagon_found: Hexagon_Type,
 }
 
-@private powerup_message_time := f32(10)
-@private upgrade_message_time := f32(10)
+powerup_message_time := f32(10)
+upgrade_message_time := f32(10)
 level_up_time: f32
 hexagon_found_time: f32
 
 toolbar_messages: [2]cstring
 
-UpdateToolbar :: proc() {	
-	toolbar_messages = GetTutorialText()
+update_toolbar :: proc() {	
+	toolbar_messages = get_tutorial_text()
 	pal := player_action_list
 
 	can_show_upgrade_text := (pal.found_upgrade && upgrade_message_time <= 0 && 
@@ -48,17 +48,17 @@ UpdateToolbar :: proc() {
 	can_show_spell_text := (pal.found_spell && pal.opened_spell_menu && pal.used_spell && 
 		session_playthroughs == 1) || session_playthroughs != 1
 	
-	if IsUpgrade(pal.last_hexagon_found) && can_show_upgrade_text && hexagon_found_time > 0 {
+	if is_upgrade(pal.last_hexagon_found) && can_show_upgrade_text && hexagon_found_time > 0 {
 		hexagon_found_time -= rl.GetFrameTime()
-		corresponding_spell_hexagon := SpellToHexagon(HexagonToSpell(pal.last_hexagon_found))
-		msg1 := fmt.ctprintf("Found new upgrade for %s:", GetHexagonName(corresponding_spell_hexagon))
-		msg2 := fmt.ctprintf("%s", GetHexagonName(pal.last_hexagon_found))
+		corresponding_spell_hexagon := spell_to_hexagon(hexagon_to_spell(pal.last_hexagon_found))
+		msg1 := fmt.ctprintf("Found new upgrade for %s:", get_hexagon_name(corresponding_spell_hexagon))
+		msg2 := fmt.ctprintf("%s", get_hexagon_name(pal.last_hexagon_found))
 		toolbar_messages = {msg1, msg2}
 	}
 	
-	if IsSpell(pal.last_hexagon_found) && can_show_spell_text && hexagon_found_time > 0 {
+	if is_spell(pal.last_hexagon_found) && can_show_spell_text && hexagon_found_time > 0 {
 		hexagon_found_time -= rl.GetFrameTime()
-		msg1 := fmt.ctprintf("Found new spell: %s", GetHexagonName(pal.last_hexagon_found))
+		msg1 := fmt.ctprintf("Found new spell: %s", get_hexagon_name(pal.last_hexagon_found))
 		msg2: cstring
 		#partial switch pal.last_hexagon_found {
 		case .HEALTH_PAD: msg2 = "Throw a health pad down to heal yourself!"
@@ -76,13 +76,14 @@ UpdateToolbar :: proc() {
 	}
 }
 
-DrawToolbar :: proc() {
+draw_toolbar :: proc() {
 	if toolbar_messages == {} do return
-	DrawTextCenter(toolbar_messages[0], {SCREEN_SIZE.x / 2, 50}, 32, spacing = 2)
-	DrawTextCenter(toolbar_messages[1], {SCREEN_SIZE.x / 2, 80}, 32, spacing = 2)
+	draw_text_center(toolbar_messages[0], {SCREEN_SIZE.x / 2, 50}, 32, spacing = 2)
+	draw_text_center(toolbar_messages[1], {SCREEN_SIZE.x / 2, 80}, 32, spacing = 2)
 }
 
-tutorial_texts := [TutorialIndex][2]cstring {
+@(rodata, private = "file")
+tutorial_texts := [Tutorial_Index][2]cstring {
 	.MOVE = {"WASD / Arrow Keys to Move", ""},
 	.SPRINT = {"Left Shift to Sprint", ""},
 	.SHOOT = {"Left Click to Shoot", ""},
@@ -96,13 +97,14 @@ tutorial_texts := [TutorialIndex][2]cstring {
 	.FOUND_SPELL_2 = {"Scroll to the spell you like,", "then press Left Click to activate it!"},
 }
 
-GetTutorialText :: proc() -> [2]cstring {
-	index := GetTutorialTextIndex()
+get_tutorial_text :: proc() -> [2]cstring {
+	index := get_tutorial_text_index()
 	if index == nil do return {}
 	return tutorial_texts[index.?]
 }
 
-GetTutorialTextIndex :: proc() -> Maybe(TutorialIndex) {
+@(private = "file")
+get_tutorial_text_index :: proc() -> Maybe(Tutorial_Index) {
 	if session_playthroughs != 1 do return nil
 
 	pal := player_action_list

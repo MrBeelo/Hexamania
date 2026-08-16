@@ -3,7 +3,7 @@ package main
 import rl "raylib"
 import "core:fmt"
 
-DrawDebug :: proc() {
+draw_debug :: proc() {
 	GROUP_BOX_POS :: rl.Vector2{10, 10}
 	GROUP_BOX_X_BUFFER :: f32(3)
 	LABEL_PADDING :: rl.Vector2{5, 5}
@@ -16,9 +16,9 @@ DrawDebug :: proc() {
 	strs := [?]cstring {
 		fmt.ctprintf("pos: %d, %d", int(player.pos.x), int(player.pos.y)),
 		fmt.ctprintf("vel: %d, %d", int(player.vel.x), int(player.vel.y)),
-		fmt.ctprintf("speed: %d", int(GetPlayerSpeed(player))),
+		fmt.ctprintf("speed: %d", int(get_player_speed(player))),
 		fmt.ctprintf("acc: %d", PLAYER_ACCELERATION),
-		fmt.ctprintf("time survived: %ds", int(GetElapsedStopwatchTime(time_survived))),
+		fmt.ctprintf("time survived: %ds", int(get_elapsed_stopwatch_time(time_survived))),
 		fmt.ctprintf("score: %d", killed_hexagons),
 		fmt.ctprintf("fps: %d", rl.GetFPS()),
 		fmt.ctprintf("enemies: %d", len(enemies)),
@@ -78,6 +78,6 @@ DrawDebug :: proc() {
 		}
 
 		result := rl.GuiButton(button_bounds, button_text)
-		if result == 1 do AddHexagonToClump(&player.clump, .RIFLE)
+		if result == 1 do add_hexagon_to_clump(&player.clump, .RIFLE)
 	}
 }

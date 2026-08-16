@@ -1,3 +1,5 @@
+#+private file
+
 package main
 
 import rl "raylib"
@@ -6,9 +8,9 @@ import "core:mem"
 HEXAMANIA_STYLE_PROPS_COUNT :: 16
 
 // Conversion from i64 -> i32 as Odin doesn't allow casts like this to untyped integers.
-@(private = "file") col :: proc "contextless" (val: i64) -> i32 { return i32(val) }
+col :: proc "contextless" (val: i64) -> i32 { return i32(val) }
 
-hexamaniaStyleProps := [HEXAMANIA_STYLE_PROPS_COUNT]rl.GuiStyleProp {
+properties := [HEXAMANIA_STYLE_PROPS_COUNT]rl.GuiStyleProp {
 	{ .DEFAULT, 0, col(0x8449deff) },    // DEFAULT_BORDER_COLOR_NORMAL 
     { .DEFAULT, 1, col(0x1a0034ff) },    // DEFAULT_BASE_COLOR_NORMAL 
     { .DEFAULT, 2, col(0xffffffff) },    // DEFAULT_TEXT_COLOR_NORMAL 
@@ -30,7 +32,7 @@ hexamaniaStyleProps := [HEXAMANIA_STYLE_PROPS_COUNT]rl.GuiStyleProp {
 HEXAMANIA_STYLE_FONT_ATLAS_COMP_SIZE :: 6155
 
 @(rodata)
-hexamaniaFontData := [HEXAMANIA_STYLE_FONT_ATLAS_COMP_SIZE]u8 { 0xed,
+font_data := [HEXAMANIA_STYLE_FONT_ATLAS_COMP_SIZE]u8 { 0xed,
     0x9d, 0x07, 0x78, 0x14, 0xd5, 0xda, 0xc7, 0x93, 0x40, 0x48, 0xe8, 0x4d, 0x04, 0x41, 0x51, 0x01, 0x91, 0x22, 0x02, 0x2a,
     0xa8, 0x80, 0x20, 0x9d, 0x0f, 0x54, 0x90, 0x0b, 0x16, 0x8a, 0x05, 0x04, 0x04, 0x91, 0x8b, 0xa0, 0x82, 0x05, 0x14, 0x15,
     0x11, 0xb8, 0x08, 0xd6, 0x7b, 0x05, 0x2f, 0xd7, 0x0b, 0x58, 0xe9, 0x45, 0xba, 0x88, 0x14, 0xe9, 0x4d, 0x6a, 0xe0, 0xd2,
@@ -342,7 +344,7 @@ hexamaniaFontData := [HEXAMANIA_STYLE_FONT_ATLAS_COMP_SIZE]u8 { 0xed,
 }
 
 @(rodata)
-hexamaniaFontRecs := [95]rl.Rectangle {
+font_rects := [95]rl.Rectangle {
     { 4, 4, 3 , 16 },
     { 15, 4, 3 , 9 },
     { 26, 4, 5 , 4 },
@@ -441,7 +443,7 @@ hexamaniaFontRecs := [95]rl.Rectangle {
 }
 
 @(rodata)
-hexamaniaFontGlyphs := [95]rl.GlyphInfo {
+font_glyphs := [95]rl.GlyphInfo {
     { 32, 0, 0, 3, {}},
     { 33, 0, 3, 3, {}},
     { 34, 0, 3, 5, {}},
@@ -539,13 +541,14 @@ hexamaniaFontGlyphs := [95]rl.GlyphInfo {
     { 126, 0, 6, 6, {}},
 }
 
-GuiLoadStyleHexamania :: proc() {
+@(private = "package")
+load_style :: proc() {
     for i in 0..<HEXAMANIA_STYLE_PROPS_COUNT {
-        rl.GuiSetStyle(hexamaniaStyleProps[i].controlId, i32(hexamaniaStyleProps[i].propertyId), i32(hexamaniaStyleProps[i].propertyValue))
+        rl.GuiSetStyle(properties[i].controlId, i32(properties[i].propertyId), i32(properties[i].propertyValue))
     }
 
-    hexamaniaFontDataSize := i32(0)
-    data := rl.DecompressData(&hexamaniaFontData[0], HEXAMANIA_STYLE_FONT_ATLAS_COMP_SIZE, &hexamaniaFontDataSize)
+    font_data_size := i32(0)
+    data := rl.DecompressData(&font_data[0], HEXAMANIA_STYLE_FONT_ATLAS_COMP_SIZE, &font_data_size)
     imFont := rl.Image{ data, 256, 256, 1, .UNCOMPRESSED_GRAY_ALPHA }
 
     font: rl.Font
@@ -558,15 +561,14 @@ GuiLoadStyleHexamania :: proc() {
     rec_ptr, rec_err := mem.alloc(int(font.glyphCount) * size_of(rl.Rectangle))
 	if rec_err != nil do panic("Font rec allocation error!")
 	font.recs = cast([^]rl.Rectangle)rec_ptr
-	copy(font.recs[:font.glyphCount], hexamaniaFontRecs[:font.glyphCount])
+	copy(font.recs[:font.glyphCount], font_rects[:font.glyphCount])
    
 	glyph_ptr, glyph_err := mem.alloc(int(font.glyphCount) * size_of(rl.GlyphInfo))
 	if glyph_err != nil do panic("Font glyph allocation error!")
 	font.glyphs = cast([^]rl.GlyphInfo)glyph_ptr
-	copy(font.glyphs[:font.glyphCount], hexamaniaFontGlyphs[:font.glyphCount])
+	copy(font.glyphs[:font.glyphCount], font_glyphs[:font.glyphCount])
 
     rl.GuiSetFont(font)
 
-    fontWhiteRec := rl.Rectangle{ 510, 254, 1, 1 }
-    rl.SetShapesTexture(font.texture, fontWhiteRec)
+    rl.SetShapesTexture(font.texture, { 510, 254, 1, 1 })
 }
