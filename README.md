@@ -128,6 +128,3 @@ move/postpone a lot of tasks. These are exactly how I had written them while mak
 
 Ultimately, some of these (like shaders and collisions) weren't added. I had some prototype  
 versions, but they ended up being too buggy or didn't fit in, so I had to scrap them.  
-
-#### Things I want to add before a 'final release'  
-- More && higher quality sound effects

@@ -3,7 +3,7 @@ package desktop
 import "base:runtime"
 import "core:fmt"
 
-PRINT_ALLOCATIONS :: true
+PRINT_ALLOCATIONS :: false
 
 @(require_results)
 heap_allocator :: proc() -> runtime.Allocator {

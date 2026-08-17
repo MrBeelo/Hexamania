@@ -15,13 +15,13 @@ ADD_EXE ?= false
 RUN ?= true
 
 # Type of optimization to use. Options: none, minimal, size, speed, aggressive
-OPTIMIZATION ?= none
+OPTIMIZATION ?= aggressive
 
 # Enforce strict odin writing conventions?
 STRICT ?= true
 
 # Enable debug? (adds debug symbols and runs with gdb, if it exists)
-DEBUG ?= true
+DEBUG ?= false
 
 # Copy resources over to the output directory? (desktop only)
 COPY_RESOURCES ?= true

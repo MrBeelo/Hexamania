@@ -2,7 +2,7 @@ package main
 
 import rl "raylib"
 
-shoot, fire_spell, explosion, ui_confirm, damaged, merge: rl.Sound
+shoot, fire_spell, explosion, ui_confirm, damaged, merge, death, freeze: rl.Sound
 
 @(private = "file")
 play_sound_normal :: proc(sound: rl.Sound, volume := f32(1)) {
@@ -29,12 +29,14 @@ get_volume_mult :: proc(a, b: Hexagon_Clump) -> f32 {
 }
 
 load_sounds :: proc() {
-	shoot = rl.LoadSound("audio/shoot.wav")
-	fire_spell = rl.LoadSound("audio/fire_spell.wav")
-	explosion = rl.LoadSound("audio/explosion.wav")
-	ui_confirm = rl.LoadSound("audio/ui_confirm.wav")
-	damaged = rl.LoadSound("audio/damaged.wav")
-	merge = rl.LoadSound("audio/merge.wav")
+	shoot = rl.LoadSound("audio/shoot.ogg")
+	fire_spell = rl.LoadSound("audio/fire_spell.ogg")
+	explosion = rl.LoadSound("audio/explosion.ogg")
+	ui_confirm = rl.LoadSound("audio/ui_confirm.ogg")
+	damaged = rl.LoadSound("audio/damaged.ogg")
+	merge = rl.LoadSound("audio/merge.ogg")
+	death = rl.LoadSound("audio/death.ogg")
+	freeze = rl.LoadSound("audio/freeze.ogg")
 }
 
 unload_sounds :: proc() {
@@ -44,4 +46,6 @@ unload_sounds :: proc() {
 	rl.UnloadSound(ui_confirm)
 	rl.UnloadSound(damaged)
 	rl.UnloadSound(merge)
+	rl.UnloadSound(death)
+	rl.UnloadSound(freeze)
 }

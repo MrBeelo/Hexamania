@@ -201,7 +201,13 @@ throw_ice_ball :: proc(clump: ^Hexagon_Clump, vel: rl.Vector2) {
 update_ice_ball :: proc(ball: ^Ice_Ball, index: int) {
 	for clump in hexagon_clumps[:clump_cap] {
 		if clump.uuid == ball.owner do continue
-		if clump_intersects_circle(clump^, ball.pos, ball.size) do clump.frozen_time_left = ball.freeze_time
+		if clump_intersects_circle(clump^, ball.pos, ball.size) {
+			if clump.frozen_time_left <= 0 {
+				if clump.uuid == player.uuid do play_sound(freeze); else do play_sound(freeze, clump^, player.clump)
+			}
+			
+			clump.frozen_time_left = ball.freeze_time
+		}
 	}
 
 	ball.time_left -= rl.GetFrameTime()
@@ -265,7 +271,7 @@ update_fireball :: proc(ball: ^Fireball, index: int) {
 			clump.burning = { damage_timer, ball.burn_time, ball.damage }
 			exploded = true
 			exploded_clump_uuid = clump.uuid
-			play_sound(explosion)
+			play_sound(explosion, 0.6)
 		}
 	}
 

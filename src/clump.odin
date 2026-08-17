@@ -269,6 +269,7 @@ damage_clump_attacker :: proc(clump: ^Hexagon_Clump, amount: f32, attacker: ^Hex
 			kills += 1
 			killed_hexagons += len(clump.hexagon_types)
 		}
+		if clump.uuid == player.uuid do play_sound(death); else do play_sound(death, clump^, player.clump)
 	}
 	
 	if clump.uuid == player.uuid do play_sound(damaged); else do play_sound(damaged, clump^, player.clump)
@@ -278,6 +279,9 @@ damage_clump_no_attacker :: proc(clump: ^Hexagon_Clump, amount: f32) {
 	if clump.grace_period > 0 || clump.invincible do return
 	clump.health -= amount
 	clump.grace_period = 0.15
+	if clump.health <= 0 {
+		if clump.uuid == player.uuid do play_sound(death); else do play_sound(death, clump^, player.clump)
+	}
 	if clump.uuid == player.uuid do play_sound(damaged); else do play_sound(damaged, clump^, player.clump)
 }
 

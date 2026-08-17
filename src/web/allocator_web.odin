@@ -5,7 +5,7 @@ import "core:c"
 import "base:intrinsics"
 import "core:fmt"
 
-PRINT_ALLOCATIONS :: true
+PRINT_ALLOCATIONS :: false
 
 @(default_calling_convention = "c")
 foreign {
