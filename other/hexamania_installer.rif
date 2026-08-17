@@ -1,0 +1,75 @@
+#############################################################################
+#
+# rInstallFriendly package descriptor file (v1.0)
+#
+#############################################################################
+
+# Product info data
+PRODUCT_NAME                        "Hexamania"
+PRODUCT_VERSION                     "1.4"
+PRODUCT_DESCRIPTION                 "My submission for the Raylib 6.x Game Jam!"
+
+# Company info data
+COMPANY_NAME                        "MrBeelo"
+COMPANY_URL                         ""
+
+# Sponsoring options
+SPONSORS_URL                        ""
+
+# Input files paths
+INPUT_FILE_PATH                     "/home/mrbeelo/Desktop/hexamania-1.4-linux.zip"
+BANNER_IMAGE_FILE_PATH              "/home/mrbeelo/Projects/Games/Hexamania/other/banner.png"
+BANNER_AUDIO_FILE_PATH              ""
+BANNER_SHADER_FILE_PATH             ""
+PRODUCT_ICON_FILE_PATH              "/home/mrbeelo/Projects/Games/Hexamania/res/texture/icon.png"
+LICENSE_FILE_PATH                   ""
+CUSTOM_STYLE_FILE_PATH              "/home/mrbeelo/Projects/Games/Hexamania/other/hexamania_kyrou.rgs"
+
+# Installation paths
+INSTALLATION_DEFAULT_PATH           "BeeloGames/Hexamania/"
+DESKTOP_SHORTCUT_FILE_TARGET        ""
+
+# Installation config options
+PACKAGE_MIN_INSTALL_TIME            0
+# Installer visual style
+INSTALLER_UI_STYLE                  (null)
+
+# Installer configuration flags
+FLAG_PACKAGE_COMPANY_NAME           0
+FLAG_PACKAGE_COMPANY_URL_LINK       0
+FLAG_PACKAGE_LICENSE_REQUIRED       0
+FLAG_PACKAGE_LICENSE_CHECKBOX       0
+FLAG_PACKAGE_INSTALL_PATH_BROWSER   1
+FLAG_PACKAGE_SPONSORS_URL_LINK      0
+FLAG_PACKAGE_PASSWORD_REQUIRED      0
+FLAG_PACKAGE_DESKTOP_SHORTCUT       0
+
+# Installer text data
+# NOTE: This is the text appearing on the installation process, it can be customized here.
+# WARNING: Make sure this text file is saved with UTF-8 encoding!
+#############################################################################
+
+# First screen
+LABEL_LICENSE_AGREEMENT_MESSAGE     "You should accept the License Agrement before continue."
+CHECK_LICENSE_AGREEMENT             "I accept the license terms and conditions"
+PANEL_LICENSE_AGREEMENT_TITLE       "License Agreement"
+LABEL_INSTALL_PATH                  "Install Path - Space required:"
+BUTTON_VIEW_LICENSE                 "View License"
+BUTTON_INSTALL_PATH_BROWSE          "Browse..."
+BUTTON_INSTALL                      "INSTALL"
+WINDOW_PASSWORD_TITLE               "Password required"
+WINDOW_PASSWORD_MESSAGE             "Enter password to install product:"
+BUTTON_PASSWORD_VALIDATE            "Validate"
+
+# Second screen
+LABEL_INSTALLING_FILES              "Installing files"
+LABEL_REMOVING_FILES                "Removing files"
+LABEL_SPONSOR_MESSAGE               "Enjoying Amazing Game? Consider Sponsoring this Project:"
+BUTTON_SPONSOR_PROJECT              "SPONSOR this PROJECT!"
+BUTTON_INSTALL_CANCEL               "Cancel"
+
+# Third screen
+LABEL_INSTALL_SUCCESS               "installed successfully!"
+LABEL_INSTALL_FAILED                "installation not completed..."
+LABEL_INSTALL_TOTAL_FILES           "INSTALLED FILES:"
+BUTTON_INSTALL_CLOSE                "Close"
