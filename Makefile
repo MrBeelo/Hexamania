@@ -35,6 +35,9 @@ RESOURCES_DIRECTORY ?= res
 # Directory in which the program along with the resources will be outputted in.
 OUTPUT_DIRECTORY ?= bin
 
+# Directory of the icon (web only)
+ICON_DIR ?= $(RESOURCES_DIRECTORY)/texture/icon.png
+
 #----------------#
 #     SCRIPT     #
 #----------------#
@@ -113,6 +116,9 @@ build-web:
 
 	# Copy over odin.js to the output directory.
 	cp $(NAMED_SOURCE_DIRECTORY)/odin.js $(NAMED_OUTPUT_DIRECTORY)
+
+	# Copy the icon to the output directory (favicon).
+	cp $(ICON_DIR) $(NAMED_OUTPUT_DIRECTORY)/favicon.png
 
 	# Second pass: emcc build command.
 	emcc -o $(NAMED_OUTPUT_DIRECTORY)/$(EXECUTABLE_NAME).html $(WEB_FILES) $(WEB_FLAGS)

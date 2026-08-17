@@ -5,7 +5,7 @@ import rl "raylib"
 import "core:strings"
 
 @(rodata) SCREEN_SIZE := rl.Vector2{720, 720} // It is a variable so it can be indexed (not planning to make the window resizable)
-VERSION :: "1.31"
+VERSION :: "1.4"
 debug_on := false
 icon: rl.Image
 
