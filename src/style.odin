@@ -344,7 +344,7 @@ font_data := [HEXAMANIA_STYLE_FONT_ATLAS_COMP_SIZE]u8 { 0xed,
 }
 
 @(rodata)
-font_rects := [95]rl.Rectangle {
+font_recs := [95]rl.Rectangle {
     { 4, 4, 3 , 16 },
     { 15, 4, 3 , 9 },
     { 26, 4, 5 , 4 },
@@ -561,7 +561,7 @@ load_style :: proc() {
     rec_ptr, rec_err := mem.alloc(int(font.glyphCount) * size_of(rl.Rectangle))
 	if rec_err != nil do panic("Font rec allocation error!")
 	font.recs = cast([^]rl.Rectangle)rec_ptr
-	copy(font.recs[:font.glyphCount], font_rects[:font.glyphCount])
+	copy(font.recs[:font.glyphCount], font_recs[:font.glyphCount])
    
 	glyph_ptr, glyph_err := mem.alloc(int(font.glyphCount) * size_of(rl.GlyphInfo))
 	if glyph_err != nil do panic("Font glyph allocation error!")

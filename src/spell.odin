@@ -133,7 +133,6 @@ Health_Pad :: struct { owner: uuid.Identifier, pos: rl.Vector2, size: f32, max_s
 summon_health_pad :: proc(clump: ^Hexagon_Clump) {
 	time_left, size, heal_amount := get_health_pad_stats(get_hexagon_type_amounts(clump^))
 
-	//rect := rl.Rectangle{clump.pos.x - size / 2, clump.pos.y - size / 2, size, size}
 	heal_timer := new_timer(1, true, true)
 	rot := f32(rand.int_range(0, 4)) * 90
 	health_pad := Health_Pad{clump.uuid, clump.pos, size, size, heal_amount, heal_timer, time_left, rot}
@@ -148,8 +147,8 @@ update_health_pad :: proc(pad: ^Health_Pad, index: int) {
 	update_timer(&pad.heal_timer)
 	if pad.heal_timer.ding do for clump in hexagon_clumps[:clump_cap] {
 		if clump.uuid != pad.owner do continue
-		rect := rl.Rectangle{pad.pos.x - pad.size / 2, pad.pos.y - pad.size / 2, pad.size, pad.size}
-		if clump_intersects_rect(clump^, rect) do heal_clump(clump, pad.heal_amount)
+		rec := rl.Rectangle{pad.pos.x - pad.size / 2, pad.pos.y - pad.size / 2, pad.size, pad.size}
+		if clump_intersects_rec(clump^, rec) do heal_clump(clump, pad.heal_amount)
 	}
 
 	pad.time_left -= rl.GetFrameTime()
@@ -159,8 +158,8 @@ update_health_pad :: proc(pad: ^Health_Pad, index: int) {
 draw_health_pad :: proc(pad: Health_Pad) {
 	src := rl.Rectangle{0, 0, f32(spell_textures[.HEALTH_PAD].width), f32(spell_textures[.HEALTH_PAD].height)}
 	color := rl.Color{255, 255, 255, 100} if pad.owner != player.uuid else rl.WHITE
-	rect := rl.Rectangle{pad.pos.x, pad.pos.y, pad.size, pad.size}
-	rl.DrawTexturePro(spell_textures[.HEALTH_PAD], src, rect, pad.size / 2, pad.rot, color)
+	rec := rl.Rectangle{pad.pos.x, pad.pos.y, pad.size, pad.size}
+	rl.DrawTexturePro(spell_textures[.HEALTH_PAD], src, rec, pad.size / 2, pad.rot, color)
 }
 
 get_health_pad_stats :: proc(hexagon_type_amounts: [Hexagon_Type]int) -> (time_left: f32, size: f32, heal_amount: f32) {

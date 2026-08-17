@@ -19,18 +19,18 @@ draw_health_bar :: proc() {
 	bar_size := rl.Vector2{256, 48}
 		
 	shell_pos := rl.Vector2{-BUFFER, SCREEN_SIZE.y - bar_size.y - BUFFER}
-	shell_rect := rl.Rectangle{shell_pos.x, shell_pos.y, bar_size.x + BUFFER * 2, bar_size.y + BUFFER * 2}
-	rl.DrawRectangleRounded(shell_rect, 0.3, 10, rl.BLACK)
+	shell_rec := rl.Rectangle{shell_pos.x, shell_pos.y, bar_size.x + BUFFER * 2, bar_size.y + BUFFER * 2}
+	rl.DrawRectangleRounded(shell_rec, 0.3, 10, rl.BLACK)
 	
 	health_bar_size := bar_size + 5
 	health_bar_size.x = health_bar_size.x * player.health / get_max_health(len(player.hexagon_types))
-	health_bar_rect := rl.Rectangle{shell_pos.x, shell_pos.y + 5, health_bar_size.x, health_bar_size.y}
-	rl.DrawRectangleRounded(health_bar_rect, 0.3, 10, rl.RED)
+	health_bar_rec := rl.Rectangle{shell_pos.x, shell_pos.y + 5, health_bar_size.x, health_bar_size.y}
+	rl.DrawRectangleRounded(health_bar_rec, 0.3, 10, rl.RED)
 	
 	sprint_bar_size := bar_size + 5
 	sprint_bar_size.x = sprint_bar_size.x * player.sprint_secs / MAX_SPRINT_SECS
-	sprint_bar_rect := rl.Rectangle{shell_pos.x, shell_pos.y + 45, sprint_bar_size.x, sprint_bar_size.y}
-	rl.DrawRectangleRec(sprint_bar_rect, rl.SKYBLUE)
+	sprint_bar_rec := rl.Rectangle{shell_pos.x, shell_pos.y + 45, sprint_bar_size.x, sprint_bar_size.y}
+	rl.DrawRectangleRec(sprint_bar_rec, rl.SKYBLUE)
 }
 
 draw_spell_menu :: proc() {
@@ -65,8 +65,8 @@ draw_active_spell_preview :: proc() {
 		_, size, _ := get_health_pad_stats(hexagon_type_amounts)
 		size *= player.camera.zoom
 		pos := world_to_camera(player.pos)
-		rect := rl.Rectangle{pos.x - size / 2, pos.y - size / 2, size, size}
-		rl.DrawRectangleRoundedLinesEx(rect, 0.2, 10, 7, rl.GREEN)
+		rec := rl.Rectangle{pos.x - size / 2, pos.y - size / 2, size, size}
+		rl.DrawRectangleRoundedLinesEx(rec, 0.2, 10, 7, rl.GREEN)
 	}
 	case .ICE_BALL: {
 		src := rl.Rectangle{0, 0, f32(circle_overlay_texture.width), f32(circle_overlay_texture.height)}

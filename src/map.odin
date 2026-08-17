@@ -14,34 +14,34 @@ draw_map :: proc() {
 
 	// Draw map background
 	BUFFER :: 20
-	map_rect := rl.Rectangle{map_center.x - MAP_SIZE / 2, map_center.y - MAP_SIZE / 2, MAP_SIZE + BUFFER, MAP_SIZE + BUFFER}
+	map_rec := rl.Rectangle{map_center.x - MAP_SIZE / 2, map_center.y - MAP_SIZE / 2, MAP_SIZE + BUFFER, MAP_SIZE + BUFFER}
 
 	BORDER_THICK :: 7
-	border_rect := rl.Rectangle{map_rect.x - BORDER_THICK, map_rect.y - BORDER_THICK, map_rect.width + BORDER_THICK + BUFFER, 
-		map_rect.height + BORDER_THICK + BUFFER}
+	border_rec := rl.Rectangle{map_rec.x - BORDER_THICK, map_rec.y - BORDER_THICK, map_rec.width + BORDER_THICK + BUFFER, 
+		map_rec.height + BORDER_THICK + BUFFER}
 	
-	rl.DrawRectangleRounded(border_rect, 0.3, 10, rl.BLACK)
-	rl.DrawRectangleRounded(map_rect, 0.3, 10, rl.LIGHTGRAY)
+	rl.DrawRectangleRounded(border_rec, 0.3, 10, rl.BLACK)
+	rl.DrawRectangleRounded(map_rec, 0.3, 10, rl.LIGHTGRAY)
 
 	// Draw screen border 
-	screen_border_rect := rl.Rectangle{map_center.x - MAP_SIZE / 2 * map_zoom, map_center.y - MAP_SIZE / 2 * map_zoom, 
+	screen_border_rec := rl.Rectangle{map_center.x - MAP_SIZE / 2 * map_zoom, map_center.y - MAP_SIZE / 2 * map_zoom, 
 		MAP_SIZE * map_zoom, MAP_SIZE * map_zoom}
-	rl.DrawRectangleLinesEx(screen_border_rect, 2, rl.BLUE)
+	rl.DrawRectangleLinesEx(screen_border_rec, 2, rl.BLUE)
 
 	// Draw clumps (entities)
 	for clump in hexagon_clumps[:clump_cap] {
 		color := rl.BLUE if clump.uuid == player.uuid else rl.RED
-		draw_point_in_map(clump.pos, color, screen_to_map_ratio, map_rect)
+		draw_point_in_map(clump.pos, color, screen_to_map_ratio, map_rec)
 	}
 
 	// Draw collectibles
-	for heart in hearts do draw_point_in_map(heart.center, rl.PINK, screen_to_map_ratio, map_rect)
-	for powerup in world_powerups do draw_point_in_map(powerup.pos, rl.GREEN, screen_to_map_ratio, map_rect)
+	for heart in hearts do draw_point_in_map(heart.center, rl.PINK, screen_to_map_ratio, map_rec)
+	for powerup in world_powerups do draw_point_in_map(powerup.pos, rl.GREEN, screen_to_map_ratio, map_rec)
 }
 
-draw_point_in_map :: proc(pos: rl.Vector2, color: rl.Color, ratio: f32, map_rect: rl.Rectangle) {
-	map_pos := world_to_map(pos, ratio, {map_rect.x + MAP_SIZE / 2, map_rect.y + MAP_SIZE / 2})
-	if !rl.CheckCollisionPointRec(map_pos, map_rect) do return
+draw_point_in_map :: proc(pos: rl.Vector2, color: rl.Color, ratio: f32, map_rec: rl.Rectangle) {
+	map_pos := world_to_map(pos, ratio, {map_rec.x + MAP_SIZE / 2, map_rec.y + MAP_SIZE / 2})
+	if !rl.CheckCollisionPointRec(map_pos, map_rec) do return
 	rl.DrawCircleV(map_pos, 2, color)
 }
 

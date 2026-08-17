@@ -52,7 +52,7 @@ get_random_spawn_pos :: proc(range: f32 = 120) -> rl.Vector2 {
 	return pos
 }
 
-get_world_camera_rect :: proc(cam := player.camera) -> rl.Rectangle {
+get_world_camera_rec :: proc(cam := player.camera) -> rl.Rectangle {
 	size := SCREEN_SIZE * cam.zoom
 	pos := cam.target - size / 2
 	return {pos.x, pos.y, size.x, size.y}

@@ -121,9 +121,9 @@ get_hexagon_type_amounts :: proc(clump: Hexagon_Clump) -> [Hexagon_Type]int {
 }
 
 // Checks if any of the clump's hexagons intersect with the rectangle
-clump_intersects_rect :: proc(clump: Hexagon_Clump, rect: rl.Rectangle) -> bool {
+clump_intersects_rec :: proc(clump: Hexagon_Clump, rec: rl.Rectangle) -> bool {
 	for hexagon in clump.hexagons {
-	 	if rl.CheckCollisionRecs(rect, hexagon.hurtbox) do return true
+	 	if rl.CheckCollisionRecs(rec, hexagon.hurtbox) do return true
 	}
 	return false
 }

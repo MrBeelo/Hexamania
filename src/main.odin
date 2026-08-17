@@ -5,8 +5,9 @@ import rl "raylib"
 import "core:strings"
 
 @(rodata) SCREEN_SIZE := rl.Vector2{720, 720} // It is a variable so it can be indexed (not planning to make the window resizable)
-VERSION :: "1.3"
+VERSION :: "1.31"
 debug_on := false
+icon: rl.Image
 
 player: Player
 
@@ -17,6 +18,10 @@ init :: proc() {
 	rl.InitWindow(i32(SCREEN_SIZE.x), i32(SCREEN_SIZE.y), "Hexamania.io")
 	rl.SetExitKey(.NULL)
 	rl.InitAudioDevice()
+
+	icon = rl.LoadImage("res/texture/icon.png")
+	rl.SetWindowIcon(icon)
+	
 	search_and_set_resource_dir("res")
 	load_style()
 	
@@ -97,6 +102,8 @@ close :: proc() {
 	unload_gui()
 	unload_sounds()
 	unload_music()
+
+	rl.UnloadImage(icon)
 
 	rl.CloseAudioDevice()
 	rl.CloseWindow() 

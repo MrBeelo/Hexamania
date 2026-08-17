@@ -264,7 +264,7 @@ get_detection_range :: proc(hexagon_types: []Hexagon_Type) -> f32 {
 // AI Helpers
 
 enemy_attack :: proc(enemy: ^Enemy, target: rl.Vector2, spell_chance: f32, spell_weights: [Spell_Type]int) {
-	if !clump_intersects_rect(enemy.clump, get_world_camera_rect()) do return
+	if !clump_intersects_rec(enemy.clump, get_world_camera_rec()) do return
 	should_use_rifle := true
 	num := rand.float32_range(0, 100)
 	if spell_chance > num do should_use_rifle = false
